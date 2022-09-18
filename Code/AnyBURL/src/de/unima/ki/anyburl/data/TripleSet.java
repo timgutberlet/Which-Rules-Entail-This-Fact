@@ -331,7 +331,7 @@ public class TripleSet {
 		long lineCounter = 0;
 		try (BufferedReader reader = Files.newBufferedReader(file, charset)) { 
 			while ((line = reader.readLine()) != null) {
-				// System.out.println("--- " + line);
+				//System.out.println("--- " + line);
 				
 				// System.out.println(line);
 				lineCounter++;
@@ -401,7 +401,7 @@ public class TripleSet {
 				if (t == null) { }
 				else {
 					if (!t.invalid) {
-						// System.out.println(">>> " + t);
+						//System.out.println(">>> " + t);
 						this.triples.add(t);
 					}
 					
