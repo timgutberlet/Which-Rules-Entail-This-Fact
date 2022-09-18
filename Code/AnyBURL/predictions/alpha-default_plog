@@ -17,7 +17,7 @@ THRESHOLD_CONFIDENCE = 1.0E-4
 DISCRIMINATION_BOUND = 1000
 TRIAL_SIZE = 1000000
 WORKER_THREADS = 7
-UNSEEN_NEGATIVE_EXAMPLES_ATYPED = [I@6d6f6e28
+UNSEEN_NEGATIVE_EXAMPLES_ATYPED = [I@14ae5a5
 TYPE_SPLIT_ANALYSIS = false
 BEAM_SAMPLING_MAX_BODY_GROUNDINGS = 1000
 BEAM_SAMPLING_MAX_BODY_GROUNDING_ATTEMPTS = 100000
@@ -33,9 +33,9 @@ AGGREGATION_TYPE = maxplus
 
 rules:   rules/alpha-10
 output: predictions/alpha-10
-finished in 168s.
+finished in 131s.
 
 rules:   rules/alpha-20
 output: predictions/alpha-20
-finished in 50s.
+finished in 45s.
 
