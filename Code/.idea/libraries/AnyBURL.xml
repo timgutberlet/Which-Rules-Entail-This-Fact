@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="AnyBURL">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/AnyBURL/AnyBURL-22.jar!/" />
+      <root url="jar://$PROJECT_DIR$/AnyBURL/AnyBURL-22-sources.zip!/" />
+      <root url="jar://$PROJECT_DIR$/AnyBURL/AnyBURL-22-custom.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
