@@ -1,15 +1,17 @@
 Logfile
 ~~~~~~~
 
-indexing dataset: data/FB15-237/train.txt
-time elapsed: 1006ms
+indexing dataset: ../Data/YAGO3-10/train.txt
+time elapsed: 5048ms
 
+SAFE_PREFIX_MODE = true
 SINGLE_RELATIONS = null
-PATH_TRAINING = data/FB15-237/train.txt
+FORBIDDEN_RELATIONS = null
+PATH_TRAINING = ../Data/YAGO3-10/train.txt
 CONSTANTS_OFF = false
 PATH_OUTPUT = rules/alpha
 PATH_DICE = null
-SNAPSHOTS_AT = 10 20 
+SNAPSHOTS_AT = 5 10 20 
 SAMPLE_SIZE = 2000
 TRIAL_SIZE = 1000000
 BATCH_TIME = 1000
@@ -18,23 +20,30 @@ ZERO_RULES_ACTIVE = true
 MAX_LENGTH_CYCLIC = 3
 MAX_LENGTH_ACYCLIC = 1
 THRESHOLD_CORRECT_PREDICTIONS = 2
-THRESHOLD_CONFIDENCE = 1.0E-4
+THRESHOLD_CONFIDENCE = 0.0
 EPSILON = 0.1
 SPECIALIZATION_CI = -1.0
-SCORING_REGIME = 5
+REWARD = 5
 POLICY = 2
 MAX_LENGTH_GROUNDED_CYCLIC = 1
 AC_MIN_NUM_OF_LAST_ATOM_GROUNDINGS = 5
 BEAM_SAMPLING_MAX_BODY_GROUNDINGS = 1000
-BEAM_SAMPLING_MAX_BODY_GROUNDING_ATTEMPTS = 100000
-BEAM_SAMPLING_MAX_REPETITIONS = 5
+BEAM_SAMPLING_MAX_BODY_GROUNDING_ATTEMPTS = 10000
+BEAM_SAMPLING_MAX_REPETITIONS = 3
 REWRITE_REFLEXIV = true
 EXCLUDE_AC2_RULES = false
 
 
+rule file: rules/alpha-5
+zero: 131935
+cyclic: 67 | 98 | 164 | 
+acyclic: 17870 | time planned: 5s
+time elapsed: 6s
+
+
 rule file: rules/alpha-10
-zero: 61155
-cyclic: 881 | 2026 | 1102 | 
-acyclic: 39608 | time planned: 10s
+zero: 131935
+cyclic: 76 | 135 | 221 | 
+acyclic: 37484 | time planned: 10s
 time elapsed: 11s
 

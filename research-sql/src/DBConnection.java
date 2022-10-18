@@ -1,6 +1,7 @@
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Connection;
+import java.util.Properties;
 
 /**
  * @author tgutberl
@@ -10,7 +11,10 @@ public class DBConnection {
     Connection con = null;
     try {
       Class.forName("org.sqlite.JDBC");
-      con = DriverManager.getConnection("jdbc:sqlite:research.db");
+      Properties props = new Properties();
+      props.setProperty("rewriteBatchedStatements", "true");
+      con = DriverManager.getConnection("jdbc:sqlite:research.db", props);
+      //con = DriverManager.getConnection("jdbc:sqlite:research.db");
       System.out.println("Connected");
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
