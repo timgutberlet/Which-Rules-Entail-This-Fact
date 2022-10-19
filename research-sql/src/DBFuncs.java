@@ -7,14 +7,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import javax.swing.plaf.nimbus.State;
 
 /**
  * @author tgutberl
  */
 public class DBFuncs {
-
-  //Veraltet - Für Inserts genutzt
   public static void insertKnowledgegraph(List<Triple> list) {
     Connection con = DBConnection.connect();
 
@@ -316,19 +315,22 @@ public class DBFuncs {
     }
   }
 
-  public static void readSpecificDataFromKG() {
+  public static Map<Integer, Triple> getKnowledgeGraph() {
     Connection con = DBConnection.connect();
     PreparedStatement ps = null;
     ResultSet rs = null;
+    Map<Integer, Triple> list = new HashMap<Integer, Triple>();
+    int count = 0;
     try {
       String sql = "SELECT * FROM knowledgegraph";
       ps = con.prepareStatement(sql);
       rs = ps.executeQuery();
       while (rs.next()) {
-        String head = rs.getString("head");
-        String tail = rs.getString("value2");
-        String relation = rs.getString("relation");
-        System.out.println(head + " " + tail + " " + relation + "\n");
+        String v1 = rs.getString("kg_v1");
+        String v2 = rs.getString("kg_v2");
+        String relation = rs.getString("kg_r");
+        list.put(count, new Triple(v1, v2, relation));
+        count++;
       }
     } catch (SQLException e) {
       System.out.println(e.toString());
@@ -341,6 +343,7 @@ public class DBFuncs {
         System.out.println(e.toString());
       }
     }
+    return list;
   }
 }
 
