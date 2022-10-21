@@ -1,0 +1,153 @@
+package utils; /**
+ * @author tgutberl
+ */
+
+import config.Settings;
+import database.DBFuncs;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import models.Triple;
+
+public class DbFill {
+
+  /**
+   * Fills the KnowledgeGraph Table with all rows given in the knowledgegraph text file
+   */
+  public static void fillKnowledgegraph(){
+    String file = Settings.KNOWLEDGEGRAPH_PATH;
+    DBFuncs.deleteKG();
+    BufferedReader reader;
+    try {
+      reader = new BufferedReader((new FileReader(file)));
+      String line = reader.readLine();
+      String[] triple;
+      List<Triple> kgList = new ArrayList<>();
+      while (line != null){
+        //System.out.println(line);
+        triple = line.split("\\s");
+        System.out.println("triple: " + triple[0] + ", " + triple[2] +", "+ triple[1]);
+        kgList.add(new Triple(triple[0], triple[2], triple[1]));
+        line = reader.readLine();
+      }
+      DBFuncs.insertKnowledgegraph(kgList);
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Used for deleting all 'e's at the start of an entity, as entities from the ruleset start with an
+   * unnessecary 'e', when they are given from AnyBURL
+   * @param string
+   * @return returns the given String without the e at the start
+   */
+  public static String delE(String string){
+    if (string.startsWith("e")){
+      try {
+        string = string.substring(1, string.length());
+      }catch(StringIndexOutOfBoundsException e){
+        System.out.println(e.getMessage());
+        System.out.println(string);
+        e.printStackTrace();
+        System.exit(0);
+      }
+    }
+    return string;
+  }
+  /**
+   * Used for deleting all 'r's at the start of an entity, as entities from the ruleset start with an
+   * unnessecary 'r', when they are given from AnyBURL
+   * @param string
+   * @return returns the given String without the r at the start
+   */
+  public static String delR(String string){
+    if (string.startsWith("r")){
+      try {
+        string = string.substring(1, string.length());
+      }catch(StringIndexOutOfBoundsException e){
+        System.out.println(e.getMessage());
+        System.out.println(string);
+        e.printStackTrace();
+        System.exit(0);
+      }
+    }
+    return string;
+  }
+
+  /**
+   * This Method is used for filling the Database tables head and base,
+   * given from the rules provided by AnyBURL
+   */
+  public static void fillHeadAndBase() {
+    String file = Settings.RULES_PATH;
+    DBFuncs.deleteHead();
+    DBFuncs.deleteTail();
+    BufferedReader reader;
+    try {
+      reader = new BufferedReader(new FileReader(
+          file));
+      String line = reader.readLine();
+      String first;
+      String second = "";
+      String [] help2;
+      String [] help1;
+      String [] help3;
+      String headRelation, headV1, headV2;
+      String tailRelation, tailV1, tailV2;
+      int ID = 0;
+      List<Triple> headList = new ArrayList<>();
+      List<Triple> tailList = new ArrayList<>();
+      while (line != null) {
+        ID++;
+        headV1 = "";
+        headV2 = "";
+        tailV1 = "";
+        tailV2 = "";
+        tailRelation = "";
+        second = "";
+        // Get the left characters that are important
+        help1 = line.split("<=");
+        first = help1[0];
+        help2 = first.split("\\s+");
+        first  = help2[3];
+        headRelation = first.split("\\(",2)[0];
+        if (help1.length > 1){
+          second = help1[1].strip();
+          help3 = second.split(",\\s");
+          for (String triple : help3){
+            System.out.println(triple + " ID: "+  ID);
+            tailRelation= triple.split("\\(",2)[0];
+            help1 = triple.split("\\(", 2)[1].split(",", 2);
+            tailV1 = help1[0];
+            tailV2 = help1[1].substring(0, help1[1].length()-1);
+            tailList.add(new Triple(ID, delE(tailV1), delE(tailV2), delR(tailRelation)));
+          }
+        }
+        //Uncomment this, if you also want to inlcude empty rules
+        /*else {
+          tailList.add(new Triple(ID, tailV1, tailV2, tailRelation));
+        }*/
+        help1 = first.split("\\(", 2)[1].split(",", 2);
+        if (help1.length > 1){
+          headV1 = help1[0];
+          headV2 = help1[1].substring(0, help1[1].length()-1);
+        }
+        //System.out.println(headRelation + " : " + headV1 + " " + headV2 + " <= " + second);
+        headList.add(new Triple(ID, delE(headV1), delE(headV2), delR(headRelation)));
+        // read next line
+        line = reader.readLine();
+      }
+      DBFuncs.insertHead(headList);
+      DBFuncs.insertTail(tailList);
+      reader.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+}
