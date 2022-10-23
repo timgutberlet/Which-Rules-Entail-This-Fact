@@ -21,6 +21,10 @@ import models.Triple;
 public class DBFuncs {
   private static Connection con;
 
+  /**
+   * Used for setting the connection
+   * @param con
+   */
   public static void setCon(Connection con) {
     DBFuncs.con = con;
   }
@@ -37,11 +41,11 @@ public class DBFuncs {
       for (Triple triple : list){
         count++;
         System.out.println(triple.toString());
-        stmt.setString(1, triple.getV1());
-        stmt.setString(2, triple.getV2());
-        stmt.setString(3, triple.getRelation());
+        stmt.setInt(1, triple.getSubject());
+        stmt.setInt(2, triple.getPredicate());
+        stmt.setInt(3, triple.getObject());
         stmt.addBatch();
-        if (count % 500 == 0 || triple.getID() == list.size()){
+        if (count % 500 == 0 || count == list.size()){
           stmt.executeBatch();
           stmt.clearBatch();
           elapsedTime = System.nanoTime() - startTime;
@@ -60,25 +64,26 @@ public class DBFuncs {
   }
   public static void insertHead(List<Triple> list) {
     PreparedStatement stmt;
+    int count = 0;
     try {
-      String sql = "INSERT INTO head(ID, head_v1, head_v2, head_r) VALUES (?,?,?,?)";
+      String sql = "INSERT INTO head(subject, predicate, object) VALUES (?,?,?)";
       System.out.println("SQL Statement");
       stmt = con.prepareStatement(sql);
       long startTime = System.nanoTime();
       long elapsedTime;
       for (Triple triple : list){
-        stmt.setInt(1, triple.getID());
-        stmt.setString(2, triple.getV1());
-        stmt.setString(3, triple.getV2());
-        stmt.setString(4, triple.getRelation());
+        stmt.setInt(1, triple.getSubject());
+        stmt.setInt(2, triple.getPredicate());
+        stmt.setInt(3, triple.getObject());
         stmt.addBatch();
-        if (triple.getID() % 1000 == 0 || triple.getID() == list.size()){
+        if (count % 1000 == 0 || count == list.size()){
           stmt.executeBatch();
           stmt.clearBatch();
           elapsedTime = System.nanoTime() - startTime;
           startTime = System.nanoTime();
-          System.out.println("Inserted " + triple.getID() + " of " + list.size() +" ; Time: "+ (elapsedTime/1000000) + "ms");
+          System.out.println("Inserted " + count + " of " + list.size() +" ; Time: "+ (elapsedTime/1000000) + "ms");
         }
+        count++;
       }
       stmt.executeBatch();
       con.commit();
@@ -93,7 +98,7 @@ public class DBFuncs {
     PreparedStatement stmt;
     try {
       con.setAutoCommit(false);
-      String sql = "INSERT INTO tail(ID, tail_v1, tail_v2, tail_r) VALUES (?,?,?,?)";
+      String sql = "INSERT INTO tail(subject, predicate, object) VALUES (?,?,?)";
       System.out.println("SQL Statement");
       stmt = con.prepareStatement(sql);
       long startTime = System.nanoTime();
@@ -101,12 +106,11 @@ public class DBFuncs {
       long count = 0;
       for (Triple triple : list){
         count++;
-        stmt.setInt(1, triple.getID());
-        stmt.setString(2, triple.getV1());
-        stmt.setString(3, triple.getV2());
-        stmt.setString(4, triple.getRelation());
+        stmt.setInt(1, triple.getSubject());
+        stmt.setInt(2, triple.getPredicate());
+        stmt.setInt(3, triple.getObject());
         stmt.addBatch();
-        if (count% 1000 == 0 || triple.getID() == list.size()){
+        if (count% 1000 == 0 || count == list.size()){
           stmt.executeBatch();
           stmt.clearBatch();
           elapsedTime = System.nanoTime() - startTime;
@@ -348,9 +352,9 @@ public class DBFuncs {
       ps = con.prepareStatement(sql);
       rs = ps.executeQuery();
       while (rs.next()) {
-        String v1 = rs.getString("kg_v1");
-        String v2 = rs.getString("kg_v2");
-        String relation = rs.getString("kg_r");
+        int v1 = rs.getInt("kg_v1");
+        int v2 = rs.getInt("kg_v2");
+        int relation = rs.getInt("kg_r");
         list.put(count, new Triple(v1, v2, relation));
         count++;
       }

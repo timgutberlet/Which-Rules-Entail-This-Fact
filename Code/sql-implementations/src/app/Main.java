@@ -3,10 +3,13 @@ package app;
 import config.IOHelper;
 import database.ConnectDB;
 import config.Settings;
+import database.CreateDB;
+import database.DBFuncs;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.util.Properties;
 
 /**
@@ -18,7 +21,10 @@ public class Main {
   public static void main(String[] args) {
     initalize();
     ConnectDB connectDB = new ConnectDB(Settings.CLASSNAME, Settings.URL, Settings.USER, Settings.PASSWORD);
+    DBFuncs.setCon(connectDB.getConnection());
+    CreateDB.setConnectDB(connectDB.getConnection());
     //Code here
+
     connectDB.closeConnection();
   }
 

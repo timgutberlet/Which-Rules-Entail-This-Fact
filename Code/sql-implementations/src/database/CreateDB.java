@@ -1,12 +1,14 @@
 package database;
 
+import java.sql.Connection;
+
 /**
  * @author tgutberl
  */
 public class CreateDB {
-  ConnectDB connectDB;
-  public CreateDB(ConnectDB connectDB){
-    this.connectDB = connectDB;
+  static Connection connection;
+  public static void setConnectDB(Connection con){
+    connection = con;
   }
 
   /**
