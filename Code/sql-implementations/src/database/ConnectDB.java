@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * @author tgutberl
+ * @author timgutberlet
  */
 public class ConnectDB {
   private Connection connection = null;

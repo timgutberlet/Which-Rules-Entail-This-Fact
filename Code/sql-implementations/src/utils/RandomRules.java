@@ -7,7 +7,7 @@ import java.util.Map;
 import models.Triple;
 
 /**
- * @author tgutberl
+ * @author timgutberlet
  */
 public class RandomRules {
   private Integer queryCount;

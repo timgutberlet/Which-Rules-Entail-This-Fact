@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.util.Properties;
+import utils.DbFill;
 
 /**
  * @author tgutberl
@@ -23,9 +24,12 @@ public class Main {
     ConnectDB connectDB = new ConnectDB(Settings.CLASSNAME, Settings.URL, Settings.USER, Settings.PASSWORD);
     DBFuncs.setCon(connectDB.getConnection());
     CreateDB.setConnectDB(connectDB.getConnection());
+    DbFill.fillKnowledgegraph();
+    //CreateDB.createKnowledgeGraphDB();
+    // DBFuncs.readAllData();
     //Code here
-
     connectDB.closeConnection();
+    //connectDB.closeConnection();
   }
 
   public static void initalize(){
@@ -34,12 +38,17 @@ public class Main {
     try {
       ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
       input = classLoader.getResourceAsStream(CONFIG_FILE);
-      prop.load(input);
+      try {
+        prop.load(input);
+      }catch (NullPointerException e){
+        e.printStackTrace();
+        System.out.println("Config file does not exist");
+      }
       Settings.CLASSNAME = IOHelper.getProperty(prop, "CLASSNAME", Settings.CLASSNAME);
       Settings.PASSWORD = IOHelper.getProperty(prop, "PASSWORD", Settings.PASSWORD);
       Settings.URL = IOHelper.getProperty(prop, "URL", Settings.URL);
       Settings.USER = IOHelper.getProperty(prop, "USER", Settings.USER);
-      Settings.KNOWLEDGEGRAPH_PATH = IOHelper.getProperty(prop, "KNOWLEDGEGRAPH_PATH", Settings.KNOWLEDGEGRAPH_PATH);
+      Settings.KNOWLEDGEGRAPH = IOHelper.getProperty(prop, "KNOWLEDGEGRAPH", Settings.KNOWLEDGEGRAPH);
       Settings.RULES_PATH = IOHelper.getProperty(prop, "RULES_PATH", Settings.RULES_PATH);
     } catch (FileNotFoundException e) {
       e.printStackTrace();

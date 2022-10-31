@@ -1,17 +1,17 @@
 Logfile
 ~~~~~~~
 
-indexing dataset: ../Data/WN18/train.txt
-time elapsed: 879ms
+indexing dataset: ../sql-implementations/resources/Data/YAGO3-10/test.txt
+time elapsed: 149ms
 
 SAFE_PREFIX_MODE = true
 SINGLE_RELATIONS = null
 FORBIDDEN_RELATIONS = null
-PATH_TRAINING = ../Data/WN18/train.txt
+PATH_TRAINING = ../sql-implementations/resources/Data/YAGO3-10/test.txt
 CONSTANTS_OFF = false
 PATH_OUTPUT = rules/alpha
 PATH_DICE = null
-SNAPSHOTS_AT = 5 10 20 
+SNAPSHOTS_AT = 1 5 10 
 SAMPLE_SIZE = 2000
 TRIAL_SIZE = 1000000
 BATCH_TIME = 1000
@@ -34,16 +34,16 @@ REWRITE_REFLEXIV = true
 EXCLUDE_AC2_RULES = false
 
 
+rule file: rules/alpha-1
+zero: 775
+cyclic: 4 | 
+acyclic: 88 | time planned: 1s
+time elapsed: 2s
+
+
 rule file: rules/alpha-5
-zero: 34948
-cyclic: 70 | 320 | 208 | 
-acyclic: 6155 | time planned: 5s
+zero: 775
+cyclic: 4 | 
+acyclic: 135 | time planned: 5s
 time elapsed: 6s
-
-
-rule file: rules/alpha-10
-zero: 34948
-cyclic: 79 | 662 | 802 | 
-acyclic: 7742 | time planned: 10s
-time elapsed: 11s
 

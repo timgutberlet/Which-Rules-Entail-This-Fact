@@ -1,5 +1,5 @@
 package utils; /**
- * @author tgutberl
+ * @author timgutberlet
  */
 
 import config.Settings;
@@ -8,7 +8,11 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import models.Triple;
 
@@ -18,21 +22,58 @@ public class DbFill {
    * Fills the KnowledgeGraph Table with all rows given in the knowledgegraph text file
    */
   public static void fillKnowledgegraph(){
-    String file = Settings.KNOWLEDGEGRAPH_PATH;
-    DBFuncs.deleteKG();
+    String file = Settings.KNOWLEDGEGRAPH;
+    //DBFuncs.deleteKG();
     BufferedReader reader;
     try {
-      reader = new BufferedReader((new FileReader(file)));
-      String line = reader.readLine();
+      // java.io.InputStream
+      InputStream is = DbFill.class.getResourceAsStream(file);
+      InputStreamReader streamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
+      reader = new BufferedReader(streamReader);
       String[] triple;
       List<Triple> kgList = new ArrayList<>();
-      while (line != null){
+      HashMap<String, Integer> subjectIndex = new HashMap<>();
+      HashMap<String, Integer> predicateIndex = new HashMap<>();
+      HashMap<String, Integer> objectIndex = new HashMap<>();
+      String subject, predicate, object;
+      Integer subC = 0, predC = 0, objC = 0;
+      Integer subH, predH, objH;
+      Integer count = 0;
+      for (String line; (line = reader.readLine()) != null;) {
+        // Process line
         //System.out.println(line);
         triple = line.split("\\s");
-        System.out.println("triple: " + triple[0] + ", " + triple[2] +", "+ triple[1]);
-        kgList.add(new Triple(triple[0], triple[2], triple[1]));
-        line = reader.readLine();
+        System.out.println(count++ + " - triple: " + triple[0] + ", " + triple[1] +", "+ triple[2]);
+        subject = triple[0];
+        predicate = triple[1];
+        object = triple[2];
+        //Check for subject
+        if (subjectIndex.containsKey(subject)){
+          subH = subjectIndex.get(subject);
+        }else {
+          subH = subC;
+          subjectIndex.put(subject, subC++);
+        }
+        //Check for predicte
+        if (predicateIndex.containsKey(predicate)){
+          predH = predicateIndex.get(predicate);
+        }else {
+          predH = predC;
+          predicateIndex.put(predicate, predC++);
+        }
+        //Check for object
+        if (objectIndex.containsKey(object)){
+          objH = objectIndex.get(object);
+        }else {
+          objH = objC;
+          objectIndex.put(object, objC++);
+        }
+        kgList.add(new Triple(subH, predH, objH));
       }
+      DBFuncs.deleteKG();
+      DBFuncs.insertSubjects(subjectIndex);
+      DBFuncs.insertPredicates(predicateIndex);
+      DBFuncs.insertObjects(objectIndex);
       DBFuncs.insertKnowledgegraph(kgList);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
@@ -84,6 +125,7 @@ public class DbFill {
    * This Method is used for filling the Database tables head and base,
    * given from the rules provided by AnyBURL
    */
+  /**
   public static void fillHeadAndBase() {
     String file = Settings.RULES_PATH;
     DBFuncs.deleteHead();
@@ -126,20 +168,20 @@ public class DbFill {
             help1 = triple.split("\\(", 2)[1].split(",", 2);
             tailV1 = help1[0];
             tailV2 = help1[1].substring(0, help1[1].length()-1);
-            tailList.add(new Triple(ID, delE(tailV1), delE(tailV2), delR(tailRelation)));
+            tailList.add(new Triple(Integer.parseInt(tailV1), Integer.parseInt(delE(tailV2)), Integer.parseInt(tailRelation)));
           }
         }
         //Uncomment this, if you also want to inlcude empty rules
         /*else {
           tailList.add(new Triple(ID, tailV1, tailV2, tailRelation));
-        }*/
+        }
         help1 = first.split("\\(", 2)[1].split(",", 2);
         if (help1.length > 1){
           headV1 = help1[0];
           headV2 = help1[1].substring(0, help1[1].length()-1);
         }
         //System.out.println(headRelation + " : " + headV1 + " " + headV2 + " <= " + second);
-        headList.add(new Triple(ID, delE(headV1), delE(headV2), delR(headRelation)));
+        headList.add(new Triple(Integer.parseInt(tailV1), Integer.parseInt(delE(tailV2)), Integer.parseInt(tailRelation)));
         // read next line
         line = reader.readLine();
       }
@@ -149,5 +191,5 @@ public class DbFill {
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
+  }**/
 }
