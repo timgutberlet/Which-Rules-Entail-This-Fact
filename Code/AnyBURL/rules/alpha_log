@@ -1,13 +1,13 @@
 Logfile
 ~~~~~~~
 
-indexing dataset: ../sql-implementations/resources/Data/YAGO3-10/test.txt
-time elapsed: 149ms
+indexing dataset: ../sql-implementations/resources/Data/YAGO3-10/train.txt
+time elapsed: 5275ms
 
 SAFE_PREFIX_MODE = true
 SINGLE_RELATIONS = null
 FORBIDDEN_RELATIONS = null
-PATH_TRAINING = ../sql-implementations/resources/Data/YAGO3-10/test.txt
+PATH_TRAINING = ../sql-implementations/resources/Data/YAGO3-10/train.txt
 CONSTANTS_OFF = false
 PATH_OUTPUT = rules/alpha
 PATH_DICE = null
@@ -15,8 +15,8 @@ SNAPSHOTS_AT = 1 5 10
 SAMPLE_SIZE = 2000
 TRIAL_SIZE = 1000000
 BATCH_TIME = 1000
-WORKER_THREADS = 7
-ZERO_RULES_ACTIVE = true
+WORKER_THREADS = 5
+ZERO_RULES_ACTIVE = false
 MAX_LENGTH_CYCLIC = 3
 MAX_LENGTH_ACYCLIC = 1
 THRESHOLD_CORRECT_PREDICTIONS = 2
@@ -35,15 +35,15 @@ EXCLUDE_AC2_RULES = false
 
 
 rule file: rules/alpha-1
-zero: 775
-cyclic: 4 | 
-acyclic: 88 | time planned: 1s
+zero: 0
+cyclic: 17 | 104 | 40 | 
+acyclic: 1212 | time planned: 1s
 time elapsed: 2s
 
 
 rule file: rules/alpha-5
-zero: 775
-cyclic: 4 | 
-acyclic: 135 | time planned: 5s
+zero: 0
+cyclic: 47 | 172 | 68 | 
+acyclic: 7072 | time planned: 5s
 time elapsed: 6s
 

@@ -71,6 +71,7 @@ public class DbFill {
         kgList.add(new Triple(subH, predH, objH));
       }
       DBFuncs.deleteKG();
+      DBFuncs.deleteIndizes();
       DBFuncs.insertSubjects(subjectIndex);
       DBFuncs.insertPredicates(predicateIndex);
       DBFuncs.insertObjects(objectIndex);
@@ -125,7 +126,7 @@ public class DbFill {
    * This Method is used for filling the Database tables head and base,
    * given from the rules provided by AnyBURL
    */
-  /**
+/**
   public static void fillHeadAndBase() {
     String file = Settings.RULES_PATH;
     DBFuncs.deleteHead();

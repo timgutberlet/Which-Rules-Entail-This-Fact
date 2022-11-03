@@ -1,5 +1,6 @@
 package database;
 
+import config.Settings;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import models.Rule;
 import models.Triple;
 
 /**
@@ -54,10 +56,10 @@ public class DBFuncs {
       }
       stmt.executeBatch();
       con.commit();
+      stmt.close();
       System.out.println("Success");
 
       System.out.println("Data has been inserted");
-      con.close();
     } catch (SQLException e) {
       e.printStackTrace();
     }
@@ -166,9 +168,9 @@ public class DBFuncs {
       }
       stmt.executeBatch();
       con.commit();
-
+      stmt.close();
       System.out.println("Data has been inserted");
-      con.close();
+
     } catch (SQLException e) {
       e.printStackTrace();
     }
@@ -202,6 +204,7 @@ public class DBFuncs {
 
       System.out.println("Data has been inserted");
       con.close();
+      stmt.close();
     } catch (SQLException e) {
       e.printStackTrace();
     }
@@ -312,6 +315,17 @@ public class DBFuncs {
     }
   }
 
+  public static void deleteIndizes(){
+    Statement stmt;
+    String sql;
+    try {
+      sql = "DELETE FROM objects; DELETE FROM predicates; DELETE FROM subjects";
+      stmt =  con.createStatement();
+      stmt.executeQuery(sql);
+    } catch (SQLException e) {
+    }
+  }
+
   public static void readAllData() {
     PreparedStatement ps = null;
     ResultSet rs = null;
@@ -320,9 +334,9 @@ public class DBFuncs {
       ps = con.prepareStatement(sql);
       rs = ps.executeQuery();
       while (rs.next()) {
-        int subject = rs.getInt("subject");
-        int predicate = rs.getInt("predicate");
-        int object = rs.getInt("object");
+        int subject = rs.getInt("sub");
+        int predicate = rs.getInt("pre");
+        int object = rs.getInt("obj");
         System.out.println(subject + " " + predicate + " " + object + "\n");
       }
     } catch (SQLException e) {
@@ -334,6 +348,87 @@ public class DBFuncs {
         System.out.println(e.toString());
       }
     }
+  }
+
+  public static int getSubjectID(String txt) {
+    PreparedStatement ps;
+    ResultSet rs = null;
+    int id;
+    try {
+      String sql = "SELECT id FROM subjects WHERE txt = ?";
+      ps = con.prepareStatement(sql);
+      ps.setString(1, txt);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        id = rs.getInt("id");
+        return id;
+      }
+    } catch (SQLException e) {
+      System.out.println(e);
+    } finally {
+      try {
+        rs.close();
+      } catch (SQLException e) {
+        return -99;
+      } catch (NullPointerException e){
+        return -99;
+      }
+    }
+    return -99;
+  }
+
+  public static int getPredicateID(String txt) {
+    PreparedStatement ps;
+    ResultSet rs = null;
+    int id;
+    try {
+      String sql = "SELECT id FROM predicates WHERE txt = ?";
+      ps = con.prepareStatement(sql);
+      ps.setString(1, txt);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        id = rs.getInt("id");
+        return id;
+      }
+    } catch (SQLException e) {
+      System.out.println(e);
+    } finally {
+      try {
+        rs.close();
+      } catch (SQLException e) {
+        System.out.println(e);
+      } catch (NullPointerException e){
+        return -99;
+      }
+    }
+    return -99;
+  }
+
+  public static int getObjectID(String txt) {
+    PreparedStatement ps;
+    ResultSet rs = null;
+    int id;
+    try {
+      String sql = "SELECT id FROM public.objects WHERE txt = ?";
+      ps = con.prepareStatement(sql);
+      ps.setString(1, txt);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        id = rs.getInt("id");
+        return id;
+      }
+    } catch (SQLException e) {
+      System.out.println(e);
+    } finally {
+      try {
+        rs.close();
+      } catch (SQLException e) {
+        return -99;
+      } catch (NullPointerException e){
+        return -99;
+      }
+    }
+    return -99;
   }
 
   public static Map<Integer, Triple> getKnowledgeGraph() {
@@ -357,12 +452,105 @@ public class DBFuncs {
     } finally {
       try {
         rs.close();
-        con.close();
       } catch (SQLException e) {
         System.out.println(e.toString());
       }
     }
     return list;
+  }
+
+  /**
+   * Used for testing
+   * @param args
+   */
+  public static void main(String[] args) {
+    ConnectDB connectDB = new ConnectDB(Settings.CLASSNAME, Settings.URL, Settings.USER, Settings.PASSWORD);
+    con = connectDB.getConnection();
+  }
+
+  public static void testRules(List<Rule> filteredRules, Triple ogTriple){
+    boolean first;
+    PreparedStatement stmt;
+    ResultSet rs = null;
+    try {
+      StringBuffer sql, sqlEnd;
+      StringBuffer sub, pre, obj;
+      StringBuffer select, where;
+      int help;
+
+      long count = 0;
+      for (Rule rule : filteredRules){
+        first = true;
+        sql = new StringBuffer("SELECT case when EXISTS (");
+        sqlEnd = new StringBuffer(") THEN ? end;");
+        select = new StringBuffer("SELECT 1 FROM ");
+        where = new StringBuffer(" WHERE 1=1");
+        help = 1;
+        for (Triple triple : rule.getBody()){
+          /** TODO Idea to create SQL Statements with Intersects and not with joins
+          if (first){
+            first = false;
+          }else {
+            sql.append(" INTERSECT ");
+          }
+          **/
+
+          //Create FROM statements
+          if (first){
+            select.append("knowledgegraph kg" + help);
+            first = false;
+          }else {
+            select.append(", knowledgegraph kg" + help);
+          }
+
+          //Create WHERE Statements
+          sub = new StringBuffer();
+          if(triple.getSubject() < 0){
+            if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()){
+              sub.append(" AND kg"+help+".sub != " + "kg"+help+".obj");
+            }
+            if (triple.getSubject() == rule.getHead().getSubject()){
+              sub.append(" AND kg"+help+".sub = " + ogTriple.getSubject() );
+            } else if (triple.getSubject() == rule.getHead().getObject()){
+              sub.append(" AND kg"+help+".sub = " + ogTriple.getObject() );
+            }
+            //Check if equal with head
+          }else{
+            sub.append(" AND kg"+help+".sub = " + triple.getSubject());
+          }
+          //Create WHERE Statements
+          obj = new StringBuffer();
+          if(triple.getObject() >= 0){
+            obj = new StringBuffer(" AND kg"+help+".obj = " + triple.getObject());
+          }else {
+            if (triple.getObject() == rule.getHead().getSubject()){
+              obj.append(" AND kg"+help+".obj = " + ogTriple.getSubject() );
+            } else if (triple.getObject() == rule.getHead().getObject()){
+              obj.append(" AND kg"+help+".obj = " + ogTriple.getObject() );
+            }
+          }
+          pre = new StringBuffer(" AND kg"+help+".pre = " + triple.getPredicate());
+          where.append(sub);
+          where.append(pre);
+          where.append(obj);
+          help++;
+        }
+        sql.append(select);
+        sql.append(where);
+        sql.append(sqlEnd);
+        System.out.println(sql);
+        stmt = con.prepareStatement(sql.toString());
+        stmt.setString(1, rule.toString());
+        rs = stmt.executeQuery();
+        System.out.println("Success");
+        while (rs.next()) {
+          System.out.println("Found: ");
+          System.out.println(rs.getString("case"));
+        }
+      }
+    } catch (SQLException e) {
+      System.out.println(e);
+    }
   }
 }
 

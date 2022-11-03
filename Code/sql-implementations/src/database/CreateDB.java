@@ -30,7 +30,6 @@ public class CreateDB {
       stmt.executeUpdate(sql);
       stmt.close();
       System.out.println("Success");
-      connection.close();
     } catch (SQLException e) {
       e.printStackTrace();
     }

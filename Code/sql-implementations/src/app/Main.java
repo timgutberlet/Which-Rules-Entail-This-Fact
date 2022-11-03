@@ -10,21 +10,30 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.util.List;
 import java.util.Properties;
+import models.Rule;
+import models.Triple;
 import utils.DbFill;
+import utils.RandomRules;
 
 /**
  * @author tgutberl
  */
 public class Main {
   private static String CONFIG_FILE = "config.properties";
+  private static ConnectDB connectDB = new ConnectDB(Settings.CLASSNAME, Settings.URL, Settings.USER, Settings.PASSWORD);
 
   public static void main(String[] args) {
     initalize();
-    ConnectDB connectDB = new ConnectDB(Settings.CLASSNAME, Settings.URL, Settings.USER, Settings.PASSWORD);
-    DBFuncs.setCon(connectDB.getConnection());
-    CreateDB.setConnectDB(connectDB.getConnection());
     DbFill.fillKnowledgegraph();
+    RandomRules randomRules = new RandomRules(20);
+    List<Rule> rules = randomRules.getRules();
+    rules.forEach(rule -> System.out.println(rule));
+    System.out.println("");
+    System.out.println("Rules found: ");
+    randomRules.searchByTriple(new Triple(657,2,571));
+
     //CreateDB.createKnowledgeGraphDB();
     // DBFuncs.readAllData();
     //Code here
@@ -55,6 +64,9 @@ public class Main {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    DBFuncs.setCon(connectDB.getConnection());
+    CreateDB.setConnectDB(connectDB.getConnection());
   }
 
 }
