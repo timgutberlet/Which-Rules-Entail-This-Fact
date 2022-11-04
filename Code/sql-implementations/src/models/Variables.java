@@ -3,6 +3,8 @@ package models;
 import java.util.HashMap;
 
 /**
+ * Vocabulary for a variable representation (A...Z) converts to (-1 .. -26)
+ *
  * @author tgutberl
  */
 public class Variables {
@@ -14,6 +16,11 @@ public class Variables {
     return map.get(c);
   }
 
+  /**
+   * Returns the char for a given ID
+   * @param i ID
+   * @return Returns the String
+   */
   public static String getChar(int i){
     int count = -1;
     HashMap<Integer, String> map = new HashMap<>();
