@@ -1,4 +1,4 @@
-# Research Project
+# Online Rule Search Database
 Tim Gutberlet (tgutberl@mail.uni-mannheim.de) & Janik Sauerbier (jsauerbi@mail.uni-mannheim.de)
 
 ## Folder structure
