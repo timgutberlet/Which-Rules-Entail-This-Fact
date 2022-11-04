@@ -475,15 +475,23 @@ public class DBFuncs {
     ResultSet rs = null;
     try {
       StringBuffer sql, sqlEnd;
+      sql = new StringBuffer();
       StringBuffer sub, pre, obj;
       StringBuffer select, where;
       int help;
+      boolean firstR = true;
 
       long count = 0;
       for (Rule rule : filteredRules){
         first = true;
-        sql = new StringBuffer("SELECT case when EXISTS (");
-        sqlEnd = new StringBuffer(") THEN ? end;");
+        if(firstR){
+          sql.append("SELECT case when EXISTS (");
+          firstR = false;
+        }else{
+          sql.append(" UNION SELECT case when EXISTS (");
+        }
+
+        sqlEnd = new StringBuffer(") THEN '" + rule.toString()+ "' end");
         select = new StringBuffer("SELECT 1 FROM ");
         where = new StringBuffer(" WHERE 1=1");
         help = 1;
@@ -540,14 +548,21 @@ public class DBFuncs {
         sql.append(where);
         sql.append(sqlEnd);
         //System.out.println(sql);
-        stmt = con.prepareStatement(sql.toString());
-        stmt.setString(1, rule.toString());
-        rs = stmt.executeQuery();
+        //stmt = con.prepareStatement(sql.toString());
+        //stmt.setString(1, rule.toString());
+        //rs = stmt.executeQuery();
         //System.out.println("Success");
-        while (rs.next()) {
+        /*while (rs.next()) {
           //System.out.println("Found: ");
           //System.out.println(rs.getString("case"));
-        }
+        }*/
+      }
+      //System.out.println(sql.toString());
+      stmt = con.prepareStatement(sql.toString());
+      rs = stmt.executeQuery();
+      while (rs.next()) {
+        //System.out.println("Found: ");
+        //System.out.println(rs.getString("case"));
       }
     } catch (SQLException e) {
       System.out.println(e);
