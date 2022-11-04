@@ -266,7 +266,7 @@ public class RandomRules {
    */
   public void startQuery2() {
     List<Triple> queryTriples = importQueryTriples();
-    rules.forEach(rule -> System.out.println(rule));
+    //rules.forEach(rule -> System.out.println(rule));
     long queries = 0;
     long startTime = System.nanoTime();
     long elapsedTime;

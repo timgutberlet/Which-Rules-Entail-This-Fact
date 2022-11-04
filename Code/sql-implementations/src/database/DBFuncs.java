@@ -545,8 +545,8 @@ public class DBFuncs {
         rs = stmt.executeQuery();
         //System.out.println("Success");
         while (rs.next()) {
-          System.out.println("Found: ");
-          System.out.println(rs.getString("case"));
+          //System.out.println("Found: ");
+          //System.out.println(rs.getString("case"));
         }
       }
     } catch (SQLException e) {
