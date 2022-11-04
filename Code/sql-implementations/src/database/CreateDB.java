@@ -62,16 +62,16 @@ public class CreateDB {
           + "); "
           + " "
           + "create index indexed_knowledgegraph_predicate_index "
-          + "    on indexed_knowledgegraph (pred); "
+          + "    on indexed_knowledgegraph (pre); "
           + " "
           + "create index indexed_knowledgegraph_predicate_object_index "
-          + "    on indexed_knowledgegraph (pred, obj); "
+          + "    on indexed_knowledgegraph (pre, obj); "
           + " "
           + "create index indexed_knowledgegraph_predicate_subject_index "
-          + "    on indexed_knowledgegraph (pred, sub); "
+          + "    on indexed_knowledgegraph (pre, sub); "
           + " "
           + "create index indexed_knowledgegraph_predicate_subject_object_index "
-          + "    on indexed_knowledgegraph (pred, sub, obj); "
+          + "    on indexed_knowledgegraph (pre, sub, obj); "
           + " ";
       stmt = connection.createStatement();
       stmt.executeUpdate(sql);

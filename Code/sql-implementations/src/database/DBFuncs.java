@@ -147,7 +147,7 @@ public class DBFuncs {
   public static void insertIndexedKnowledgegraph(List<Triple> list) {
     PreparedStatement stmt;
     try {
-      String sql = "INSERT INTO indexed_knowledgegraph(sub, pred, obj) VALUES (?,?,?)";
+      String sql = "INSERT INTO indexed_knowledgegraph(sub, pre, obj) VALUES (?,?,?)";
       stmt = con.prepareStatement(sql);
       long startTime = System.nanoTime();
       long elapsedTime;
@@ -309,7 +309,7 @@ public class DBFuncs {
     Statement stmt;
     String sql;
     try {
-      sql = "DELETE FROM knowledgegraph";
+      sql = "DELETE FROM "+ Settings.KNOWLEDGEGRAPH_TABLE;
       stmt =  con.createStatement();
       stmt.executeQuery(sql);
     } catch (SQLException e) {
@@ -331,7 +331,7 @@ public class DBFuncs {
     PreparedStatement ps = null;
     ResultSet rs = null;
     try {
-      String sql = "SELECT * FROM knowledgegraph";
+      String sql = "SELECT * FROM " + Settings.KNOWLEDGEGRAPH_TABLE;
       ps = con.prepareStatement(sql);
       rs = ps.executeQuery();
       while (rs.next()) {
@@ -498,10 +498,10 @@ public class DBFuncs {
 
           //Create FROM statements
           if (first){
-            select.append("knowledgegraph kg" + help);
+            select.append( Settings.KNOWLEDGEGRAPH_TABLE  +" kg" + help);
             first = false;
           }else {
-            select.append(", knowledgegraph kg" + help);
+            select.append(", " +Settings.KNOWLEDGEGRAPH_TABLE + " kg" + help);
           }
 
           //Create WHERE Statements
