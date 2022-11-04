@@ -539,11 +539,11 @@ public class DBFuncs {
         sql.append(select);
         sql.append(where);
         sql.append(sqlEnd);
-        System.out.println(sql);
+        //System.out.println(sql);
         stmt = con.prepareStatement(sql.toString());
         stmt.setString(1, rule.toString());
         rs = stmt.executeQuery();
-        System.out.println("Success");
+        //System.out.println("Success");
         while (rs.next()) {
           System.out.println("Found: ");
           System.out.println(rs.getString("case"));

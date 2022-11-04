@@ -231,7 +231,7 @@ public class RandomRules {
           System.out.println("Error while reading QueryTriples");
         }
       }
-      System.out.println("Import finished");
+      //System.out.println("Import finished");
       reader.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -247,7 +247,7 @@ public class RandomRules {
    */
   public void startQuery() {
     List<Triple> queryTriples = importQueryTriples();
-    rules.forEach(rule -> System.out.println(rule));
+    //rules.forEach(rule -> System.out.println(rule));
     long queries = 0;
     long startTime = System.nanoTime();
     long elapsedTime;
