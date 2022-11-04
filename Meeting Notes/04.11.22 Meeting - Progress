@@ -1,0 +1,65 @@
+# Meeting 04.11.2022 - Progress
+
+## Was haben wir gemacht
+
+###Speicherstruktur:
+- Wörter in Integer umgewandelt
+  - Aufsteigend positive Integer für konstanten
+  - Negative von -1 bis -26 für Variablen
+  - In Hashmap gespeichert, für eventuelle Rückübersetzung oder wenn Triple Queries in Textform kommen
+  
+**Frage:** Sind Triple Queries in Textform zu berücksichtigen / sollte die Suchzeit in der Hashmap zu Umwandlung mit eingerechnet werden (auch wenn ggf. vernachlässigbar)
+
+###Datenbankstruktur
+**knowledgegraph**(subject, predicate, object)
+
+**knowledgegraph**(subject, predicate, object) mit index (subject, predicate, object) —> da meistens eh alle im where Statement auftauchen
+
+**knowledgegraph**(subject, predicate, object) mit index (subject, predicate, object) —> da meistens eh alle im where Statement auftauchen
+
+### Wie funktioniert eine query:
+(Als query wird das Triple bezeichnet, zu dem die entsprechende Regel die das Triple impliziert, gefunden werden soll)
+
+- Regelliste als Arraylist bestehend aus Head und Base
+- Wird per Stream vor-gefiltert nach Regel der query + subject/object gegebenfals, falls diese gleiche Variable oder Konstante sind
+    - Stream hier vllt nicht die effizienteste Variante? vllt einfach durchloopen und and neue Liste anhängen
+    - Parallel Stream?
+    - LinkedList?
+- Dann werden SQL-Queries erstellt nach dem Muster:
+    - SELECT case when EXISTS(SELECT 1 FROM knowledgegraph kg1, kg2… WHERE kg1.pre = … AND kg2.pre = … AND kg1.sub = sub AND ….) THEN {Rule} END;
+    - Returned die Regel wenn für alle Triple der Base das entsprechende Triple im knowledgegraph ist
+    - Triple der base werden hier alle in dem einen Select Statement durch mehrfach nutzung vom knowledgegraph geprüft
+        - Da meistens Base in unseren Beispielen nicht signifikant groß, wurde es so gemacht, aber:
+            - ggf. effizienter wenn diese per INTERSECT jeweils einzeln Selected werden oder per JOIN zusammengebracht, muss noch getested werden
+    - Wichtige Verbesserung:
+        - Für jede in Frage kommende Rule wird zurzeit noch eine SQL-Query einzeln abgesendet - massive performance einschränkung wahrscheinlich. Muss Noch per Union verbunden werden, bin hier gerade dran
+### Messung
+
+    - Datensätze:
+        - YAGO-3 - Test Datensatz: 5000 Triple
+        - Regelmenge: 50 / 250 / 500 feste Regeln —> Keine Empty rules
+        - Query Menge: 100 / 500 - random generiert - muss auch noch besser gemacht werden
+    - Messung der Gesamtdauer
+    - Messung der Durchschnittszeit pro Anfrage
+
+- 50 Rules / 500 Queries:
+
+  - Indexed Knowledgegraph:
+
+    - Gesamtzeit: 2271 ms
+    - Durchschnittszeit: 4 ms
+    - Abfragen: 500
+  - Non-Indexed:
+    - Gesamtzeit: 4862 ms
+    - Durchschnittszeit: 9 ms
+    - Abfragen: 500
+
+- 50 Rules / 100 Queries
+  - Indexed Knowledgegraph:
+    - Gesamtzeit: 628 ms
+    - Durchschnittszeit: 6 ms
+    - Abfragen: 100
+  - Non-Indexed:
+    - Gesamtzeit: 1266 ms
+    - Durchschnittszeit: 12 ms
+    - Abfragen: 100
