@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import de.unima.ki.anyburl.*;
@@ -124,6 +125,10 @@ public class ExplainNew {
 
 			Settings.PATH_RULES = rulePath + "-" + DURATION;
 		}
+
+		long abfragen = 0;
+		long startTime = System.nanoTime();
+		long elapsedTime;
 		
 		System.out.println(">>> apply previously learned rules");
 		
@@ -147,6 +152,7 @@ public class ExplainNew {
 		// Settings.REWRITE_REFLEXIV = false;
 		Apply.main(null);
 
+		System.out.println(explanationsTail);
 
 		// Settings.REWRITE_REFLEXIV = true;
 		
@@ -155,23 +161,31 @@ public class ExplainNew {
 		TripleSet train = new TripleSet(trainPath);
 		
 		int explanationCounter = 0;
-		HashMap<Triple, Rule> predictedTripleToExplainingRule = new HashMap<Triple, Rule>();
-		HashMap<Triple, Triple> predictedTripleToExplainingTriple = new HashMap<Triple, Triple>();
-		HashMap<Triple, Double> predictedTripleToConfidenceOfExplanation = new HashMap<Triple, Double>();
+		HashMap<Triple, List<Rule>> predictedTripleToExplainingRules = new HashMap<Triple, List<Rule>>();
+		HashMap<Triple, List<Triple>> predictedTripleToExplainingTriples = new HashMap<Triple, List<Triple>>();
+		HashMap<Triple, List<Double>> predictedTripleToConfidenceOfExplanations = new HashMap<Triple, List<Double>>();
 		
 		ArrayList<Triple> targets = new ArrayList<Triple>();
 		
 		for (Triple target : explanationsTail.keySet()) {
 			if (!targets.contains(getFixedTriple(target))) targets.add(getFixedTriple(target));
+
 			ArrayList<Rule> rules = getExplainingRules(target, explanationsTail.get(target), false);
 
 			for(Rule rule : rules) {
 				//Triple explanation = getExplainingTripleTail(target, train,  rules.get(0));
-				//predictedTripleToExplainingTriple.put(getFixedTriple(target), explanation);
-				predictedTripleToExplainingTriple.put(getFixedTriple(target), null);
-				predictedTripleToConfidenceOfExplanation.put(getFixedTriple(target), rule.getAppliedConfidence());
-				predictedTripleToExplainingRule.put(getFixedTriple(target), rule);
+				//predictedTripleToExplainingTriples.get(getFixedTriple(target)).add(explanation)
+				if(predictedTripleToExplainingTriples.get(getFixedTriple(target)) == null){
+					predictedTripleToExplainingTriples.put(getFixedTriple(target), new ArrayList<Triple>());
+					predictedTripleToConfidenceOfExplanations.put(getFixedTriple(target), new ArrayList<Double>());
+					predictedTripleToExplainingRules.put(getFixedTriple(target), new ArrayList<Rule>());
+				}
+				predictedTripleToExplainingTriples.get(getFixedTriple(target)).add(null);
+				predictedTripleToConfidenceOfExplanations.get(getFixedTriple(target)).add(rule.getAppliedConfidence());
+				predictedTripleToExplainingRules.get(getFixedTriple(target)).add(rule);
 			}
+
+			abfragen++;
 
 			/*
 
@@ -222,11 +236,16 @@ public class ExplainNew {
 		PrintWriter pw_vb = new PrintWriter(outputDeletePathVB);
 		for (Triple target : targets) {
 			pw_vb.println("Rules for target: " + getFixedTriple(target));
-			Triple explanation = predictedTripleToExplainingTriple.get(getFixedTriple(target));
-			if (explanation != null) {
-				pw_vb.println(explanation + "\t" + predictedTripleToExplainingRule.get(getFixedTriple(target)));
-			} else {
-				pw_vb.println(predictedTripleToExplainingRule.get(getFixedTriple(target)));
+			List<Triple> explanations = predictedTripleToExplainingTriples.get(getFixedTriple(target));
+			if(explanations == null){
+				continue;
+			}
+			for (int i=0; i<explanations.size(); i++){
+				if (explanations.get(i) != null) {
+					pw_vb.println(explanations.get(i) + "\t" + predictedTripleToExplainingRules.get(getFixedTriple(target)).get(i));
+				} else {
+					pw_vb.println(predictedTripleToExplainingRules.get(getFixedTriple(target)).get(i));
+				}
 			}
 			pw_vb.println();
 		}
@@ -250,6 +269,11 @@ public class ExplainNew {
 		System.out.println(">>> saved triples to be added in " + outputAdditionPath + "");
 
 		*/
+
+		elapsedTime = System.nanoTime();
+		System.out.println("Gesamtzeit: " + ((elapsedTime - startTime)/1000000) + " ms");
+		System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime)/1000000)/abfragen));
+		System.out.println("Abfragen: "+ abfragen);
 
 	}
 	
