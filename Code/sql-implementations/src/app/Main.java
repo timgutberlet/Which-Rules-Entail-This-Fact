@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import models.Rule;
 import models.Triple;
 import utils.DbFill;
@@ -26,13 +27,11 @@ public class Main {
 
   public static void main(String[] args) {
     initalize();
-    DbFill.fillKnowledgegraph();
-    RandomRules randomRules = new RandomRules(20);
-    List<Rule> rules = randomRules.getRules();
-    rules.forEach(rule -> System.out.println(rule));
-    System.out.println("");
-    System.out.println("Rules found: ");
-    randomRules.searchByTriple(new Triple(657,2,571));
+    DbFill dbFill = new DbFill();
+    dbFill.fillKnowledgegraph();
+
+    RandomRules randomRules = new RandomRules(20, dbFill.getSubjectIndex(), dbFill.getPredicateIndex(), dbFill.getObjectIndex());
+    randomRules.startQuery();
 
     //CreateDB.createKnowledgeGraphDB();
     // DBFuncs.readAllData();
@@ -59,12 +58,14 @@ public class Main {
       Settings.USER = IOHelper.getProperty(prop, "USER", Settings.USER);
       Settings.KNOWLEDGEGRAPH = IOHelper.getProperty(prop, "KNOWLEDGEGRAPH", Settings.KNOWLEDGEGRAPH);
       Settings.RULES_PATH = IOHelper.getProperty(prop, "RULES_PATH", Settings.RULES_PATH);
+      Settings.QUERYTRIPLES = IOHelper.getProperty(prop, "QUERYTRIPLES", Settings.QUERYTRIPLES);
+      Settings.QUERYTRIPLESFORMAT = IOHelper.getProperty(prop, "QUERYTRIPLESFORMAT", Settings.QUERYTRIPLESFORMAT);
+      Settings.KNOWLEDGEGRAPH_TABLE = IOHelper.getProperty(prop, "KNOWLEDGEGRAPH_TABLE", Settings.KNOWLEDGEGRAPH_TABLE);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
-
     DBFuncs.setCon(connectDB.getConnection());
     CreateDB.setConnectDB(connectDB.getConnection());
   }

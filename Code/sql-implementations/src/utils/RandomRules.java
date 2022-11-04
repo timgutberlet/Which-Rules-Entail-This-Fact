@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,45 +23,20 @@ public class RandomRules {
 
   private Integer queryCount;
   private List<Rule> rules;
+  private HashMap<String, Integer> subjectIndex;
+  private HashMap<String, Integer> predicateIndex;
+  private HashMap<String, Integer> objectIndex;
 
-  public RandomRules(Integer queryCount) {
+  public RandomRules(Integer queryCount, HashMap<String, Integer> subjectIndex,
+      HashMap<String, Integer> predicateIndex, HashMap<String, Integer> objectIndex) {
     this.queryCount = queryCount;
     this.rules = importRules();
+    this.subjectIndex = subjectIndex;
+    this.predicateIndex = predicateIndex;
+    this.objectIndex = objectIndex;
   }
 
-  public List<Rule> getRules() {
-    return rules;
-  }
-
-  public void searchByTriple(Triple triple){
-    List<Rule> filteredRules;
-    if (triple.getObject().equals(triple.getSubject())){
-      filteredRules = this.rules
-          .stream()
-          .filter(rule -> rule.getHead().getPredicate().equals(triple.getPredicate()))
-          .filter(rule -> rule.getHead().getObject().equals(rule.getHead().getSubject()))
-          .filter(rule -> rule.getHead().getObject().equals(triple.getObject()) && rule.getHead().getSubject().equals(triple.getSubject())
-          || rule.getHead().getSubject() < 0 && rule.getHead().getObject().equals(triple.getObject())
-          || rule.getHead().getSubject().equals(triple.getSubject()) && rule.getHead().getObject() < 0
-          || rule.getHead().getSubject() < 0 && rule.getHead().getObject() <0)
-          .collect(Collectors.toList());
-    }else {
-      filteredRules = this.rules
-          .stream()
-          .filter(rule -> rule.getHead().getPredicate().equals(triple.getPredicate()))
-          .filter(rule -> !rule.getHead().getObject().equals(rule.getHead().getSubject()))
-          .filter(rule -> rule.getHead().getObject().equals(triple.getObject()) && rule.getHead().getSubject().equals(triple.getSubject())
-          || rule.getHead().getSubject() < 0 && rule.getHead().getObject().equals(triple.getObject())
-          || rule.getHead().getSubject().equals(triple.getSubject()) && rule.getHead().getObject() < 0
-          || rule.getHead().getSubject() < 0 && rule.getHead().getObject() <0)
-          .collect(Collectors.toList());
-    }
-
-    DBFuncs.testRules(filteredRules, triple);
-    //filteredRules.forEach(rule -> System.out.println(rule));
-  }
-
-  public static List<Rule> importRules(){
+  public List<Rule> importRules() {
     String file = Settings.RULES_PATH;
     InputStream is = DbFill.class.getResourceAsStream(file);
     InputStreamReader streamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
@@ -96,14 +72,14 @@ public class RandomRules {
             help1 = triple.split("\\(", 2)[1].split(",", 2);
             bodySubject = help1[0];
             bodyObject = help1[1].substring(0, help1[1].length() - 1);
-            if (bodySubject.length() == 1){
+            if (bodySubject.length() == 1) {
               subjectID = Variables.getID(bodySubject);
-            }else {
+            } else {
               subjectID = DBFuncs.getSubjectID(delE(bodySubject));
             }
-            if(bodyObject.length() == 1){
+            if (bodyObject.length() == 1) {
               objectID = Variables.getID(bodyObject);
-            }else {
+            } else {
               objectID = DBFuncs.getObjectID(delE(bodyObject));
             }
             predicateID = DBFuncs.getPredicateID(delR(bodyPredicate));
@@ -126,17 +102,17 @@ public class RandomRules {
           headObject = help1[1].substring(0, help1[1].length() - 1);
         }
         //System.out.println(headPredicate + " : " + headSubject + " " + headObject + " <= " + second);
-        if (headSubject.length() == 1){
+        if (headSubject.length() == 1) {
 
         }
-        if (headSubject.length() == 1){
+        if (headSubject.length() == 1) {
           subjectID = Variables.getID(headSubject);
-        }else {
+        } else {
           subjectID = DBFuncs.getSubjectID(delE(headSubject));
         }
-        if(headObject.length() == 1){
+        if (headObject.length() == 1) {
           objectID = Variables.getID(headObject);
-        }else {
+        } else {
           objectID = DBFuncs.getObjectID(delE(headObject));
         }
         predicateID = DBFuncs.getPredicateID(delR(headPredicate));
@@ -187,31 +163,120 @@ public class RandomRules {
     return string;
   }
 
+  public List<Rule> getRules() {
+    return rules;
+  }
+
+  public void searchByTriple(Triple triple) {
+    List<Rule> filteredRules;
+    if (triple.getObject().equals(triple.getSubject())) {
+      filteredRules = this.rules
+          .stream()
+          .filter(rule -> rule.getHead().getPredicate().equals(triple.getPredicate()))
+          .filter(rule -> rule.getHead().getObject().equals(rule.getHead().getSubject()))
+          .filter(rule ->
+              rule.getHead().getObject().equals(triple.getObject()) && rule.getHead().getSubject()
+                  .equals(triple.getSubject())
+                  || rule.getHead().getSubject() < 0 && rule.getHead().getObject()
+                  .equals(triple.getObject())
+                  || rule.getHead().getSubject().equals(triple.getSubject())
+                  && rule.getHead().getObject() < 0
+                  || rule.getHead().getSubject() < 0 && rule.getHead().getObject() < 0)
+          .collect(Collectors.toList());
+    } else {
+      filteredRules = this.rules
+          .stream()
+          .filter(rule -> rule.getHead().getPredicate().equals(triple.getPredicate()))
+          .filter(rule -> !rule.getHead().getObject().equals(rule.getHead().getSubject()))
+          .filter(rule ->
+              rule.getHead().getObject().equals(triple.getObject()) && rule.getHead().getSubject()
+                  .equals(triple.getSubject())
+                  || rule.getHead().getSubject() < 0 && rule.getHead().getObject()
+                  .equals(triple.getObject())
+                  || rule.getHead().getSubject().equals(triple.getSubject())
+                  && rule.getHead().getObject() < 0
+                  || rule.getHead().getSubject() < 0 && rule.getHead().getObject() < 0)
+          .collect(Collectors.toList());
+    }
+
+    DBFuncs.testRules(filteredRules, triple);
+    //filteredRules.forEach(rule -> System.out.println(rule));
+  }
+
+  public List<Triple> importQueryTriples() {
+    String file = Settings.QUERYTRIPLES;
+    InputStream is = DbFill.class.getResourceAsStream(file);
+    InputStreamReader streamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
+    BufferedReader reader = new BufferedReader(streamReader);
+    List<Triple> tripleList = new ArrayList<>();
+    String[] importList;
+    int sub, pre, obj;
+
+    try {
+
+      for (String line; (line = reader.readLine()) != null; ) {
+        importList = line.split("\\s+");
+        if (importList.length == 3) {
+          if (Settings.QUERYTRIPLESFORMAT.equals("TEXT")) {
+            sub = subjectIndex.get(importList[0]);
+            pre = predicateIndex.get(importList[1]);
+            obj = objectIndex.get(importList[2]);
+          } else {
+            sub = Integer.parseInt(importList[0]);
+            pre = Integer.parseInt(importList[1]);
+            obj = Integer.parseInt(importList[2]);
+          }
+          tripleList.add(new Triple(sub, pre, obj));
+        } else {
+          System.out.println("Error while reading QueryTriples");
+        }
+      }
+      System.out.println("Import finished");
+      reader.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return tripleList;
+  }
+
+
   /**
+   * 1. Variante - alle Abfragen befinden sich
    * Used for getting the average time for a query to find a fitting rule. This will create random
    * rules out of all possible subjects, predicates and objects
    */
   public void startQuery() {
+    List<Triple> queryTriples = importQueryTriples();
+    rules.forEach(rule -> System.out.println(rule));
     long queries = 0;
     long startTime = System.nanoTime();
     long elapsedTime;
-    int random1, random2, random3;
-    Map<Integer, Triple> map = DBFuncs.getKnowledgeGraph();
-    //Comment out when Integer IDs were implemented
-    /*while (queries < queryCount){
-      random1 = (int) (Math.random() * map.size());
-      random2 = (int) (Math.random() * map.size());
-      random3 = (int) (Math.random() * map.size());
-      Hashtable<String, ArrayList<String>> field = DBFuncs.getByTripel(map.get(random1).getSubject(), map.get(random2).getObject(), map.get(random3).getPredicate());
-      if (field.size() > 0 ){
-        System.out.println("V1: "+ map.get(random1).getSubject() + " ; V2: "+ map.get(random2).getObject() + " ; Relaton: "+ map.get(random3).getPredicate());
-        System.out.println(field);
-      }
+    for (Triple triple : queryTriples){
       queries++;
-    }*/
+      searchByTriple(triple);
+    }
     elapsedTime = System.nanoTime();
     System.out.println("Gesamtzeit: " + ((elapsedTime - startTime) / 1000000) + " ms");
-    System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime) / 1000000) / queries));
+    System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime) / 1000000) / queries) + " ms");
+    System.out.println("Abfragen: " + queries);
+  }
+
+  /**
+   * Zweite Variante wo alle Abfragen in einem SQL Statement / wenigen zusammengefasst werden
+   */
+  public void startQuery2() {
+    List<Triple> queryTriples = importQueryTriples();
+    rules.forEach(rule -> System.out.println(rule));
+    long queries = 0;
+    long startTime = System.nanoTime();
+    long elapsedTime;
+    for (Triple triple : queryTriples){
+      queries++;
+      searchByTriple(triple);
+    }
+    elapsedTime = System.nanoTime();
+    System.out.println("Gesamtzeit: " + ((elapsedTime - startTime) / 1000000) + " ms");
+    System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime) / 1000000) / queries) + " ms");
     System.out.println("Abfragen: " + queries);
   }
 }

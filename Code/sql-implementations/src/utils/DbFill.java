@@ -17,11 +17,26 @@ import java.util.List;
 import models.Triple;
 
 public class DbFill {
+  private HashMap<String, Integer> subjectIndex;
+  private HashMap<String, Integer> predicateIndex;
+  private HashMap<String, Integer> objectIndex;
+
+  public HashMap<String, Integer> getObjectIndex() {
+    return objectIndex;
+  }
+
+  public HashMap<String, Integer> getPredicateIndex() {
+    return predicateIndex;
+  }
+
+  public HashMap<String, Integer> getSubjectIndex() {
+    return subjectIndex;
+  }
 
   /**
    * Fills the KnowledgeGraph Table with all rows given in the knowledgegraph text file
    */
-  public static void fillKnowledgegraph(){
+  public void fillKnowledgegraph(){
     String file = Settings.KNOWLEDGEGRAPH;
     //DBFuncs.deleteKG();
     BufferedReader reader;
@@ -32,9 +47,9 @@ public class DbFill {
       reader = new BufferedReader(streamReader);
       String[] triple;
       List<Triple> kgList = new ArrayList<>();
-      HashMap<String, Integer> subjectIndex = new HashMap<>();
-      HashMap<String, Integer> predicateIndex = new HashMap<>();
-      HashMap<String, Integer> objectIndex = new HashMap<>();
+      subjectIndex = new HashMap<>();
+      predicateIndex = new HashMap<>();
+      objectIndex = new HashMap<>();
       String subject, predicate, object;
       Integer subC = 0, predC = 0, objC = 0;
       Integer subH, predH, objH;

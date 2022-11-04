@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import models.Rule;
 import models.Triple;
 
@@ -34,7 +35,7 @@ public class DBFuncs {
   public static void insertKnowledgegraph(List<Triple> list) {
     PreparedStatement stmt;
     try {
-      String sql = "INSERT INTO knowledgegraph(sub, pre, obj) VALUES (?,?,?)";
+      String sql = "INSERT INTO "+ Settings.KNOWLEDGEGRAPH_TABLE + "(sub, pre, obj) VALUES (?,?,?)";
       stmt = con.prepareStatement(sql);
       long startTime = System.nanoTime();
       long elapsedTime;

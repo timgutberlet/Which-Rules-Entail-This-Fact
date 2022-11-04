@@ -10,4 +10,7 @@ public class Settings {
   public static String PASSWORD = "root";
   public static String KNOWLEDGEGRAPH = "/YAGO3-10/test";
   public static String RULES_PATH = "rules.txt";
+  public static String QUERYTRIPLES = "/DATA/comparison/queryTriples/queryTriples";
+  public static String QUERYTRIPLESFORMAT = "TEXT"; //Could also be INDEX
+  public static String KNOWLEDGEGRAPH_TABLE = "indexed_knowledgegraph_unique"; //Could also be INDEX
 }
