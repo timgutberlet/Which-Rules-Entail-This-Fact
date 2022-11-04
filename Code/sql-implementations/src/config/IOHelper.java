@@ -7,15 +7,30 @@ public class IOHelper {
 
   private static StringBuilder valueBuffer = new StringBuilder();
 
-
+  /**
+   * Stores a property value
+   * @param propertyName
+   * @param v
+   */
   private static void store(String propertyName, String v) {
     valueBuffer.append(propertyName + " = " + v + "\n");
   }
 
+  /**
+   *
+   * @return returns all parameters
+   */
   public static String getParams() {
     return valueBuffer.toString();
   }
 
+  /**
+   * Returns a property from the config.properties
+   * @param prop
+   * @param propertyName
+   * @param defaultValue
+   * @return value
+   */
   public static int getProperty(Properties prop, String propertyName, int defaultValue) {
 
     if (prop.getProperty(propertyName) != null) {
@@ -29,8 +44,13 @@ public class IOHelper {
     }
   }
 
-
-
+  /**
+   * Returns a property from the config.properties
+   * @param prop
+   * @param propertyName
+   * @param defaultValue
+   * @return value
+   */
   public static long getProperty(Properties prop, String propertyName, long defaultValue) {
     if (prop.getProperty(propertyName) != null) {
       long v = Long.parseLong(prop.getProperty(propertyName));
@@ -43,6 +63,13 @@ public class IOHelper {
     }
   }
 
+  /**
+   * Returns a property from the config.properties
+   * @param prop
+   * @param propertyName
+   * @param defaultValues
+   * @return value
+   */
   public static int[] getProperty(Properties prop, String propertyName, int[] defaultValues) {
     if (prop.getProperty(propertyName) != null) {
       String s = prop.getProperty(propertyName);
@@ -61,7 +88,13 @@ public class IOHelper {
       return defaultValues;
     }
   }
-
+  /**
+   * Returns a property from the config.properties
+   * @param prop
+   * @param propertyName
+   * @param defaultValues
+   * @return value
+   */
   public static String[] getProperty(Properties prop, String propertyName, String[] defaultValues) {
     if (prop.getProperty(propertyName) != null) {
       String s = prop.getProperty(propertyName);
@@ -74,7 +107,13 @@ public class IOHelper {
       return defaultValues;
     }
   }
-
+  /**
+   * Returns a property from the config.properties
+   * @param prop
+   * @param propertyName
+   * @param defaultValue
+   * @return value
+   */
   public static double getProperty(Properties prop, String propertyName, double defaultValue) {
     if (prop.getProperty(propertyName) != null) {
       double v = Double.parseDouble(prop.getProperty(propertyName));
@@ -86,7 +125,13 @@ public class IOHelper {
       return defaultValue;
     }
   }
-
+  /**
+   * Returns a property from the config.properties
+   * @param prop
+   * @param propertyName
+   * @param defaultValue
+   * @return value
+   */
   public static boolean getProperty(Properties prop, String propertyName, boolean defaultValue) {
     if (prop.getProperty(propertyName) != null) {
       boolean v = false;
@@ -99,7 +144,13 @@ public class IOHelper {
       return defaultValue;
     }
   }
-
+  /**
+   * Returns a property from the config.properties
+   * @param prop
+   * @param propertyName
+   * @param defaultValue
+   * @return value
+   */
   public static String getProperty(Properties prop, String propertyName, String defaultValue) {
     if (prop.getProperty(propertyName) != null) {
       String v = prop.getProperty(propertyName);
@@ -111,12 +162,5 @@ public class IOHelper {
       return defaultValue;
     }
   }
-
-
-
-
-
-
-
 }
 

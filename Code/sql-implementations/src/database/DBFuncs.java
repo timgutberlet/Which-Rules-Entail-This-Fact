@@ -32,6 +32,11 @@ public class DBFuncs {
     DBFuncs.con = con;
   }
 
+  /**
+   * Method used for inserting a list of triples in the knowledgegraph database.
+   * The knowledgegraph table is used, that was specified in the config.properites
+   * @param list A list of triples, imported from e.g. a text file, that is supposed to be inserted in the database
+   */
   public static void insertKnowledgegraph(List<Triple> list) {
     PreparedStatement stmt;
     try {
@@ -66,6 +71,10 @@ public class DBFuncs {
     }
   }
 
+  /**
+   * Inserts the vocabulary for subjects
+   * @param map
+   */
   public static void insertSubjects(HashMap<String, Integer> map) {
     PreparedStatement stmt;
     try {
@@ -92,6 +101,10 @@ public class DBFuncs {
     }
   }
 
+  /**
+   * Inserts a predicate with its key in the database
+   * @param map
+   */
   public static void insertPredicates(HashMap<String, Integer> map) {
     PreparedStatement stmt;
     try {
@@ -118,6 +131,10 @@ public class DBFuncs {
     }
   }
 
+  /**
+   * Inserts an Object with its key in the database
+   * @param map
+   */
   public static void insertObjects(HashMap<String, Integer> map) {
     PreparedStatement stmt;
     try {
@@ -144,72 +161,6 @@ public class DBFuncs {
     }
   }
 
-  public static void insertIndexedKnowledgegraph(List<Triple> list) {
-    PreparedStatement stmt;
-    try {
-      String sql = "INSERT INTO indexed_knowledgegraph(sub, pre, obj) VALUES (?,?,?)";
-      stmt = con.prepareStatement(sql);
-      long startTime = System.nanoTime();
-      long elapsedTime;
-      long count = 0;
-      for (Triple triple : list){
-        count++;
-        //System.out.println(triple.toString());
-        stmt.setInt(1, triple.getSubject());
-        stmt.setInt(2, triple.getPredicate());
-        stmt.setInt(3, triple.getObject());
-        stmt.addBatch();
-        if (count % 500 == 0 || count == list.size()){
-          stmt.executeBatch();
-          stmt.clearBatch();
-          elapsedTime = System.nanoTime() - startTime;
-          startTime = System.nanoTime();
-          //System.out.println("Inserted " + triple.getID() + " of " + list.size() +" ; Time: "+ (elapsedTime/1000000) + "ms");
-        }
-      }
-      stmt.executeBatch();
-      con.commit();
-      stmt.close();
-      System.out.println("Data has been inserted");
-
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public static void insertIndexedKnowledgegraphUnique(List<Triple> list) {
-    PreparedStatement stmt;
-    try {
-      String sql = "INSERT INTO indexed_knowledgegraph_unique(sub, pre, obj) VALUES (?,?,?)";
-      stmt = con.prepareStatement(sql);
-      long startTime = System.nanoTime();
-      long elapsedTime;
-      long count = 0;
-      for (Triple triple : list){
-        count++;
-        //System.out.println(triple.toString());
-        stmt.setInt(1, triple.getSubject());
-        stmt.setInt(2, triple.getPredicate());
-        stmt.setInt(3, triple.getObject());
-        stmt.addBatch();
-        if (count % 500 == 0 || count == list.size()){
-          stmt.executeBatch();
-          stmt.clearBatch();
-          elapsedTime = System.nanoTime() - startTime;
-          startTime = System.nanoTime();
-          //System.out.println("Inserted " + triple.getID() + " of " + list.size() +" ; Time: "+ (elapsedTime/1000000) + "ms");
-        }
-      }
-      stmt.executeBatch();
-      con.commit();
-
-      System.out.println("Data has been inserted");
-      con.close();
-      stmt.close();
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-  }
   /**
   public static void insertHead(List<Triple> list) {
     PreparedStatement stmt;
@@ -305,6 +256,10 @@ public class DBFuncs {
     }
   }
   **/
+
+  /**
+   * Deletes the in the config.properties specified Knowledgegraph
+   */
   public static void deleteKG(){
     Statement stmt;
     String sql;
@@ -316,6 +271,9 @@ public class DBFuncs {
     }
   }
 
+  /**
+   * Deletes the vocabulary tables where a key is specified to a String
+   */
   public static void deleteIndizes(){
     Statement stmt;
     String sql;
@@ -327,6 +285,9 @@ public class DBFuncs {
     }
   }
 
+  /**
+   * Reads all data from the Knowledgegraph and prints it
+   */
   public static void readAllData() {
     PreparedStatement ps = null;
     ResultSet rs = null;
@@ -351,6 +312,11 @@ public class DBFuncs {
     }
   }
 
+  /**
+   * Returns a subject id, for a subject String that is specified
+   * @param txt Text where the key searched
+   * @return Returns the ID
+   */
   public static int getSubjectID(String txt) {
     PreparedStatement ps;
     ResultSet rs = null;
@@ -378,6 +344,11 @@ public class DBFuncs {
     return -99;
   }
 
+  /**
+   * Returns the predicate ID for a specified String
+   * @param txt Specified String
+   * @return Returns the ID
+   */
   public static int getPredicateID(String txt) {
     PreparedStatement ps;
     ResultSet rs = null;
@@ -405,6 +376,11 @@ public class DBFuncs {
     return -99;
   }
 
+  /**
+   * Returns the Object ID for a specified Object
+   * @param txt Specified String
+   * @return Returns the objectID
+   */
   public static int getObjectID(String txt) {
     PreparedStatement ps;
     ResultSet rs = null;
@@ -432,34 +408,6 @@ public class DBFuncs {
     return -99;
   }
 
-  public static Map<Integer, Triple> getKnowledgeGraph() {
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-    Map<Integer, Triple> list = new HashMap<Integer, Triple>();
-    int count = 0;
-    try {
-      String sql = "SELECT * FROM knowledgegraph";
-      ps = con.prepareStatement(sql);
-      rs = ps.executeQuery();
-      while (rs.next()) {
-        int v1 = rs.getInt("kg_v1");
-        int v2 = rs.getInt("kg_v2");
-        int relation = rs.getInt("kg_r");
-        list.put(count, new Triple(v1, v2, relation));
-        count++;
-      }
-    } catch (SQLException e) {
-      System.out.println(e.toString());
-    } finally {
-      try {
-        rs.close();
-      } catch (SQLException e) {
-        System.out.println(e.toString());
-      }
-    }
-    return list;
-  }
-
   /**
    * Used for testing
    * @param args
@@ -469,6 +417,11 @@ public class DBFuncs {
     con = connectDB.getConnection();
   }
 
+  /**
+   * Method to test if a given Rule Set with a query value has Rules, that are found in the database
+   * @param filteredRules
+   * @param ogTriple
+   */
   public static void testRules(List<Rule> filteredRules, Triple ogTriple){
     boolean first;
     PreparedStatement stmt;
