@@ -540,6 +540,7 @@ public class DBFuncs {
    * @param ogTriple
    */
   public static StringBuffer testRules(List<Rule> filteredRules, Triple ogTriple) {
+    long startTime1 = System.nanoTime();
     StringBuffer foundRules = new StringBuffer();
     boolean first;
     PreparedStatement stmt;
@@ -627,8 +628,14 @@ public class DBFuncs {
         }*/
       }
       //System.out.println(sql.toString());
+      long elapsedTime1 = System.nanoTime();
+      System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
+      long startTime = System.nanoTime();
       stmt = con.prepareStatement(sql.toString());
       rs = stmt.executeQuery();
+      long elapsedTime = System.nanoTime();
+      System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
+      long startTime2 = System.nanoTime();
       while (rs.next()) {
         if (rs.getString("case") != null) {
           foundRules.append(rs.getString("case") + "\n");
@@ -636,6 +643,126 @@ public class DBFuncs {
         //System.out.println("Found: ");
         //System.out.println(rs.getString("case"));
       }
+      long elapsedTime2 = System.nanoTime();
+      System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
+    } catch (SQLException e) {
+      //e.printStackTrace();
+    }
+    return foundRules;
+  }
+
+  /**
+   * Search Method, that enables short Select statements
+   * @param filteredRules
+   * @param ogTriple
+   * @return
+   */
+  public static StringBuffer testRulesShorterSelect(List<Rule> filteredRules, Triple ogTriple) {
+    long startTime1 = System.nanoTime();
+    StringBuffer foundRules = new StringBuffer();
+    boolean first;
+    PreparedStatement stmt;
+    ResultSet rs;
+    try {
+      StringBuffer sql, sqlEnd;
+      sql = new StringBuffer();
+      StringBuffer sub, pre, obj;
+      StringBuffer select, where;
+      int help;
+      boolean firstR = true;
+      for (Rule rule : filteredRules) {
+        first = true;
+        if (firstR) {
+          sql.append("(");
+          firstR = false;
+        } else {
+          sql.append(" UNION (");
+        }
+
+        sqlEnd = new StringBuffer(")");
+        select = new StringBuffer("SELECT DISTINCT('" + rule + "') FROM ");
+        where = new StringBuffer(" WHERE 1=1");
+        help = 1;
+        for (Triple triple : rule.getBody()) {
+          /** TODO Idea to create SQL Statements with Intersects and not with joins
+           if (first){
+           first = false;
+           }else {
+           sql.append(" INTERSECT ");
+           }
+           **/
+
+          //Create FROM statements
+          if (first) {
+            select.append(Settings.KNOWLEDGEGRAPH_TABLE + " k" + help);
+            first = false;
+          } else {
+            select.append(", " + Settings.KNOWLEDGEGRAPH_TABLE + " k" + help);
+          }
+
+          //Create WHERE Statements
+          sub = new StringBuffer();
+          if (triple.getSubject() < 0) {
+            if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
+              sub.append(" AND kg" + help + ".sub != " + "kg" + help + ".obj");
+            }
+            if (triple.getSubject() == rule.getHead().getSubject()) {
+              sub.append(" AND kg" + help + ".sub = " + ogTriple.getSubject());
+            } else if (triple.getSubject() == rule.getHead().getObject()) {
+              sub.append(" AND kg" + help + ".sub = " + ogTriple.getObject());
+            }
+            //Check if equal with head
+          } else {
+            sub.append(" AND kg" + help + ".sub = " + triple.getSubject());
+          }
+          //Create WHERE Statements
+          obj = new StringBuffer();
+          if (triple.getObject() >= 0) {
+            obj = new StringBuffer(" AND kg" + help + ".obj = " + triple.getObject());
+          } else {
+            if (triple.getObject() == rule.getHead().getSubject()) {
+              obj.append(" AND kg" + help + ".obj = " + ogTriple.getSubject());
+            } else if (triple.getObject() == rule.getHead().getObject()) {
+              obj.append(" AND kg" + help + ".obj = " + ogTriple.getObject());
+            }
+          }
+          pre = new StringBuffer(" AND kg" + help + ".pre = " + triple.getPredicate());
+          where.append(sub);
+          where.append(pre);
+          where.append(obj);
+          help++;
+        }
+        sql.append(select);
+        sql.append(where);
+        sql.append(sqlEnd);
+        //System.out.println(sql);
+        //stmt = con.prepareStatement(sql.toString());
+        //stmt.setString(1, rule.toString());
+        //rs = stmt.executeQuery();
+        //System.out.println("Success");
+        /*while (rs.next()) {
+          //System.out.println("Found: ");
+          //System.out.println(rs.getString("case"));
+        }*/
+      }
+      //System.out.println(sql.toString());
+      long elapsedTime1 = System.nanoTime();
+      System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
+      long startTime = System.nanoTime();
+      stmt = con.prepareStatement(sql.toString());
+      rs = stmt.executeQuery();
+      long elapsedTime = System.nanoTime();
+      System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
+      long startTime2 = System.nanoTime();
+      while (rs.next()) {
+        if (rs.getString("case") != null) {
+          foundRules.append(rs.getString("case") + "\n");
+        }
+        //System.out.println("Found: ");
+        //System.out.println(rs.getString("case"));
+      }
+      long elapsedTime2 = System.nanoTime();
+      System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
     } catch (SQLException e) {
       //e.printStackTrace();
     }
