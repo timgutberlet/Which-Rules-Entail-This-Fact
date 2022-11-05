@@ -13,4 +13,5 @@ public class Settings {
   public static String QUERYTRIPLES = "/DATA/comparison/queryTriples/queryTriples";
   public static String QUERYTRIPLESFORMAT = "TEXT"; //Could also be INDEX
   public static String KNOWLEDGEGRAPH_TABLE = "indexed_knowledgegraph_unique"; //Could also be INDEX
+  public static String REFILL_TABLES = "YES";
 }

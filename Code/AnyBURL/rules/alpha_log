@@ -2,7 +2,7 @@ Logfile
 ~~~~~~~
 
 indexing dataset: ../sql-implementations/resources/Data/YAGO3-10/train.txt
-time elapsed: 5275ms
+time elapsed: 7513ms
 
 SAFE_PREFIX_MODE = true
 SINGLE_RELATIONS = null
@@ -11,7 +11,7 @@ PATH_TRAINING = ../sql-implementations/resources/Data/YAGO3-10/train.txt
 CONSTANTS_OFF = false
 PATH_OUTPUT = rules/alpha
 PATH_DICE = null
-SNAPSHOTS_AT = 1 5 10 
+SNAPSHOTS_AT = 50 
 SAMPLE_SIZE = 2000
 TRIAL_SIZE = 1000000
 BATCH_TIME = 1000
@@ -32,18 +32,4 @@ BEAM_SAMPLING_MAX_BODY_GROUNDING_ATTEMPTS = 10000
 BEAM_SAMPLING_MAX_REPETITIONS = 3
 REWRITE_REFLEXIV = true
 EXCLUDE_AC2_RULES = false
-
-
-rule file: rules/alpha-1
-zero: 0
-cyclic: 17 | 104 | 40 | 
-acyclic: 1212 | time planned: 1s
-time elapsed: 2s
-
-
-rule file: rules/alpha-5
-zero: 0
-cyclic: 47 | 172 | 68 | 
-acyclic: 7072 | time planned: 5s
-time elapsed: 6s
 

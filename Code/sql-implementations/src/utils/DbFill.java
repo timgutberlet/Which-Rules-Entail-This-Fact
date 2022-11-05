@@ -98,6 +98,12 @@ public class DbFill {
     }
   }
 
+  public void setIndexes(){
+    this.subjectIndex = getSubjectIndex();
+    this.objectIndex = getObjectIndex();
+    this.predicateIndex = getPredicateIndex();
+  };
+
   /**
    * Used for deleting all 'e's at the start of an entity, as entities from the ruleset start with an
    * unnessecary 'e', when they are given from AnyBURL

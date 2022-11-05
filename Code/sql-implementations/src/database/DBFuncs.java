@@ -52,12 +52,12 @@ public class DBFuncs {
         stmt.setInt(2, triple.getPredicate());
         stmt.setInt(3, triple.getObject());
         stmt.addBatch();
-        if (count % 500 == 0 || count == list.size()){
+        if (count % 1000 == 0 || count == list.size()){
           stmt.executeBatch();
           stmt.clearBatch();
           elapsedTime = System.nanoTime() - startTime;
           startTime = System.nanoTime();
-          //System.out.println("Inserted " + triple.getID() + " of " + list.size() +" ; Time: "+ (elapsedTime/1000000) + "ms");
+          System.out.println("Inserted " + count+ " of " + list.size() +" ; Time: "+ (elapsedTime/1000000) + "ms");
         }
       }
       stmt.executeBatch();
@@ -416,6 +416,102 @@ public class DBFuncs {
     ConnectDB connectDB = new ConnectDB(Settings.CLASSNAME, Settings.URL, Settings.USER, Settings.PASSWORD);
     con = connectDB.getConnection();
   }
+
+  /**
+   * Get Subject Index
+   */
+  public static HashMap<String, Integer> getSubjectIndex(){
+    HashMap<String, Integer> hashMap = new HashMap<>();
+    PreparedStatement ps;
+    ResultSet rs = null;
+    int id;
+    String txt;
+    try {
+      String sql = "SELECT id, txt FROM public.subjects";
+      ps = con.prepareStatement(sql);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        id = rs.getInt("id");
+        txt = rs.getString("txt");
+        hashMap.put(txt, id);
+      }
+    } catch (SQLException e) {
+      System.out.println(e);
+    } finally {
+      try {
+        rs.close();
+      } catch (SQLException e) {
+        System.out.println(e);
+      } catch (NullPointerException e){
+        System.out.println(e);
+      }
+    }
+    return hashMap;
+  }
+  /**
+   * Get Object Index
+   */
+  public static HashMap<String, Integer> getObjectIndex(){
+    HashMap<String, Integer> hashMap = new HashMap<>();
+    PreparedStatement ps;
+    ResultSet rs = null;
+    int id;
+    String txt;
+    try {
+      String sql = "SELECT id, txt FROM public.objects";
+      ps = con.prepareStatement(sql);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        id = rs.getInt("id");
+        txt = rs.getString("txt");
+        hashMap.put(txt, id);
+      }
+    } catch (SQLException e) {
+      System.out.println(e);
+    } finally {
+      try {
+        rs.close();
+      } catch (SQLException e) {
+        System.out.println(e);
+      } catch (NullPointerException e){
+        System.out.println(e);
+      }
+    }
+    return hashMap;
+  }
+  /**
+   * Get Predicate Index
+   */
+  public static HashMap<String, Integer> getPredicateIndex(){
+    HashMap<String, Integer> hashMap = new HashMap<>();
+    PreparedStatement ps;
+    ResultSet rs = null;
+    int id;
+    String txt;
+    try {
+      String sql = "SELECT id, txt FROM public.predicates";
+      ps = con.prepareStatement(sql);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        id = rs.getInt("id");
+        txt = rs.getString("txt");
+        hashMap.put(txt, id);
+      }
+    } catch (SQLException e) {
+      System.out.println(e);
+    } finally {
+      try {
+        rs.close();
+      } catch (SQLException e) {
+        System.out.println(e);
+      } catch (NullPointerException e){
+        System.out.println(e);
+      }
+    }
+    return hashMap;
+  }
+
+
 
   /**
    * Method to test if a given Rule Set with a query value has Rules, that are found in the database

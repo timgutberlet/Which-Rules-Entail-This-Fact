@@ -28,9 +28,15 @@ public class Main {
   public static void main(String[] args) {
     initalize();
     DbFill dbFill = new DbFill();
-    dbFill.fillKnowledgegraph();
-
+    if(Settings.REFILL_TABLES.equals("YES")){
+      dbFill.fillKnowledgegraph();
+      System.out.println("Knowledgegraph filled");
+    }else {
+      dbFill.setIndexes();
+      System.out.println("Knowledgegraph already filled, set Indexes");
+    }
     RandomRules randomRules = new RandomRules(20, dbFill.getSubjectIndex(), dbFill.getPredicateIndex(), dbFill.getObjectIndex());
+    System.out.println("RandomRulesSet");
     randomRules.startQuery();
 
     //CreateDB.createKnowledgeGraphDB();
@@ -61,6 +67,7 @@ public class Main {
       Settings.QUERYTRIPLES = IOHelper.getProperty(prop, "QUERYTRIPLES", Settings.QUERYTRIPLES);
       Settings.QUERYTRIPLESFORMAT = IOHelper.getProperty(prop, "QUERYTRIPLESFORMAT", Settings.QUERYTRIPLESFORMAT);
       Settings.KNOWLEDGEGRAPH_TABLE = IOHelper.getProperty(prop, "KNOWLEDGEGRAPH_TABLE", Settings.KNOWLEDGEGRAPH_TABLE);
+      Settings.REFILL_TABLES = IOHelper.getProperty(prop, "REFILL_TABLES", Settings.REFILL_TABLES);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (IOException e) {

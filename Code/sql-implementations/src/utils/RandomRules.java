@@ -168,6 +168,7 @@ public class RandomRules {
   }
 
   public void searchByTriple(Triple triple) {
+    System.out.println("Start filtering");
     List<Rule> filteredRules;
     if (triple.getObject().equals(triple.getSubject())) {
       filteredRules = this.rules
@@ -198,6 +199,8 @@ public class RandomRules {
                   || rule.getHead().getSubject() < 0 && rule.getHead().getObject() < 0)
           .collect(Collectors.toList());
     }
+
+    System.out.println("Rules Filtered");
 
     DBFuncs.testRules(filteredRules, triple);
     //filteredRules.forEach(rule -> System.out.println(rule));
