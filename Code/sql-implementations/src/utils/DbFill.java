@@ -6,7 +6,6 @@ import config.Settings;
 import database.DBFuncs;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,49 +46,22 @@ public class DbFill {
       reader = new BufferedReader(streamReader);
       String[] triple;
       List<Triple> kgList = new ArrayList<>();
-      subjectIndex = new HashMap<>();
-      predicateIndex = new HashMap<>();
-      objectIndex = new HashMap<>();
       String subject, predicate, object;
-      Integer subC = 0, predC = 0, objC = 0;
       Integer subH, predH, objH;
-      Integer count = 0;
       for (String line; (line = reader.readLine()) != null;) {
         // Process line
         //System.out.println(line);
         triple = line.split("\\s");
-        System.out.println(count++ + " - triple: " + triple[0] + ", " + triple[1] +", "+ triple[2]);
+        //System.out.println(count++ + " - triple: " + triple[0] + ", " + triple[1] +", "+ triple[2]);
         subject = triple[0];
         predicate = triple[1];
         object = triple[2];
-        //Check for subject
-        if (subjectIndex.containsKey(subject)){
-          subH = subjectIndex.get(subject);
-        }else {
-          subH = subC;
-          subjectIndex.put(subject, subC++);
-        }
-        //Check for predicte
-        if (predicateIndex.containsKey(predicate)){
-          predH = predicateIndex.get(predicate);
-        }else {
-          predH = predC;
-          predicateIndex.put(predicate, predC++);
-        }
-        //Check for object
-        if (objectIndex.containsKey(object)){
-          objH = objectIndex.get(object);
-        }else {
-          objH = objC;
-          objectIndex.put(object, objC++);
-        }
+        subH = subjectIndex.get(subject);
+        predH = predicateIndex.get(predicate);
+        objH = objectIndex.get(object);
         kgList.add(new Triple(subH, predH, objH));
       }
       DBFuncs.deleteKG();
-      DBFuncs.deleteIndizes();
-      DBFuncs.insertSubjects(subjectIndex);
-      DBFuncs.insertPredicates(predicateIndex);
-      DBFuncs.insertObjects(objectIndex);
       DBFuncs.insertKnowledgegraph(kgList);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
@@ -98,10 +70,61 @@ public class DbFill {
     }
   }
 
+  /**
+   * Fills the Index Database files
+   */
+  public void fillVocabulary(){
+    String file = Settings.VOCABULARY_DATASET;
+    //DBFuncs.deleteKG();
+    BufferedReader reader;
+    try {
+      // java.io.InputStream
+      InputStream is = DbFill.class.getResourceAsStream(file);
+      InputStreamReader streamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
+      reader = new BufferedReader(streamReader);
+      String[] triple;
+      subjectIndex = new HashMap<>();
+      predicateIndex = new HashMap<>();
+      objectIndex = new HashMap<>();
+      String subject, predicate, object;
+      Integer subC = 0, predC = 0, objC = 0;
+      Integer count = 0;
+      for (String line; (line = reader.readLine()) != null;) {
+        // Process line
+        //System.out.println(line);
+        triple = line.split("\\s");
+        //System.out.println(count++ + " - triple: " + triple[0] + ", " + triple[1] +", "+ triple[2]);
+        subject = triple[0];
+        predicate = triple[1];
+        object = triple[2];
+        //Check for subject
+        if (!subjectIndex.containsKey(subject)){
+          subjectIndex.put(subject, subC++);
+        }
+        //Check for predicte
+        if (!predicateIndex.containsKey(predicate)){
+          predicateIndex.put(predicate, predC++);
+        }
+        //Check for object
+        if (!objectIndex.containsKey(object)){
+          objectIndex.put(object, objC++);
+        }
+      }
+      DBFuncs.deleteIndizes();
+      DBFuncs.insertSubjects(subjectIndex);
+      DBFuncs.insertPredicates(predicateIndex);
+      DBFuncs.insertObjects(objectIndex);
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   public void setIndexes(){
-    this.subjectIndex = getSubjectIndex();
-    this.objectIndex = getObjectIndex();
-    this.predicateIndex = getPredicateIndex();
+    this.subjectIndex = DBFuncs.getSubjectIndex();
+    this.objectIndex = DBFuncs.getObjectIndex();
+    this.predicateIndex = DBFuncs.getPredicateIndex();
   };
 
   /**

@@ -5,16 +5,10 @@ import database.ConnectDB;
 import config.Settings;
 import database.CreateDB;
 import database.DBFuncs;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.util.List;
 import java.util.Properties;
-import java.util.Set;
-import models.Rule;
-import models.Triple;
 import utils.DbFill;
 import utils.RandomRules;
 
@@ -29,14 +23,15 @@ public class Main {
     initalize();
     DbFill dbFill = new DbFill();
     if(Settings.REFILL_TABLES.equals("YES")){
+      dbFill.fillVocabulary();
       dbFill.fillKnowledgegraph();
       System.out.println("Knowledgegraph filled");
     }else {
       dbFill.setIndexes();
       System.out.println("Knowledgegraph already filled, set Indexes");
     }
-    RandomRules randomRules = new RandomRules(20, dbFill.getSubjectIndex(), dbFill.getPredicateIndex(), dbFill.getObjectIndex());
-    System.out.println("RandomRulesSet");
+    RandomRules randomRules = new RandomRules(dbFill.getSubjectIndex(), dbFill.getPredicateIndex(), dbFill.getObjectIndex());
+    System.out.println("RandomRules Set");
     randomRules.startQuery();
 
     //CreateDB.createKnowledgeGraphDB();
@@ -68,6 +63,7 @@ public class Main {
       Settings.QUERYTRIPLESFORMAT = IOHelper.getProperty(prop, "QUERYTRIPLESFORMAT", Settings.QUERYTRIPLESFORMAT);
       Settings.KNOWLEDGEGRAPH_TABLE = IOHelper.getProperty(prop, "KNOWLEDGEGRAPH_TABLE", Settings.KNOWLEDGEGRAPH_TABLE);
       Settings.REFILL_TABLES = IOHelper.getProperty(prop, "REFILL_TABLES", Settings.REFILL_TABLES);
+      Settings.VOCABULARY_DATASET = IOHelper.getProperty(prop, "VOCABULARY_DATASET", Settings.VOCABULARY_DATASET);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (IOException e) {

@@ -2,7 +2,7 @@ Logfile
 ~~~~~~~
 
 indexing dataset: ../sql-implementations/resources/Data/YAGO3-10/train.txt
-time elapsed: 7513ms
+time elapsed: 38ms
 
 SAFE_PREFIX_MODE = true
 SINGLE_RELATIONS = null
@@ -11,11 +11,11 @@ PATH_TRAINING = ../sql-implementations/resources/Data/YAGO3-10/train.txt
 CONSTANTS_OFF = false
 PATH_OUTPUT = rules/alpha
 PATH_DICE = null
-SNAPSHOTS_AT = 50 
+SNAPSHOTS_AT = 10 
 SAMPLE_SIZE = 2000
 TRIAL_SIZE = 1000000
 BATCH_TIME = 1000
-WORKER_THREADS = 5
+WORKER_THREADS = 1
 ZERO_RULES_ACTIVE = false
 MAX_LENGTH_CYCLIC = 3
 MAX_LENGTH_ACYCLIC = 1
