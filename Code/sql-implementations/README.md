@@ -14,31 +14,30 @@ obj integer
 alter table knowledgegraph
 owner to postgres;
 
-create table indexed_knowledgegraph
-(
-sub  integer,
-pred integer,
-obj  integer
-);
-
-alter table indexed_knowledgegraph
-owner to postgres;
-
-create index indexed_knowledgegraph_predicate_subject_object_index
-on indexed_knowledgegraph (pred, sub, obj);
-
-create table indexed_knowledgegraph_unique
+create table ik
 (
 sub integer,
 pre integer,
 obj integer
 );
 
-alter table indexed_knowledgegraph_unique
+alter table ik
 owner to postgres;
 
-create unique index createindexeduniqueknowledgegraphdb_predicate_subject_object_ui
-on indexed_knowledgegraph_unique (pre, sub, obj);
+create index indexed_knowledgegraph_predicate_subject_object_index
+on ik (pre, sub, obj);
+
+create table iku
+(
+sub integer not null,
+pre integer not null,
+obj integer not null,
+constraint indexed_knowledgegraph_unique_pk
+primary key (pre, sub, obj)
+);
+
+alter table iku
+owner to postgres;
 
 create table predicates
 (
@@ -72,4 +71,26 @@ txt varchar
 
 alter table objects
 owner to postgres;
+
+create table ika
+(
+sub integer,
+pre integer,
+obj integer
+);
+
+alter table ika
+owner to postgres;
+
+create index indexed_knowledgegraph_all_pre_index
+on ika (pre);
+
+create index indexed_knowledgegraph_all_pre_obj_index
+on ika (pre, obj);
+
+create index indexed_knowledgegraph_all_pre_sub_index
+on ika (pre, sub);
+
+create index indexed_knowledgegraph_all_pre_sub_obj_index
+on ika (pre, sub, obj);
 
