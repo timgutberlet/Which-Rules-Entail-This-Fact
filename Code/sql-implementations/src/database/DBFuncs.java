@@ -558,10 +558,10 @@ public class DBFuncs {
           sql.append("SELECT case when EXISTS (");
           firstR = false;
         } else {
-          sql.append(" UNION SELECT case when EXISTS (");
+          sql.append(" UNION ALL SELECT case when EXISTS (");
         }
 
-        sqlEnd = new StringBuffer(") THEN '" + rule.toString() + "' end");
+        sqlEnd = new StringBuffer(") THEN '" + rule.toString() + "' end"); //TODO Hash key hier rein
         select = new StringBuffer("SELECT 1 FROM ");
         where = new StringBuffer(" WHERE 1=1");
         help = 1;
@@ -630,6 +630,7 @@ public class DBFuncs {
       //System.out.println(sql.toString());
       long elapsedTime1 = System.nanoTime();
       System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
+      System.out.println(sql.toString());
       long startTime = System.nanoTime();
       stmt = con.prepareStatement(sql.toString());
       rs = stmt.executeQuery();
@@ -643,6 +644,7 @@ public class DBFuncs {
         //System.out.println("Found: ");
         //System.out.println(rs.getString("case"));
       }
+      rs.close();
       long elapsedTime2 = System.nanoTime();
       System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
     } catch (SQLException e) {
@@ -679,8 +681,8 @@ public class DBFuncs {
           sql.append(" UNION (");
         }
 
-        sqlEnd = new StringBuffer(")");
-        select = new StringBuffer("SELECT DISTINCT('" + rule + "') FROM ");
+        sqlEnd = new StringBuffer(" LIMIT 1)");
+        select = new StringBuffer("SELECT DISTINCT('" + rule + "') FROM "); //TODO LIMIT 1
         where = new StringBuffer(" WHERE 1=1");
         help = 1;
         for (Triple triple : rule.getBody()) {
