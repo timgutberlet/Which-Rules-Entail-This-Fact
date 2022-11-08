@@ -561,7 +561,7 @@ public class DBFuncs {
           sql.append(" UNION SELECT case when EXISTS (");
         }
 
-        sqlEnd = new StringBuffer(") THEN '" + rule.toString() + "' end"); //TODO Hash key hier rein
+        sqlEnd = new StringBuffer(") THEN '" + rule.getId() + "' end"); //TODO Hash key hier rein
         select = new StringBuffer("SELECT 1 FROM ");
         where = new StringBuffer(" WHERE 1=1");
         help = 1;
@@ -684,7 +684,7 @@ public class DBFuncs {
           sql.append(" UNION ALL SELECT case when EXISTS (");
         }
 
-        sqlEnd = new StringBuffer(") THEN '" + rule.toString() + "' end"); //TODO Hash key hier rein
+        sqlEnd = new StringBuffer(") THEN '" + rule.getId() + "' end"); //TODO Hash key hier rein
         select = new StringBuffer("SELECT 1 FROM ");
         where = new StringBuffer(" WHERE 1=1");
         help = 1;
@@ -786,9 +786,10 @@ public class DBFuncs {
     long startTime1 = System.nanoTime();
     StringBuffer foundRules = new StringBuffer();
     boolean first;
-    PreparedStatement stmt;
+
     ResultSet rs;
     try {
+      Statement stmt = con.createStatement();
       StringBuffer sql, sqlEnd;
       sql = new StringBuffer();
       StringBuffer sub, pre, obj;
@@ -873,13 +874,9 @@ public class DBFuncs {
       //System.out.println(sql.toString());
       long elapsedTime1 = System.nanoTime();
       System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
-      System.out.println("SQL "+ sql.toString());
-      long startTime3 = System.nanoTime();
-      stmt = con.prepareStatement(sql.toString());
-      long elapsedTime3 = System.nanoTime();
-      System.out.println("Dauer nur für PrepareStatement: " +((elapsedTime3-startTime3)/1000000) + "ms" );
+      //System.out.println("SQL "+ sql.toString());
       long startTime = System.nanoTime();
-      rs = stmt.executeQuery();
+      rs = stmt.executeQuery(sql.toString());
       long elapsedTime = System.nanoTime();
       System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
       long startTime2 = System.nanoTime();

@@ -406,13 +406,16 @@ public class RandomRules {
     for (Triple triple : queryTriples){
       queries++;
       //found.append("Query: " + triple.toString() + " : " + searchByTriple(triple).toString() +" \n");
-      System.out.println("Query: " + triple.toString() + " : " + searchByTriple(triple));
+      //System.out.println("Query: " + triple.toString() + " : " + searchByTriple(triple));
+      searchByTriple(triple);
       if(queries % 10 == 0){
         elapsedTime = System.nanoTime();
-        System.out.println(found);
+        //System.out.println(found);
+        System.out.println("");
         System.out.println("Gesamtzeit: " + ((elapsedTime - startTime) / 1000000) + " ms");
         System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime) / 1000000) / queries) + " ms");
         System.out.println("Abfragen: " + queries);
+        System.out.println("");
       }
     }
     elapsedTime = System.nanoTime();
