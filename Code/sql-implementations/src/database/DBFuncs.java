@@ -558,6 +558,129 @@ public class DBFuncs {
           sql.append("SELECT case when EXISTS (");
           firstR = false;
         } else {
+          sql.append(" UNION SELECT case when EXISTS (");
+        }
+
+        sqlEnd = new StringBuffer(") THEN '" + rule.toString() + "' end"); //TODO Hash key hier rein
+        select = new StringBuffer("SELECT 1 FROM ");
+        where = new StringBuffer(" WHERE 1=1");
+        help = 1;
+        for (Triple triple : rule.getBody()) {
+          /** TODO Idea to create SQL Statements with Intersects and not with joins
+           if (first){
+           first = false;
+           }else {
+           sql.append(" INTERSECT ");
+           }
+           **/
+
+          //Create FROM statements
+          if (first) {
+            select.append(Settings.KNOWLEDGEGRAPH_TABLE + " kg" + help);
+            first = false;
+          } else {
+            select.append(", " + Settings.KNOWLEDGEGRAPH_TABLE + " kg" + help);
+          }
+
+          //Create WHERE Statements
+          sub = new StringBuffer();
+          if (triple.getSubject() < 0) {
+            if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
+              sub.append(" AND kg" + help + ".sub != " + "kg" + help + ".obj");
+            }
+            if (triple.getSubject() == rule.getHead().getSubject()) {
+              sub.append(" AND kg" + help + ".sub = " + ogTriple.getSubject());
+            } else if (triple.getSubject() == rule.getHead().getObject()) {
+              sub.append(" AND kg" + help + ".sub = " + ogTriple.getObject());
+            }
+            //Check if equal with head
+          } else {
+            sub.append(" AND kg" + help + ".sub = " + triple.getSubject());
+          }
+          //Create WHERE Statements
+          obj = new StringBuffer();
+          if (triple.getObject() >= 0) {
+            obj = new StringBuffer(" AND kg" + help + ".obj = " + triple.getObject());
+          } else {
+            if (triple.getObject() == rule.getHead().getSubject()) {
+              obj.append(" AND kg" + help + ".obj = " + ogTriple.getSubject());
+            } else if (triple.getObject() == rule.getHead().getObject()) {
+              obj.append(" AND kg" + help + ".obj = " + ogTriple.getObject());
+            }
+          }
+          pre = new StringBuffer(" AND kg" + help + ".pre = " + triple.getPredicate());
+          where.append(sub);
+          where.append(pre);
+          where.append(obj);
+          help++;
+        }
+        sql.append(select);
+        sql.append(where);
+        sql.append(sqlEnd);
+        //System.out.println(sql);
+        //stmt = con.prepareStatement(sql.toString());
+        //stmt.setString(1, rule.toString());
+        //rs = stmt.executeQuery();
+        //System.out.println("Success");
+        /*while (rs.next()) {
+          //System.out.println("Found: ");
+          //System.out.println(rs.getString("case"));
+        }*/
+      }
+      //System.out.println(sql.toString());
+      long elapsedTime1 = System.nanoTime();
+      System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
+      System.out.println(sql.toString());
+      long startTime3 = System.nanoTime();
+      stmt = con.prepareStatement(sql.toString());
+      long elapsedTime3 = System.nanoTime();
+      System.out.println("Dauer nur für PrepareStatement: " +((elapsedTime3-startTime3)/1000000) + "ms" );
+      long startTime = System.nanoTime();
+      rs = stmt.executeQuery();
+      long elapsedTime = System.nanoTime();
+      System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
+      long startTime2 = System.nanoTime();
+      while (rs.next()) {
+        if (rs.getString("?column?") != null) {
+          foundRules.append(rs.getString("?column?") + "\n");
+        }
+        //System.out.println("Found: ");
+        //System.out.println(rs.getString("case"));
+      }
+      rs.close();
+      long elapsedTime2 = System.nanoTime();
+      System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
+    } catch (SQLException e) {
+      //e.printStackTrace();
+    }
+    return foundRules;
+  }
+
+  /**
+   * Change from testRules: From UNION to UNIONALL
+   *
+   * @param filteredRules
+   * @param ogTriple
+   */
+  public static StringBuffer testRulesUnionAll(List<Rule> filteredRules, Triple ogTriple) {
+    long startTime1 = System.nanoTime();
+    StringBuffer foundRules = new StringBuffer();
+    boolean first;
+    PreparedStatement stmt;
+    ResultSet rs;
+    try {
+      StringBuffer sql, sqlEnd;
+      sql = new StringBuffer();
+      StringBuffer sub, pre, obj;
+      StringBuffer select, where;
+      int help;
+      boolean firstR = true;
+      for (Rule rule : filteredRules) {
+        first = true;
+        if (firstR) {
+          sql.append("SELECT case when EXISTS (");
+          firstR = false;
+        } else {
           sql.append(" UNION ALL SELECT case when EXISTS (");
         }
 
@@ -638,8 +761,8 @@ public class DBFuncs {
       System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
       long startTime2 = System.nanoTime();
       while (rs.next()) {
-        if (rs.getString("case") != null) {
-          foundRules.append(rs.getString("case") + "\n");
+        if (rs.getString("?column?") != null) {
+          foundRules.append(rs.getString("?column?") + "\n");
         }
         //System.out.println("Found: ");
         //System.out.println(rs.getString("case"));
@@ -654,12 +777,12 @@ public class DBFuncs {
   }
 
   /**
-   * Search Method, that enables short Select statements
+   * Change from testRulesUnionAll: Also shorter selects, without exists
+   *
    * @param filteredRules
    * @param ogTriple
-   * @return
    */
-  public static StringBuffer testRulesShorterSelect(List<Rule> filteredRules, Triple ogTriple) {
+  public static StringBuffer testRulesUnionAllShorterSelect(List<Rule> filteredRules, Triple ogTriple) {
     long startTime1 = System.nanoTime();
     StringBuffer foundRules = new StringBuffer();
     boolean first;
@@ -678,11 +801,11 @@ public class DBFuncs {
           sql.append("(");
           firstR = false;
         } else {
-          sql.append(" UNION (");
+          sql.append(" UNION ALL (");
         }
 
-        sqlEnd = new StringBuffer(" LIMIT 1)");
-        select = new StringBuffer("SELECT DISTINCT('" + rule + "') FROM "); //TODO LIMIT 1
+        sqlEnd = new StringBuffer(" LIMIT 1) "); //TODO Hash key hier rein
+        select = new StringBuffer("SELECT " + rule.getId() + " FROM ");
         where = new StringBuffer(" WHERE 1=1");
         help = 1;
         for (Triple triple : rule.getBody()) {
@@ -706,29 +829,29 @@ public class DBFuncs {
           sub = new StringBuffer();
           if (triple.getSubject() < 0) {
             if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
-              sub.append(" AND kg" + help + ".sub != " + "kg" + help + ".obj");
+              sub.append(" AND k" + help + ".sub != " + "k" + help + ".obj");
             }
             if (triple.getSubject() == rule.getHead().getSubject()) {
-              sub.append(" AND kg" + help + ".sub = " + ogTriple.getSubject());
+              sub.append(" AND k" + help + ".sub = " + ogTriple.getSubject());
             } else if (triple.getSubject() == rule.getHead().getObject()) {
-              sub.append(" AND kg" + help + ".sub = " + ogTriple.getObject());
+              sub.append(" AND k" + help + ".sub = " + ogTriple.getObject());
             }
             //Check if equal with head
           } else {
-            sub.append(" AND kg" + help + ".sub = " + triple.getSubject());
+            sub.append(" AND k" + help + ".sub = " + triple.getSubject());
           }
           //Create WHERE Statements
           obj = new StringBuffer();
           if (triple.getObject() >= 0) {
-            obj = new StringBuffer(" AND kg" + help + ".obj = " + triple.getObject());
+            obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
           } else {
             if (triple.getObject() == rule.getHead().getSubject()) {
-              obj.append(" AND kg" + help + ".obj = " + ogTriple.getSubject());
+              obj.append(" AND k" + help + ".obj = " + ogTriple.getSubject());
             } else if (triple.getObject() == rule.getHead().getObject()) {
-              obj.append(" AND kg" + help + ".obj = " + ogTriple.getObject());
+              obj.append(" AND k" + help + ".obj = " + ogTriple.getObject());
             }
           }
-          pre = new StringBuffer(" AND kg" + help + ".pre = " + triple.getPredicate());
+          pre = new StringBuffer(" AND k" + help + ".pre = " + triple.getPredicate());
           where.append(sub);
           where.append(pre);
           where.append(obj);
@@ -750,19 +873,24 @@ public class DBFuncs {
       //System.out.println(sql.toString());
       long elapsedTime1 = System.nanoTime();
       System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
-      long startTime = System.nanoTime();
+      System.out.println("SQL "+ sql.toString());
+      long startTime3 = System.nanoTime();
       stmt = con.prepareStatement(sql.toString());
+      long elapsedTime3 = System.nanoTime();
+      System.out.println("Dauer nur für PrepareStatement: " +((elapsedTime3-startTime3)/1000000) + "ms" );
+      long startTime = System.nanoTime();
       rs = stmt.executeQuery();
       long elapsedTime = System.nanoTime();
       System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
       long startTime2 = System.nanoTime();
       while (rs.next()) {
-        if (rs.getString("case") != null) {
-          foundRules.append(rs.getString("case") + "\n");
+        if (rs.getString("?column?") != null) {
+          foundRules.append(rs.getString("?column?") + "\n");
         }
         //System.out.println("Found: ");
         //System.out.println(rs.getString("case"));
       }
+      rs.close();
       long elapsedTime2 = System.nanoTime();
       System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
     } catch (SQLException e) {

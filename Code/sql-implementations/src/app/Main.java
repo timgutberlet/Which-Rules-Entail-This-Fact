@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Set;
 import utils.DbFill;
 import utils.RandomRules;
 
@@ -64,6 +65,7 @@ public class Main {
       Settings.KNOWLEDGEGRAPH_TABLE = IOHelper.getProperty(prop, "KNOWLEDGEGRAPH_TABLE", Settings.KNOWLEDGEGRAPH_TABLE);
       Settings.REFILL_TABLES = IOHelper.getProperty(prop, "REFILL_TABLES", Settings.REFILL_TABLES);
       Settings.VOCABULARY_DATASET = IOHelper.getProperty(prop, "VOCABULARY_DATASET", Settings.VOCABULARY_DATASET);
+      Settings.TESTRULES_METHOD = IOHelper.getProperty(prop, "TESTRULES_METHOD", Settings.TESTRULES_METHOD);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (IOException e) {

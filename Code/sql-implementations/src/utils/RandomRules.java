@@ -46,6 +46,7 @@ public class RandomRules {
     InputStreamReader streamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
     BufferedReader reader = new BufferedReader(streamReader);
     Rule rule;
+    Integer counter = 0;
     try {
       String first;
       String second;
@@ -191,6 +192,7 @@ public class RandomRules {
           }
           objBound.get(key2Int).add(rule);
         }
+        rule.setId(counter++);
 
         //ruleList.add(new Rule(head, body));
       }
@@ -302,7 +304,22 @@ public class RandomRules {
     long elapsedTime = System.nanoTime();
     System.out.println("Zeit für Regelsuche: " + ((elapsedTime - startTime) / 1000000) + " ms");
     startTime = System.nanoTime();
-    StringBuffer stringBuffer = DBFuncs.testRules(filteredRules, triple);
+    StringBuffer stringBuffer = new StringBuffer();
+    if(Settings.TESTRULES_METHOD.equals("testRules")){
+      stringBuffer = DBFuncs.testRules(filteredRules, triple);
+    }else if (Settings.TESTRULES_METHOD.equals("testRulesUnionAll")){
+      stringBuffer = DBFuncs.testRulesUnionAll(filteredRules, triple);
+    }else if (Settings.TESTRULES_METHOD.equals("testRulesUnionAllShorterSelect")){
+      stringBuffer = DBFuncs.testRulesUnionAllShorterSelect(filteredRules, triple);
+    }else if (Settings.TESTRULES_METHOD == ""){
+
+    }else if (Settings.TESTRULES_METHOD == ""){
+
+    }else if (Settings.TESTRULES_METHOD == ""){
+
+    }else if (Settings.TESTRULES_METHOD == ""){
+
+    }
     elapsedTime = System.nanoTime();
     System.out.println("Zeit für SQL Abfrage: " + ((elapsedTime - startTime) / 1000000) + " ms");
     return stringBuffer;

@@ -15,4 +15,5 @@ public class Settings {
   public static String KNOWLEDGEGRAPH_TABLE = "indexed_knowledgegraph_unique"; //Could also be INDEX
   public static String REFILL_TABLES = "YES";
   public static String VOCABULARY_DATASET = "/Data/Vocabulary/YAGO-10.txt";
+  public static String TESTRULES_METHOD = "testRulesUnionAllShorterSelect";
 }

@@ -10,6 +10,7 @@ import java.util.List;
 public class Rule {
   private Triple head;
   private List<Triple> body;
+  private Integer id;
 
   /**
    * Costructor for setting
@@ -19,6 +20,25 @@ public class Rule {
   public Rule(Triple head, List<Triple> body){
     this.head = head;
     this.body = body;
+  }
+
+  /**
+   * Costructor for setting
+   * @param head Triple representation of Head
+   * @param body Triple Array representation of Body
+   */
+  public Rule(Triple head, List<Triple> body, Integer id){
+    this.head = head;
+    this.body = body;
+    this.id = id;
+  }
+
+  public Integer getId() {
+    return id;
+  }
+
+  public void setId(Integer id) {
+    this.id = id;
   }
 
   /**
