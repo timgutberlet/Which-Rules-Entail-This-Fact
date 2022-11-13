@@ -790,7 +790,7 @@ public class DBFuncs {
   public static StringBuffer testRulesUnionAllShorterSelect(List<Rule> filteredRules, Triple ogTriple) {
     long startTime1 = System.nanoTime();
     StringBuffer foundRules = new StringBuffer();
-    boolean first;
+    boolean first, first2;
 
     ResultSet rs;
     try {
@@ -803,6 +803,7 @@ public class DBFuncs {
       boolean firstR = true;
       for (Rule rule : filteredRules) {
         first = true;
+        first2 = true;
         if (firstR) {
           sql.append("(");
           firstR = false;
@@ -812,7 +813,7 @@ public class DBFuncs {
 
         sqlEnd = new StringBuffer(" LIMIT 1) "); //TODO Hash key hier rein
         select = new StringBuffer("SELECT " + rule.getId() + " FROM ");
-        where = new StringBuffer(" WHERE 1=1");
+        where = new StringBuffer(" WHERE");
         help = 1;
         for (Triple triple : rule.getBody()) {
           /** TODO Idea to create SQL Statements with Intersects and not with joins
@@ -835,16 +836,38 @@ public class DBFuncs {
           sub = new StringBuffer();
           if (triple.getSubject() < 0) {
             if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
-              sub.append(" AND k" + help + ".sub != " + "k" + help + ".obj");
+              if(first2){
+                first2 = false;
+                sub.append(" k" + help + ".sub != " + "k" + help + ".obj");
+              }else {
+                sub.append(" AND k" + help + ".sub != " + "k" + help + ".obj");
+              }
+
             }
             if (triple.getSubject() == rule.getHead().getSubject()) {
-              sub.append(" AND k" + help + ".sub = " + ogTriple.getSubject());
+              if(first2) {
+                first2 = false;
+                sub.append(" k" + help + ".sub = " + ogTriple.getSubject());
+              }else {
+                sub.append(" AND k" + help + ".sub = " + ogTriple.getSubject());
+              }
             } else if (triple.getSubject() == rule.getHead().getObject()) {
-              sub.append(" AND k" + help + ".sub = " + ogTriple.getObject());
+              if(first2) {
+                first2 = false;
+                sub.append(" k" + help + ".sub = " + ogTriple.getObject());
+              }else {
+                sub.append(" AND k" + help + ".sub = " + ogTriple.getObject());
+              }
             }
             //Check if equal with head
           } else {
-            sub.append(" AND k" + help + ".sub = " + triple.getSubject());
+            if(first2) {
+              first2 = false;
+              sub.append(" k" + help + ".sub = " + triple.getSubject());
+            }else {
+              sub.append(" AND k" + help + ".sub = " + triple.getSubject());
+            }
+
           }
           //Create WHERE Statements
           obj = new StringBuffer();
@@ -908,19 +931,20 @@ public class DBFuncs {
   public static StringBuffer testRulesUnionAllShorterSelectViewsForRelations(List<Rule> filteredRules, Triple ogTriple) {
     long startTime1 = System.nanoTime();
     StringBuffer foundRules = new StringBuffer();
-    boolean first;
+    boolean first, first2;
 
     ResultSet rs;
     try {
       Statement stmt = con.createStatement();
       StringBuffer sql, sqlEnd;
       sql = new StringBuffer();
-      StringBuffer sub, pre, obj;
+      StringBuffer sub, obj;
       StringBuffer select, where;
       int help;
       boolean firstR = true;
       for (Rule rule : filteredRules) {
         first = true;
+        first2 = true;
         if (firstR) {
           sql.append("(");
           firstR = false;
@@ -930,7 +954,7 @@ public class DBFuncs {
 
         sqlEnd = new StringBuffer(" LIMIT 1) "); //TODO Hash key hier rein
         select = new StringBuffer("SELECT " + rule.getId() + " FROM ");
-        where = new StringBuffer(" WHERE 1=1");
+        where = new StringBuffer(" WHERE");
         help = 1;
         for (Triple triple : rule.getBody()) {
 
@@ -946,16 +970,38 @@ public class DBFuncs {
           sub = new StringBuffer();
           if (triple.getSubject() < 0) {
             if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
-              sub.append(" AND k" + help  + ".sub != " + "k" + help  + ".obj");
+              if(first2){
+                first2 = false;
+                sub.append(" k" + help  + ".sub != " + "k" + help  + ".obj");
+              }else {
+                sub.append(" AND k" + help  + ".sub != " + "k" + help  + ".obj");
+              }
             }
             if (triple.getSubject() == rule.getHead().getSubject()) {
-              sub.append(" AND k" + help + ".sub = " + ogTriple.getSubject());
+              if(first2){
+                first2 = false;
+                sub.append(" k" + help + ".sub = " + ogTriple.getSubject());
+              }else {
+                sub.append(" AND k" + help + ".sub = " + ogTriple.getSubject());
+              }
             } else if (triple.getSubject() == rule.getHead().getObject()) {
-              sub.append(" AND k" + help + ".sub = " + ogTriple.getObject());
+              if(first2){
+                first2 = false;
+                sub.append(" k" + help + ".sub = " + ogTriple.getObject());
+              }else {
+                sub.append(" AND k" + help + ".sub = " + ogTriple.getObject());
+              }
+
             }
             //Check if equal with head
           } else {
-            sub.append(" AND k" + help + ".sub = " + triple.getSubject());
+            if(first2){
+              first2 = false;
+              sub.append(" k" + help + ".sub = " + triple.getSubject());
+            }else {
+              sub.append(" AND k" + help + ".sub = " + triple.getSubject());
+            }
+
           }
           //Create WHERE Statements
           obj = new StringBuffer();
