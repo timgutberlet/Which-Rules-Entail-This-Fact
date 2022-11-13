@@ -6,10 +6,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import models.Key2Int;
+import models.Key3Int;
 import models.Rule;
 import models.Triple;
+import utils.RandomRules;
 
 /**
  * This file provides all functions used for working with the DB
@@ -895,5 +900,64 @@ public class DBFuncs {
     }
     return foundRules;
   }
+
+  /**
+   *
+   * Function to create a view for every rule and store all possible triples that would fit the body
+   * A lot of view (will probably be very ineffiecient)
+   */
+  public void viewsForRule(){
+
+  }
+
+  /**
+   * Function to create a view for every Relation possible
+   */
+  public static void viewsForPredicate(List<Integer> predicateList){
+    try {
+      String sql;
+      long startTime = System.nanoTime();
+      long elapsedTime;
+      long count = 0;
+      Statement stmt = con.createStatement();
+      for (Integer integer : predicateList) {
+        sql = "DROP MATERIALIZED VIEW IF EXISTS v"+integer.toString()+";";
+        stmt.addBatch(sql);
+        sql = "create materialized view  v"+integer.toString() + " as \n" +
+                        "select sub, obj from " + Settings.KNOWLEDGEGRAPH_TABLE + " where pre = "+ integer +  ";";
+        count++;
+        //System.out.println(triple.toString());
+        stmt.addBatch(sql);
+        sql = "CREATE UNIQUE INDEX v"+integer+"Index ON v"+integer+ " (sub, obj);";
+        stmt.addBatch(sql);
+        if (count % 10 == 0 || count == predicateList.size()) {
+          stmt.executeBatch();
+          stmt.clearBatch();
+          elapsedTime = System.nanoTime() - startTime;
+          startTime = System.nanoTime();
+          System.out.println(
+                  "Inserted " + count + " of " + predicateList.size() + " ; Time: " + (elapsedTime / 1000000)
+                          + "ms");
+        }
+      }
+      stmt.executeBatch();
+      con.commit();
+      stmt.close();
+      System.out.println("Success");
+
+      System.out.println("Data has been inserted");
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Function that creates a View for every rule type: SubBound / ObjBound / NoBound / BothBound
+   */
+
+  public void viewsForRuleTypes(HashMap<Key2Int, ArrayList<Rule>> subBound, HashMap<Key2Int, ArrayList<Rule>> objBound, HashMap<Key3Int, ArrayList<Rule>> bothBound, HashMap<Integer, ArrayList<Rule>> noBoundUnequal, HashMap<Integer, ArrayList<Rule>> noBoundEqual ){
+  }
+
+
 }
 

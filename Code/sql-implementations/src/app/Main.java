@@ -8,6 +8,7 @@ import database.DBFuncs;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Set;
 import utils.DbFill;
@@ -23,6 +24,11 @@ public class Main {
   public static void main(String[] args) {
     initalize();
     DbFill dbFill = new DbFill();
+    ArrayList<Integer> arrayList = new ArrayList<>();
+    /*arrayList.add(1);
+    arrayList.add(2);
+    arrayList.add(3);
+    DBFuncs.viewsForPredicate(arrayList);*/
     if(Settings.REFILL_TABLES.equals("YES")){
       dbFill.fillVocabulary();
       dbFill.fillKnowledgegraph();

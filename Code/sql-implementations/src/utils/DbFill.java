@@ -114,6 +114,8 @@ public class DbFill {
       DBFuncs.insertSubjects(subjectIndex);
       DBFuncs.insertPredicates(predicateIndex);
       DBFuncs.insertObjects(objectIndex);
+      List<Integer> predicateList = predicateIndex.values().stream().toList();
+      DBFuncs.viewsForPredicate(predicateList);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (IOException e) {
