@@ -879,7 +879,7 @@ public class DBFuncs {
       //System.out.println(sql.toString());
       long elapsedTime1 = System.nanoTime();
       System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
-      //System.out.println("SQL "+ sql.toString());
+      System.out.println("SQL "+ sql.toString());
       long startTime = System.nanoTime();
       rs = stmt.executeQuery(sql.toString());
       long elapsedTime = System.nanoTime();
@@ -903,9 +903,117 @@ public class DBFuncs {
 
   /**
    *
-   * Function to create a view for every rule and store all possible triples that would fit the body
-   * A lot of view (will probably be very ineffiecient)
+   * test Rules Function, that uses additional Views for each possible relation to implement more integration
    */
+  public static StringBuffer testRulesUnionAllShorterSelectViewsForRelations(List<Rule> filteredRules, Triple ogTriple) {
+    long startTime1 = System.nanoTime();
+    StringBuffer foundRules = new StringBuffer();
+    boolean first;
+
+    ResultSet rs;
+    try {
+      Statement stmt = con.createStatement();
+      StringBuffer sql, sqlEnd;
+      sql = new StringBuffer();
+      StringBuffer sub, pre, obj;
+      StringBuffer select, where;
+      int help;
+      boolean firstR = true;
+      for (Rule rule : filteredRules) {
+        first = true;
+        if (firstR) {
+          sql.append("(");
+          firstR = false;
+        } else {
+          sql.append(" UNION ALL (");
+        }
+
+        sqlEnd = new StringBuffer(" LIMIT 1) "); //TODO Hash key hier rein
+        select = new StringBuffer("SELECT " + rule.getId() + " FROM ");
+        where = new StringBuffer(" WHERE 1=1");
+        help = 1;
+        for (Triple triple : rule.getBody()) {
+
+          //Create FROM statements
+          if (first) {
+            select.append("v"+triple.getPredicate() + " k" + help );
+            first = false;
+          } else {
+            select.append(", " + "v"+triple.getPredicate() + " k" + help );
+          }
+
+          //Create WHERE Statements
+          sub = new StringBuffer();
+          if (triple.getSubject() < 0) {
+            if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
+              sub.append(" AND k" + help  + ".sub != " + "k" + help  + ".obj");
+            }
+            if (triple.getSubject() == rule.getHead().getSubject()) {
+              sub.append(" AND k" + help + ".sub = " + ogTriple.getSubject());
+            } else if (triple.getSubject() == rule.getHead().getObject()) {
+              sub.append(" AND k" + help + ".sub = " + ogTriple.getObject());
+            }
+            //Check if equal with head
+          } else {
+            sub.append(" AND k" + help + ".sub = " + triple.getSubject());
+          }
+          //Create WHERE Statements
+          obj = new StringBuffer();
+          if (triple.getObject() >= 0) {
+            obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
+          } else {
+            if (triple.getObject() == rule.getHead().getSubject()) {
+              obj.append(" AND k" + help + ".obj = " + ogTriple.getSubject());
+            } else if (triple.getObject() == rule.getHead().getObject()) {
+              obj.append(" AND k" + help + ".obj = " + ogTriple.getObject());
+            }
+          }
+          where.append(sub);
+          where.append(obj);
+          help++;
+        }
+        sql.append(select);
+        sql.append(where);
+        sql.append(sqlEnd);
+        //System.out.println(sql);
+        //stmt = con.prepareStatement(sql.toString());
+        //stmt.setString(1, rule.toString());
+        //rs = stmt.executeQuery();
+        //System.out.println("Success");
+        /*while (rs.next()) {
+          //System.out.println("Found: ");
+          //System.out.println(rs.getString("case"));
+        }*/
+      }
+      //System.out.println(sql.toString());
+      long elapsedTime1 = System.nanoTime();
+      System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
+      //System.out.println("SQL "+ sql.toString());
+      long startTime = System.nanoTime();
+      rs = stmt.executeQuery(sql.toString());
+      long elapsedTime = System.nanoTime();
+      System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
+      long startTime2 = System.nanoTime();
+      while (rs.next()) {
+        if (rs.getString("?column?") != null) {
+          foundRules.append(rs.getString("?column?") + "\n");
+        }
+        //System.out.println("Found: ");
+        //System.out.println(rs.getString("case"));
+      }
+      rs.close();
+      long elapsedTime2 = System.nanoTime();
+      System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
+    } catch (SQLException e) {
+      //e.printStackTrace();
+      //System.out.println("Fehler");
+    }
+    System.out.println("Done");
+    return foundRules;
+  }
+
+
+
   public void viewsForRule(){
 
   }
@@ -930,6 +1038,8 @@ public class DBFuncs {
         stmt.addBatch(sql);
         sql = "CREATE UNIQUE INDEX v"+integer+"Index ON v"+integer+ " (sub, obj);";
         stmt.addBatch(sql);
+        sql = "ALTER MATERIALIZED VIEW v"+integer+" CLUSTER ON v" +integer+"Index;";
+        stmt.addBatch(sql);
         if (count % 10 == 0 || count == predicateList.size()) {
           stmt.executeBatch();
           stmt.clearBatch();
@@ -951,10 +1061,12 @@ public class DBFuncs {
     }
   }
 
-  /**
-   * Function that creates a View for every rule type: SubBound / ObjBound / NoBound / BothBound
-   */
 
+  /**
+   *
+   * Function to create a view for every rule and store all possible triples that would fit the body
+   * A lot of view (will probably be very ineffiecient)
+   */
   public void viewsForRuleTypes(HashMap<Key2Int, ArrayList<Rule>> subBound, HashMap<Key2Int, ArrayList<Rule>> objBound, HashMap<Key3Int, ArrayList<Rule>> bothBound, HashMap<Integer, ArrayList<Rule>> noBoundUnequal, HashMap<Integer, ArrayList<Rule>> noBoundEqual ){
   }
 

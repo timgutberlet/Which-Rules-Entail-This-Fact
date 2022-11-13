@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import models.Key2Int;
 import models.Key3Int;
@@ -311,14 +312,16 @@ public class RandomRules {
       stringBuffer = DBFuncs.testRulesUnionAll(filteredRules, triple);
     }else if (Settings.TESTRULES_METHOD.equals("testRulesUnionAllShorterSelect")){
       stringBuffer = DBFuncs.testRulesUnionAllShorterSelect(filteredRules, triple);
-    }else if (Settings.TESTRULES_METHOD == ""){
+    }else if (Settings.TESTRULES_METHOD.equals("testRulesUnionAllShorterSelectViewsForRelations")){
+      stringBuffer = DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple);
+    }else if (Settings.TESTRULES_METHOD.equals("")){
 
-    }else if (Settings.TESTRULES_METHOD == ""){
+    }else if (Settings.TESTRULES_METHOD.equals("")){
 
-    }else if (Settings.TESTRULES_METHOD == ""){
+    }else if (Settings.TESTRULES_METHOD.equals("")){
 
-    }else if (Settings.TESTRULES_METHOD == ""){
-
+    } else {
+      System.out.println("Keine methode ausgewählt: "+ Settings.TESTRULES_METHOD);
     }
     elapsedTime = System.nanoTime();
     System.out.println("Zeit für SQL Abfrage: " + ((elapsedTime - startTime) / 1000000) + " ms");
@@ -406,8 +409,9 @@ public class RandomRules {
     for (Triple triple : queryTriples){
       queries++;
       //found.append("Query: " + triple.toString() + " : " + searchByTriple(triple).toString() +" \n");
-      //System.out.println("Query: " + triple.toString() + " : " + searchByTriple(triple));
-      searchByTriple(triple);
+      System.out.println("Query: " + triple.toString() + " : " + searchByTriple(triple));
+      //searchByTriple(triple);
+      System.out.println("--------------------------------------------");
       if(queries % 10 == 0){
         elapsedTime = System.nanoTime();
         //System.out.println(found);

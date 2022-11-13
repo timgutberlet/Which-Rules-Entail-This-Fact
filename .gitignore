@@ -1,10 +1,10 @@
 /Code/AnyBURL/data/
 /.idea/
 .DS_Store
-Code/sql-implementations/out/production/research-sql/Date.class
-Code/sql-implementations/out/production/research-sql/DBConnection.class
-Code/sql-implementations/out/production/research-sql/dbFill.class
-Code/sql-implementations/out/production/research-sql/DBFuncs.class
+/Code/sql-implementations/out/production/research-sql/Date.class
+/Code/sql-implementations/out/production/research-sql/DBConnection.class
+/Code/sql-implementations/out/production/research-sql/dbFill.class
+/Code/sql-implementations/out/production/research-sql/DBFuncs.class
 Code/sql-implementations/out/production/research-sql/Main.class
 Code/sql-implementations/out/production/research-sql/Runner.class
 Code/sql-implementations/out/production/research-sql/test.class
@@ -12,6 +12,7 @@ Code/sql-implementations/out/production/research-sql/Triple.class
 Code/sql-implementations/out/production/research-sql
 Code/sql-implementations/out/production/research-sql
 /Code/Playground/initial-sql-test/out/production/research-sql
-Code/sql-implementations/sql-implementations.iml
-Code/AnyBURL/AnyBurl.iml
-Code/sql-implementations/resources/config.properties
+/Code/sql-implementations/sql-implementations.iml
+/Code/AnyBURL/AnyBurl.iml
+/Code/sql-implementations/resources/config.properties
+
