@@ -2,11 +2,11 @@ package utils;
 
 import config.Settings;
 import database.DBFuncs;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +17,7 @@ import models.Key3Int;
 import models.Rule;
 import models.Triple;
 import models.Variables;
+import org.postgresql.jdbc2.ArrayAssistant;
 
 /**
  * @author timgutberlet
@@ -48,6 +49,7 @@ public class RandomRules {
     BufferedReader reader = new BufferedReader(streamReader);
     Rule rule;
     Integer counter = 0;
+    Boolean continuer;
     try {
       String first;
       String second;
@@ -58,6 +60,7 @@ public class RandomRules {
       Triple head;
       List<Triple> body;
       Triple tripleHelp;
+      ArrayList<String> filteredRulesStrings = new ArrayList<>();
       for (String line; (line = reader.readLine()) != null; ) {
         body = new ArrayList<>();
         headSubject = "";
@@ -153,6 +156,47 @@ public class RandomRules {
           continue;
         }
 
+
+        if(Settings.FILTER_SIMPLE_RULES.equals("YES")){
+          continuer = false;
+
+          if(rule.getHead().getSubject() < 0
+                  && rule.getHead().getObject() < 0
+                  && rule.getBody().size() == 1){
+            if (rule.getHead().getSubject() == rule.getBody().get(0).getSubject()
+                    && rule.getHead().getObject() == rule.getBody().get(0).getObject()){
+              continuer = true;
+              System.out.println("Type1: "+ rule);
+            }
+          }
+          else if(rule.getHead().getSubject() < 0
+                  && rule.getHead().getObject() < 0
+                  && rule.getBody().size() == 2){
+            if (rule.getHead().getSubject() == rule.getBody().get(0).getSubject()
+                    && rule.getHead().getObject() == rule.getBody().get(1).getObject()
+                    && rule.getBody().get(0).getObject() == rule.getBody().get(1).getSubject() ){
+              continuer = true;
+              System.out.println("Type2: "+ rule);
+            }
+          }
+          else if(rule.getHead().getSubject() < 0
+                  && rule.getHead().getObject() >= 0
+                  && rule.getBody().size() == 1 ){
+            if(rule.getBody().get(0).getSubject() == rule.getHead().getSubject()
+                    && rule.getBody().get(0).getObject() >= 0){
+              continuer = true;
+              System.out.println("Type3: "+ rule);
+            }
+          }
+
+          if (!continuer){
+            continue;
+          }else {
+            filteredRulesStrings.add(line);
+          }
+        }
+
+
         //Beide ungebunden & ungleich
         if (rule.getHead().getObject()<0 && rule.getHead().getSubject() <0 && rule.getHead().getObject() != rule.getHead().getSubject()){
           if(!noBoundUnequal.containsKey(rule.getHead().getPredicate())){
@@ -193,6 +237,7 @@ public class RandomRules {
           }
           objBound.get(key2Int).add(rule);
         }
+
         rule.setId(counter++);
 
         //ruleList.add(new Rule(head, body));
@@ -202,6 +247,9 @@ public class RandomRules {
       reader.close();
     } catch (IOException e) {
       e.printStackTrace();
+    }
+    if(Settings.FILTER_SIMPLE_RULES.equals("YES")){
+
     }
     //System.out.println("noBoundUnequal");
     //noBoundUnequal.forEach((integer, rules) -> System.out.println(integer.toString() + " : " +rules));
@@ -214,6 +262,7 @@ public class RandomRules {
     //System.out.println("bothBound");
     //bothBound.forEach((integer, rules) -> System.out.println(integer.toString() + " : " +rules));
   }
+
 
   /**
    * Used for deleting all 'e's at the start of an entity, as entities from the ruleset start with
@@ -410,6 +459,7 @@ public class RandomRules {
       queries++;
       //found.append("Query: " + triple.toString() + " : " + searchByTriple(triple).toString() +" \n");
       System.out.println("Query: " + triple.toString() + " : " + searchByTriple(triple));
+      searchByTriple(triple);
       //searchByTriple(triple);
       System.out.println("--------------------------------------------");
       if(queries % 10 == 0){

@@ -72,6 +72,7 @@ public class Main {
       Settings.REFILL_TABLES = IOHelper.getProperty(prop, "REFILL_TABLES", Settings.REFILL_TABLES);
       Settings.VOCABULARY_DATASET = IOHelper.getProperty(prop, "VOCABULARY_DATASET", Settings.VOCABULARY_DATASET);
       Settings.TESTRULES_METHOD = IOHelper.getProperty(prop, "TESTRULES_METHOD", Settings.TESTRULES_METHOD);
+      Settings.FILTER_SIMPLE_RULES = IOHelper.getProperty(prop, "FILTER_SIMPLE_RULES ", Settings.FILTER_SIMPLE_RULES);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (IOException e) {
