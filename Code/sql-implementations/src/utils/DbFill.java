@@ -43,7 +43,9 @@ public class DbFill {
       List<Triple> kgList = new ArrayList<>();
       String subject, predicate, object;
       Integer subH, predH, objH;
+      int count = 1;
       for (String line; (line = reader.readLine()) != null;) {
+        System.out.println(count++);
         // Process line
         //System.out.println(line);
         triple = line.split("\\s");

@@ -161,7 +161,7 @@ public class RandomRules {
             if (rule.getHead().getSubject() == rule.getBody().get(0).getSubject()
                     && rule.getHead().getObject() == rule.getBody().get(0).getObject()){
               continuer = true;
-              //System.out.println(c++ +  " Type1: "+ rule);
+              System.out.println(c++ +  " Type1: "+ rule);
             }
           }
           else if(rule.getHead().getSubject() < 0
@@ -171,7 +171,7 @@ public class RandomRules {
                     && rule.getHead().getObject() == rule.getBody().get(1).getObject()
                     && rule.getBody().get(0).getObject() == rule.getBody().get(1).getSubject() ){
               continuer = true;
-              //System.out.println(c++  + " Type2: "+ rule);
+              System.out.println(c++  + " Type2: "+ rule);
             }
           }
           else if(rule.getHead().getSubject() < 0
@@ -180,7 +180,7 @@ public class RandomRules {
             if(rule.getBody().get(0).getSubject() == rule.getHead().getSubject()
                     && rule.getBody().get(0).getObject() >= 0){
               continuer = true;
-              //System.out.println(c++ + " Type3: "+ rule);
+              System.out.println(c++ + " Type3: "+ rule);
             }
           }
 
@@ -234,6 +234,7 @@ public class RandomRules {
         }
 
         rule.setId(counter++);
+        System.out.println(counter);
 
         //ruleList.add(new Rule(head, body));
       }

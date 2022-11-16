@@ -47,8 +47,9 @@ public class Main {
   }
 
   public static void initalize(){
-    Config.loadStandardConfig();
-    Config.saveProperty();
+    Config.loadProperty();
+    //Config.loadStandardConfig();
+    //Config.saveProperty();
     DBFuncs.setCon(connectDB.getConnection());
     CreateDB.setConnectDB(connectDB.getConnection());
   }
