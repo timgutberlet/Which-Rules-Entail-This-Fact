@@ -1,0 +1,10 @@
+eGregorio_Torres	rhasWonPrize	eFrickley_Athletic_F.C.
+eGiovanni_Pasquale	risAffiliatedTo	eCarolina_RailHawks
+ePeter_Masterson	rplaysFor	eBologna_F.C._1909
+eJimmy_Ashcroft	risLocatedIn	eScotland_national_football_team
+eRouyn-Noranda	risAffiliatedTo	ePhilosophy_of_language
+eHarri_Ylönen	risAffiliatedTo	eF.C._Dynamo_Kyiv
+eBruno_Uvini	rwasBornIn	eInglewood_United_SC
+eAdelaide_of_Susa	rplaysFor	ePanathinaikos_F.C.
+eBradley_Thomas_(footballer)	risLocatedIn	eHamburger_SV_II
+eWhippany,_New_Jersey	risAffiliatedTo	eColombia

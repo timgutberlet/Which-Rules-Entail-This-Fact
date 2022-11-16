@@ -70,6 +70,7 @@ public class Main {
       Settings.QUERYTRIPLESFORMAT = IOHelper.getProperty(prop, "QUERYTRIPLESFORMAT", Settings.QUERYTRIPLESFORMAT);
       Settings.KNOWLEDGEGRAPH_TABLE = IOHelper.getProperty(prop, "KNOWLEDGEGRAPH_TABLE", Settings.KNOWLEDGEGRAPH_TABLE);
       Settings.REFILL_TABLES = IOHelper.getProperty(prop, "REFILL_TABLES", Settings.REFILL_TABLES);
+      Settings.RULES_IN_DB_MODE = IOHelper.getProperty(prop, "RULES_IN_DB_MODE", Settings.RULES_IN_DB_MODE);
       Settings.VOCABULARY_DATASET = IOHelper.getProperty(prop, "VOCABULARY_DATASET", Settings.VOCABULARY_DATASET);
       Settings.TESTRULES_METHOD = IOHelper.getProperty(prop, "TESTRULES_METHOD", Settings.TESTRULES_METHOD);
       Settings.FILTER_SIMPLE_RULES = IOHelper.getProperty(prop, "FILTER_SIMPLE_RULES ", Settings.FILTER_SIMPLE_RULES);

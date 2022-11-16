@@ -94,9 +94,10 @@ public class Explain {
 		for (String r : targetRelations) singleRelations[counter++] = r;
 		System.out.println(">>> collected " + singleRelations.length + " different relations");
 		
-		
-		
-		System.out.println(">>> learn rules for the previously collected relations");
+		System.err.println(">>> SKIP rule learning");
+
+
+		/* System.out.println(">>> learn rules for the previously collected relations");
 		
 		Settings.MAX_LENGTH_CYCLIC = ruleLength;
 		Settings.PATH_TRAINING = trainPath;
@@ -106,8 +107,9 @@ public class Explain {
 		Settings.SINGLE_RELATIONS = singleRelations;
 		
 		LearnReinforced.main(null);
-		
-		
+
+		*/
+
 		
 		System.out.println(">>> apply previously learned rules");
 		
@@ -130,6 +132,10 @@ public class Explain {
 		
 		// run the Apply and store the rule based explanations generated when doing this
 		RuleEngine.listenToExplanations(explanationsHead, explanationsTail);
+
+		long startTime = System.nanoTime();
+		long elapsedTime;
+
 		// Settings.REWRITE_REFLEXIV = false;
 		Apply.main(null);
 
@@ -173,7 +179,14 @@ public class Explain {
 		
 		
 		System.out.println(">>> collected "+ explanationCounter + " triples for attacking " + predictedTripleToExplainingTriple.keySet().size() + " predictions.");
-		
+
+		elapsedTime = System.nanoTime();
+		System.out.println("");
+		System.out.println("Gesamtzeit: " + ((elapsedTime - startTime) / 1000000) + " ms");
+		System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime) / 1000000) / targets.size()) + " ms");
+		System.out.println("Abfragen: " + targets.size());
+		System.out.println("");
+
 		PrintWriter pw = new PrintWriter(outputDeletePath);
 		for (Triple target : targets) {
 			Triple explanation = predictedTripleToExplainingTriple.get(getFixedTriple(target));
