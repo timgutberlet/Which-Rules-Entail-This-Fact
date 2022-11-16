@@ -56,6 +56,7 @@ public class RandomRules {
       List<Triple> body;
       Triple tripleHelp;
       int c = 0;
+      int bodyCount = 0;
       for (String line; (line = reader.readLine()) != null; ) {
         body = new ArrayList<>();
         headSubject = "";
@@ -182,6 +183,10 @@ public class RandomRules {
               continuer = true;
               System.out.println(c++ + " Type3: "+ rule);
             }
+          }
+
+          if(rule.getBody().size() == 1){
+            System.out.println(bodyCount++);
           }
 
           if (!continuer){
