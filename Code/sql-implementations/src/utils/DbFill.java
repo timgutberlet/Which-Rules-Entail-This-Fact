@@ -2,13 +2,10 @@ package utils; /**
  * @author timgutberlet
  */
 
-import config.Settings;
+import config.Config;
 import database.DBFuncs;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,14 +33,12 @@ public class DbFill {
    * Fills the KnowledgeGraph Table with all rows given in the knowledgegraph text file
    */
   public void fillKnowledgegraph(){
-    String file = Settings.KNOWLEDGEGRAPH;
+    String file = Config.getStringValue("KNOWLEDGEGRAPH");
     //DBFuncs.deleteKG();
     BufferedReader reader;
     try {
       // java.io.InputStream
-      InputStream is = DbFill.class.getResourceAsStream(file);
-      InputStreamReader streamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
-      reader = new BufferedReader(streamReader);
+      reader = new BufferedReader(new FileReader(file));
       String[] triple;
       List<Triple> kgList = new ArrayList<>();
       String subject, predicate, object;
@@ -74,14 +69,12 @@ public class DbFill {
    * Fills the Index Database files
    */
   public void fillVocabulary(){
-    String file = Settings.VOCABULARY_DATASET;
+    String file = Config.getStringValue("VOCABULARY_DATASET");
     //DBFuncs.deleteKG();
     BufferedReader reader;
     try {
       // java.io.InputStream
-      InputStream is = DbFill.class.getResourceAsStream(file);
-      InputStreamReader streamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
-      reader = new BufferedReader(streamReader);
+      reader = new BufferedReader(new FileReader(file));
       String[] triple;
       subjectIndex = new HashMap<>();
       predicateIndex = new HashMap<>();

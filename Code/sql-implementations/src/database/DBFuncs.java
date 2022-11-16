@@ -1,6 +1,5 @@
 package database;
 
-import config.Settings;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,11 +9,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import config.Config;
 import models.Key2Int;
 import models.Key3Int;
 import models.Rule;
 import models.Triple;
-import utils.RandomRules;
 
 /**
  * This file provides all functions used for working with the DB
@@ -45,7 +44,7 @@ public class DBFuncs {
     PreparedStatement stmt;
     try {
       String sql =
-          "INSERT INTO " + Settings.KNOWLEDGEGRAPH_TABLE + "(sub, pre, obj) VALUES (?,?,?)";
+          "INSERT INTO " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + "(sub, pre, obj) VALUES (?,?,?)";
       stmt = con.prepareStatement(sql);
       long startTime = System.nanoTime();
       long elapsedTime;
@@ -271,7 +270,7 @@ public class DBFuncs {
     Statement stmt;
     String sql;
     try {
-      sql = "DELETE FROM " + Settings.KNOWLEDGEGRAPH_TABLE;
+      sql = "DELETE FROM " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE");
       stmt = con.createStatement();
       stmt.executeQuery(sql);
     } catch (SQLException e) {
@@ -299,7 +298,7 @@ public class DBFuncs {
     PreparedStatement ps = null;
     ResultSet rs = null;
     try {
-      String sql = "SELECT * FROM " + Settings.KNOWLEDGEGRAPH_TABLE;
+      String sql = "SELECT * FROM " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE");
       ps = con.prepareStatement(sql);
       rs = ps.executeQuery();
       while (rs.next()) {
@@ -435,9 +434,9 @@ public class DBFuncs {
    * @param args
    */
   public static void main(String[] args) {
-    ConnectDB connectDB = new ConnectDB(Settings.CLASSNAME, Settings.URL, Settings.USER,
-        Settings.PASSWORD);
-    con = connectDB.getConnection();
+    //ConnectDB connectDB = new ConnectDB(Settings.CLASSNAME, Settings.URL, Settings.USER,
+    //    Settings.PASSWORD);
+    //con = connectDB.getConnection();
   }
 
   /**
@@ -581,10 +580,10 @@ public class DBFuncs {
 
           //Create FROM statements
           if (first) {
-            select.append(Settings.KNOWLEDGEGRAPH_TABLE + " kg" + help);
+            select.append(Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " kg" + help);
             first = false;
           } else {
-            select.append(", " + Settings.KNOWLEDGEGRAPH_TABLE + " kg" + help);
+            select.append(", " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " kg" + help);
           }
 
           //Create WHERE Statements
@@ -704,10 +703,10 @@ public class DBFuncs {
 
           //Create FROM statements
           if (first) {
-            select.append(Settings.KNOWLEDGEGRAPH_TABLE + " kg" + help);
+            select.append(Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " kg" + help);
             first = false;
           } else {
-            select.append(", " + Settings.KNOWLEDGEGRAPH_TABLE + " kg" + help);
+            select.append(", " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " kg" + help);
           }
 
           //Create WHERE Statements
@@ -826,10 +825,10 @@ public class DBFuncs {
 
           //Create FROM statements
           if (first) {
-            select.append(Settings.KNOWLEDGEGRAPH_TABLE + " k" + help);
+            select.append(Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " k" + help);
             first = false;
           } else {
-            select.append(", " + Settings.KNOWLEDGEGRAPH_TABLE + " k" + help);
+            select.append(", " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " k" + help);
           }
 
           //Create WHERE Statements
@@ -901,12 +900,12 @@ public class DBFuncs {
       }
       //System.out.println(sql.toString());
       long elapsedTime1 = System.nanoTime();
-      System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
-      System.out.println("SQL "+ sql.toString());
+      //System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
+      //System.out.println("SQL "+ sql.toString());
       long startTime = System.nanoTime();
       rs = stmt.executeQuery(sql.toString());
       long elapsedTime = System.nanoTime();
-      System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
+      //System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
       long startTime2 = System.nanoTime();
       while (rs.next()) {
         if (rs.getString("?column?") != null) {
@@ -917,7 +916,7 @@ public class DBFuncs {
       }
       rs.close();
       long elapsedTime2 = System.nanoTime();
-      System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
+      //System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
     } catch (SQLException e) {
       //e.printStackTrace();
     }
@@ -929,7 +928,7 @@ public class DBFuncs {
    * test Rules Function, that uses additional Views for each possible relation to implement more integration
    */
   public static StringBuffer testRulesUnionAllShorterSelectViewsForRelations(List<Rule> filteredRules, Triple ogTriple) {
-    long startTime1 = System.nanoTime();
+    //long startTime1 = System.nanoTime();
     StringBuffer foundRules = new StringBuffer();
     boolean first, first2;
 
@@ -1033,12 +1032,12 @@ public class DBFuncs {
       }
       //System.out.println(sql.toString());
       long elapsedTime1 = System.nanoTime();
-      System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
+      //System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
       //System.out.println("SQL "+ sql.toString());
       long startTime = System.nanoTime();
       rs = stmt.executeQuery(sql.toString());
       long elapsedTime = System.nanoTime();
-      System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
+      //System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
       long startTime2 = System.nanoTime();
       while (rs.next()) {
         if (rs.getString("?column?") != null) {
@@ -1048,13 +1047,13 @@ public class DBFuncs {
         //System.out.println(rs.getString("case"));
       }
       rs.close();
-      long elapsedTime2 = System.nanoTime();
-      System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
+      //long elapsedTime2 = System.nanoTime();
+      //System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
     } catch (SQLException e) {
       //e.printStackTrace();
       //System.out.println("Fehler");
     }
-    System.out.println("Done");
+    //System.out.println("Done");
     return foundRules;
   }
 
@@ -1078,7 +1077,7 @@ public class DBFuncs {
         sql = "DROP MATERIALIZED VIEW IF EXISTS v"+integer.toString()+";";
         stmt.addBatch(sql);
         sql = "create materialized view  v"+integer.toString() + " as \n" +
-                        "select sub, obj from " + Settings.KNOWLEDGEGRAPH_TABLE + " where pre = "+ integer +  ";";
+                        "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = "+ integer +  ";";
         count++;
         //System.out.println(triple.toString());
         stmt.addBatch(sql);

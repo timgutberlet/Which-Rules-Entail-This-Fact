@@ -1,23 +1,19 @@
 package utils;
 
-import config.Settings;
+import config.Config;
 import database.DBFuncs;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 import models.Key2Int;
 import models.Key3Int;
 import models.Rule;
 import models.Triple;
 import models.Variables;
-import org.postgresql.jdbc2.ArrayAssistant;
 
 /**
  * @author timgutberlet
@@ -43,14 +39,13 @@ public class RandomRules {
   public void importRules() {
     Key3Int key3Int;
     Key2Int key2Int;
-    String file = Settings.RULES_PATH;
-    InputStream is = DbFill.class.getResourceAsStream(file);
-    InputStreamReader streamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
-    BufferedReader reader = new BufferedReader(streamReader);
+    String file = Config.getStringValue("RULES_PATH");
     Rule rule;
     Integer counter = 0;
     Boolean continuer;
+    ArrayList<String> filteredRulesStrings = new ArrayList<>();
     try {
+      BufferedReader reader = new BufferedReader(new FileReader(file));
       String first;
       String second;
       String[] help2, help1, help3;
@@ -60,7 +55,7 @@ public class RandomRules {
       Triple head;
       List<Triple> body;
       Triple tripleHelp;
-      ArrayList<String> filteredRulesStrings = new ArrayList<>();
+      int c = 0;
       for (String line; (line = reader.readLine()) != null; ) {
         body = new ArrayList<>();
         headSubject = "";
@@ -157,7 +152,7 @@ public class RandomRules {
         }
 
 
-        if(Settings.FILTER_SIMPLE_RULES.equals("YES")){
+        if(Config.getStringValue("FILTER_SIMPLE_RULES").equals("YES")){
           continuer = false;
 
           if(rule.getHead().getSubject() < 0
@@ -166,7 +161,7 @@ public class RandomRules {
             if (rule.getHead().getSubject() == rule.getBody().get(0).getSubject()
                     && rule.getHead().getObject() == rule.getBody().get(0).getObject()){
               continuer = true;
-              System.out.println("Type1: "+ rule);
+              //System.out.println(c++ +  " Type1: "+ rule);
             }
           }
           else if(rule.getHead().getSubject() < 0
@@ -176,7 +171,7 @@ public class RandomRules {
                     && rule.getHead().getObject() == rule.getBody().get(1).getObject()
                     && rule.getBody().get(0).getObject() == rule.getBody().get(1).getSubject() ){
               continuer = true;
-              System.out.println("Type2: "+ rule);
+              //System.out.println(c++  + " Type2: "+ rule);
             }
           }
           else if(rule.getHead().getSubject() < 0
@@ -185,7 +180,7 @@ public class RandomRules {
             if(rule.getBody().get(0).getSubject() == rule.getHead().getSubject()
                     && rule.getBody().get(0).getObject() >= 0){
               continuer = true;
-              System.out.println("Type3: "+ rule);
+              //System.out.println(c++ + " Type3: "+ rule);
             }
           }
 
@@ -248,8 +243,19 @@ public class RandomRules {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    if(Settings.FILTER_SIMPLE_RULES.equals("YES")){
-
+    if(Config.getStringValue("FILTER_SIMPLE_RULES").equals("YES")){
+      try {
+        /*String path = Test.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        //String decodedPath = URLDecoder.decode(path, "UTF-8");
+        PrintWriter writer =
+                new PrintWriter(
+                         this.getClass().getClassLoader().g ("t/est.txt"));
+        for (String s : filteredRulesStrings){
+          writer.println(s);
+        }*/
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
     //System.out.println("noBoundUnequal");
     //noBoundUnequal.forEach((integer, rules) -> System.out.println(integer.toString() + " : " +rules));
@@ -352,28 +358,28 @@ public class RandomRules {
     //filteredRules.forEach(rule1 -> System.out.println(rule1));
     //System.out.println("Rules Filtered");
     long elapsedTime = System.nanoTime();
-    System.out.println("Zeit für Regelsuche: " + ((elapsedTime - startTime) / 1000000) + " ms");
+    //System.out.println("Zeit für Regelsuche: " + ((elapsedTime - startTime) / 1000000) + " ms");
     startTime = System.nanoTime();
     StringBuffer stringBuffer = new StringBuffer();
-    if(Settings.TESTRULES_METHOD.equals("testRules")){
+    if(Config.getStringValue("TESTRULES_METHOD").equals("testRules")){
       stringBuffer = DBFuncs.testRules(filteredRules, triple);
-    }else if (Settings.TESTRULES_METHOD.equals("testRulesUnionAll")){
+    }else if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesUnionAll")){
       stringBuffer = DBFuncs.testRulesUnionAll(filteredRules, triple);
-    }else if (Settings.TESTRULES_METHOD.equals("testRulesUnionAllShorterSelect")){
+    }else if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesUnionAllShorterSelect")){
       stringBuffer = DBFuncs.testRulesUnionAllShorterSelect(filteredRules, triple);
-    }else if (Settings.TESTRULES_METHOD.equals("testRulesUnionAllShorterSelectViewsForRelations")){
+    }else if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesUnionAllShorterSelectViewsForRelations")){
       stringBuffer = DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple);
-    }else if (Settings.TESTRULES_METHOD.equals("")){
+    }else if (Config.getStringValue("TESTRULES_METHOD").equals("")){
 
-    }else if (Settings.TESTRULES_METHOD.equals("")){
+    }else if (Config.getStringValue("TESTRULES_METHOD").equals("")){
 
-    }else if (Settings.TESTRULES_METHOD.equals("")){
+    }else if (Config.getStringValue("TESTRULES_METHOD").equals("")){
 
     } else {
-      System.out.println("Keine methode ausgewählt: "+ Settings.TESTRULES_METHOD);
+      System.out.println("Keine methode ausgewählt: "+ Config.getStringValue("TESTRULES_METHOD"));
     }
     elapsedTime = System.nanoTime();
-    System.out.println("Zeit für SQL Abfrage: " + ((elapsedTime - startTime) / 1000000) + " ms");
+    //System.out.println("Zeit für SQL Abfrage: " + ((elapsedTime - startTime) / 1000000) + " ms");
     return stringBuffer;
     //filteredRules.forEach(rule -> System.out.println(rule));
   }
@@ -387,21 +393,18 @@ public class RandomRules {
   }
 
   public List<Triple> importQueryTriples() {
-    String file = Settings.QUERYTRIPLES;
-    InputStream is = DbFill.class.getResourceAsStream(file);
-    InputStreamReader streamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
-    BufferedReader reader = new BufferedReader(streamReader);
+    String file = Config.getStringValue("QUERYTRIPLES");
     List<Triple> tripleList = new ArrayList<>();
     String[] importList;
     int sub, pre, obj;
-
     try {
+      BufferedReader reader = new BufferedReader(new FileReader(file));
 
       for (String line; (line = reader.readLine()) != null; ) {
         importList = line.split("\\s+");
         if (importList.length == 3) {
           //System.out.println(Arrays.toString(importList));
-          if (Settings.QUERYTRIPLESFORMAT.equals("TEXT")) {
+          if (Config.getStringValue("QUERYTRIPLESFORMAT").equals("TEXT")) {
             if (subjectIndex.get(importList[0]) == null){
               //System.out.println("Added " + importList[0]);
               sub = subjectIndex.size()+1;
@@ -451,6 +454,7 @@ public class RandomRules {
   public void startQuery() {
     List<Triple> queryTriples = importQueryTriples();
     StringBuffer found = new StringBuffer();
+    System.out.println("Testing Method: "+ Config.getStringValue("TESTRULES_METHOD"));
     //rules.forEach(rule -> System.out.println(rule));
     long queries = 0;
     long startTime = System.nanoTime();
@@ -458,18 +462,18 @@ public class RandomRules {
     for (Triple triple : queryTriples){
       queries++;
       //found.append("Query: " + triple.toString() + " : " + searchByTriple(triple).toString() +" \n");
-      System.out.println("Query: " + triple.toString() + " : " + searchByTriple(triple));
+      //System.out.println("Query: " + triple.toString() + " : " + searchByTriple(triple));
       searchByTriple(triple);
       //searchByTriple(triple);
-      System.out.println("--------------------------------------------");
-      if(queries % 10 == 0){
+      //System.out.println("--------------------------------------------");
+      if(queries % 100 == 0){
         elapsedTime = System.nanoTime();
         //System.out.println(found);
-        System.out.println("");
+        //System.out.println("");
         System.out.println("Gesamtzeit: " + ((elapsedTime - startTime) / 1000000) + " ms");
         System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime) / 1000000) / queries) + " ms");
         System.out.println("Abfragen: " + queries);
-        System.out.println("");
+        //System.out.println("");
       }
     }
     elapsedTime = System.nanoTime();
