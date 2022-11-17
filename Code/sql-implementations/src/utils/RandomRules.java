@@ -185,9 +185,7 @@ public class RandomRules {
             }
           }
 
-          if(rule.getBody().size() == 1){
-            System.out.println(bodyCount++);
-          }
+          System.out.println(bodyCount++);
 
           if (!continuer){
             continue;
