@@ -18,11 +18,7 @@ public final class Key3Int {
 
   @Override
   public String toString() {
-    return "Key3Int{" +
-        "a=" + a +
-        ", b=" + b +
-        ", c=" + c +
-        '}';
+    return String.valueOf(hashCode());
   }
 
   @Override

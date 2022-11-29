@@ -29,10 +29,7 @@ public final class Key2Int {
 
   @Override
   public String toString() {
-    return "Key2Int{" +
-        "a=" + a +
-        ", b=" + b +
-        '}';
+    return String.valueOf(hashCode());
   }
 
   @Override

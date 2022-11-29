@@ -28,8 +28,28 @@ public class RandomRules {
   private HashMap<Integer, ArrayList<Rule>> noBoundUnequal = new HashMap<>();
   private HashMap<Integer, ArrayList<Rule>> noBoundEqual = new HashMap<>();
 
+  public HashMap<Key2Int, ArrayList<Rule>> getObjBound() {
+    return objBound;
+  }
+
+  public HashMap<Key3Int, ArrayList<Rule>> getBothBound() {
+    return bothBound;
+  }
+
+  public HashMap<Key2Int, ArrayList<Rule>> getSubBound() {
+    return subBound;
+  }
+
+  public HashMap<Integer, ArrayList<Rule>> getNoBoundUnequal() {
+    return noBoundUnequal;
+  }
+
+  public HashMap<Integer, ArrayList<Rule>> getNoBoundEqual() {
+    return noBoundEqual;
+  }
+
   public RandomRules(HashMap<String, Integer> subjectIndex,
-      HashMap<String, Integer> predicateIndex, HashMap<String, Integer> objectIndex) {
+                     HashMap<String, Integer> predicateIndex, HashMap<String, Integer> objectIndex) {
     this.subjectIndex = subjectIndex;
     this.predicateIndex = predicateIndex;
     this.objectIndex = objectIndex;
@@ -242,35 +262,13 @@ public class RandomRules {
         //ruleList.add(new Rule(head, body));
       }
       System.out.println("Import finished");
-
       reader.close();
+      if(Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews")){
+        DBFuncs.createNormalViewForRule(this);
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
-    if(Config.getStringValue("FILTER_SIMPLE_RULES").equals("YES")){
-      try {
-        /*String path = Test.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        //String decodedPath = URLDecoder.decode(path, "UTF-8");
-        PrintWriter writer =
-                new PrintWriter(
-                         this.getClass().getClassLoader().g ("t/est.txt"));
-        for (String s : filteredRulesStrings){
-          writer.println(s);
-        }*/
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-    //System.out.println("noBoundUnequal");
-    //noBoundUnequal.forEach((integer, rules) -> System.out.println(integer.toString() + " : " +rules));
-    //System.out.println("noBoundEqual");
-    //noBoundEqual.forEach((integer, rules) -> System.out.println(integer.toString() + " : " +rules));
-    //System.out.println("objBound");
-    //objBound.forEach((integer, rules) -> System.out.println(integer.toString() + " : " +rules));
-    //System.out.println("subBound");
-    //subBound.forEach((integer, rules) -> System.out.println(integer.toString() + " : " +rules));
-    //System.out.println("bothBound");
-    //bothBound.forEach((integer, rules) -> System.out.println(integer.toString() + " : " +rules));
   }
 
 
@@ -373,8 +371,8 @@ public class RandomRules {
       stringBuffer = DBFuncs.testRulesUnionAllShorterSelect(filteredRules, triple);
     }else if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesUnionAllShorterSelectViewsForRelations")){
       stringBuffer = DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple);
-    }else if (Config.getStringValue("TESTRULES_METHOD").equals("")){
-
+    }else if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews")){
+      stringBuffer = DBFuncs.testRulesSimpleViews(filteredRules, triple);
     }else if (Config.getStringValue("TESTRULES_METHOD").equals("")){
 
     }else if (Config.getStringValue("TESTRULES_METHOD").equals("")){
@@ -465,18 +463,20 @@ public class RandomRules {
     long elapsedTime;
     for (Triple triple : queryTriples){
       queries++;
-      //found.append("Query: " + triple.toString() + " : " + searchByTriple(triple).toString() +" \n");
+      found.append("Query: " + triple.toString() + " : " + searchByTriple(triple).toString() +" \n");
       //System.out.println("Query: " + triple.toString() + " : " + searchByTriple(triple));
-      searchByTriple(triple);
+      //searchByTriple(triple);
       //searchByTriple(triple);
       //System.out.println("--------------------------------------------");
       if(queries % 100 == 0){
         elapsedTime = System.nanoTime();
         //System.out.println(found);
         //System.out.println("");
+        System.out.println(found);
         System.out.println("Gesamtzeit: " + ((elapsedTime - startTime) / 1000000) + " ms");
         System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime) / 1000000) / queries) + " ms");
         System.out.println("Abfragen: " + queries);
+        found = new StringBuffer();
         //System.out.println("");
       }
     }

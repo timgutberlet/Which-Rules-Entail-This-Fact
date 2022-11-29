@@ -12,7 +12,7 @@ public class StandardConfig {
    * Config File is not used or outdated.
    */
   public static final String[][] standardConfig = new String[][]{
-      {"VERSION", "2"},
+      {"VERSION", "3"},
       {"CLASSNAME", "org.postgresql.Driver"},
       {"URL", "jdbc:postgresql://localhost:5432/postgres"},
       {"USER", "postgres"},
@@ -22,9 +22,9 @@ public class StandardConfig {
       {"QUERYTRIPLES", "./files/Comparison/queryTriples/valid.txt"},
       {"QUERYTRIPLESFORMAT", "TEXT"},
       {"KNOWLEDGEGRAPH_TABLE", "iku"},
-      {"REFILL_TABLES", "YES"},
+      {"REFILL_TABLES", "NO"},
       {"VOCABULARY_DATASET", "./files/Vocabulary/YAGO3-10.txt"},
-      {"TESTRULES_METHOD", "testRulesUnionAllShorterSelectViewsForRelations"},
+      {"TESTRULES_METHOD", "testRulesUnionAllShorterSelect"},
       {"FILTER_SIMPLE_RULES", "YES"},
   };
 
