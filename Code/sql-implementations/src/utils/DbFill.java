@@ -71,12 +71,12 @@ public class DbFill {
    * Fills the Index Database files
    */
   public void fillVocabulary(){
-    String file = Config.getStringValue("VOCABULARY_DATASET");
+    String train = Config.getStringValue("QUERYTRIPLES");
     //DBFuncs.deleteKG();
     BufferedReader reader;
     try {
       // java.io.InputStream
-      reader = new BufferedReader(new FileReader(file));
+      reader = new BufferedReader(new FileReader(train));
       String[] triple;
       subjectIndex = new HashMap<>();
       predicateIndex = new HashMap<>();
@@ -105,17 +105,55 @@ public class DbFill {
           objectIndex.put(object, objC++);
         }
       }
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    String valid = Config.getStringValue("KNOWLEDGEGRAPH");
+    try {
+      // java.io.InputStream
+      reader = new BufferedReader(new FileReader(valid));
+      String[] triple;
+      subjectIndex = new HashMap<>();
+      predicateIndex = new HashMap<>();
+      objectIndex = new HashMap<>();
+      String subject, predicate, object;
+      Integer subC = 0, predC = 0, objC = 0;
+      Integer count = 0;
+      for (String line; (line = reader.readLine()) != null;) {
+        // Process line
+        //System.out.println(line);
+        triple = line.split("\\s");
+        //System.out.println(count++ + " - triple: " + triple[0] + ", " + triple[1] +", "+ triple[2]);
+        subject = triple[0];
+        predicate = triple[1];
+        object = triple[2];
+        //Check for subject
+        if (!subjectIndex.containsKey(subject)){
+          subjectIndex.put(subject, subC++);
+        }
+        //Check for predicte
+        if (!predicateIndex.containsKey(predicate)){
+          predicateIndex.put(predicate, predC++);
+        }
+        //Check for object
+        if (!objectIndex.containsKey(object)){
+          objectIndex.put(object, objC++);
+        }
+      }
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
       DBFuncs.deleteIndizes();
       DBFuncs.insertSubjects(subjectIndex);
       DBFuncs.insertPredicates(predicateIndex);
       DBFuncs.insertObjects(objectIndex);
       List<Integer> predicateList = predicateIndex.values().stream().toList();
       DBFuncs.viewsForPredicate(predicateList);
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+      System.out.println("Vocubalry filled");
   }
 
   public void setIndexes(){

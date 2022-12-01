@@ -535,274 +535,6 @@ public class DBFuncs {
         return hashMap;
     }
 
-
-    /**
-     * Method to test if a given Rule Set with a query value has Rules, that are found in the
-     * database
-     *
-     * @param filteredRules
-     * @param ogTriple
-     */
-    public static StringBuffer testRules(List<Rule> filteredRules, Triple ogTriple) {
-        long startTime1 = System.nanoTime();
-        StringBuffer foundRules = new StringBuffer();
-        boolean first;
-        PreparedStatement stmt;
-        ResultSet rs;
-        try {
-            StringBuffer sql, sqlEnd;
-            sql = new StringBuffer();
-            StringBuffer sub, pre, obj;
-            StringBuffer select, where;
-            int help;
-            boolean firstR = true;
-            for (Rule rule : filteredRules) {
-                first = true;
-                if (firstR) {
-                    sql.append("SELECT case when EXISTS (");
-                    firstR = false;
-                } else {
-                    sql.append(" UNION SELECT case when EXISTS (");
-                }
-
-                sqlEnd = new StringBuffer(") THEN '" + rule.getId() + "' end"); //TODO Hash key hier rein
-                select = new StringBuffer("SELECT 1 FROM ");
-                where = new StringBuffer(" WHERE 1=1");
-                help = 1;
-                for (Triple triple : rule.getBody()) {
-                    /** TODO Idea to create SQL Statements with Intersects and not with joins
-                     if (first){
-                     first = false;
-                     }else {
-                     sql.append(" INTERSECT ");
-                     }
-                     **/
-
-                    //Create FROM statements
-                    if (first) {
-                        select.append(Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " kg" + help);
-                        first = false;
-                    } else {
-                        select.append(", " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " kg" + help);
-                    }
-
-                    //Create WHERE Statements
-                    sub = new StringBuffer();
-                    if (triple.getSubject() < 0) {
-                        if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
-                            sub.append(" AND kg" + help + ".sub != " + "kg" + help + ".obj");
-                        }
-                        if (triple.getSubject() == rule.getHead().getSubject()) {
-                            sub.append(" AND kg" + help + ".sub = " + ogTriple.getSubject());
-                        } else if (triple.getSubject() == rule.getHead().getObject()) {
-                            sub.append(" AND kg" + help + ".sub = " + ogTriple.getObject());
-                        }
-                        //Check if equal with head
-                    } else {
-                        sub.append(" AND kg" + help + ".sub = " + triple.getSubject());
-                    }
-                    //Create WHERE Statements
-                    obj = new StringBuffer();
-                    if (triple.getObject() >= 0) {
-                        obj = new StringBuffer(" AND kg" + help + ".obj = " + triple.getObject());
-                    } else {
-                        if (triple.getObject() == rule.getHead().getSubject()) {
-                            obj.append(" AND kg" + help + ".obj = " + ogTriple.getSubject());
-                        } else if (triple.getObject() == rule.getHead().getObject()) {
-                            obj.append(" AND kg" + help + ".obj = " + ogTriple.getObject());
-                        }
-                    }
-                    pre = new StringBuffer(" AND kg" + help + ".pre = " + triple.getPredicate());
-                    where.append(sub);
-                    where.append(pre);
-                    where.append(obj);
-                    help++;
-                }
-                sql.append(select);
-                sql.append(where);
-                sql.append(sqlEnd);
-                //System.out.println(sql);
-                //stmt = con.prepareStatement(sql.toString());
-                //stmt.setString(1, rule.toString());
-                //rs = stmt.executeQuery();
-                //System.out.println("Success");
-        /*while (rs.next()) {
-          //System.out.println("Found: ");
-          //System.out.println(rs.getString("case"));
-        }*/
-            }
-            //System.out.println(sql.toString());
-            long elapsedTime1 = System.nanoTime();
-            System.out.println("Dauer für StringBuffer zusammenfügen: " + ((elapsedTime1 - startTime1) / 1000000) + "ms");
-            System.out.println(sql.toString());
-            long startTime3 = System.nanoTime();
-            stmt = con.prepareStatement(sql.toString());
-            long elapsedTime3 = System.nanoTime();
-            System.out.println("Dauer nur für PrepareStatement: " + ((elapsedTime3 - startTime3) / 1000000) + "ms");
-            long startTime = System.nanoTime();
-            rs = stmt.executeQuery();
-            long elapsedTime = System.nanoTime();
-            System.out.println("Dauer nur für Anfrage: " + ((elapsedTime - startTime) / 1000000) + "ms");
-            long startTime2 = System.nanoTime();
-            while (rs.next()) {
-                if (rs.getString("?column?") != null) {
-                    foundRules.append(rs.getString("?column?") + "\n");
-                }
-                //System.out.println("Found: ");
-                //System.out.println(rs.getString("case"));
-            }
-            rs.close();
-            long elapsedTime2 = System.nanoTime();
-            System.out.println("Dauer nur für rsNext: " + ((elapsedTime2 - startTime2) / 1000000) + "ms");
-        } catch (SQLException e) {
-            //e.printStackTrace();
-        }
-        return foundRules;
-    }
-
-    /**
-     * Change from testRules: From UNION to UNIONALL
-     *
-     * @param filteredRules
-     * @param ogTriple
-     */
-    public static StringBuffer testRulesUnionAll(List<Rule> filteredRules, Triple ogTriple) {
-        Triple r1, r2;
-        long startTime1 = System.nanoTime();
-        StringBuffer foundRules = new StringBuffer();
-        boolean first;
-        PreparedStatement stmt;
-        ResultSet rs;
-        try {
-            StringBuffer sql, sqlEnd;
-            sql = new StringBuffer();
-            StringBuffer sub, pre, obj;
-            StringBuffer select, where;
-            int help;
-            boolean firstR = true;
-            for (Rule rule : filteredRules) {
-                first = true;
-                if (firstR) {
-                    sql.append("SELECT case when EXISTS (");
-                    firstR = false;
-                } else {
-                    sql.append(" UNION ALL SELECT case when EXISTS (");
-                }
-
-                sqlEnd = new StringBuffer(") THEN '" + rule.getId() + "' end"); //TODO Hash key hier rein
-                select = new StringBuffer("SELECT 1 FROM ");
-                where = new StringBuffer(" WHERE 1=1");
-                help = 1;
-                for (Triple triple : rule.getBody()) {
-                    /** TODO Idea to create SQL Statements with Intersects and not with joins
-                     if (first){
-                     first = false;
-                     }else {
-                     sql.append(" INTERSECT ");
-                     }
-                     **/
-
-                    //Create FROM statements
-                    if (first) {
-                        select.append(Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " kg" + help);
-                        first = false;
-                    } else {
-                        select.append(", " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " kg" + help);
-                    }
-
-                    //Create WHERE Statements
-                    sub = new StringBuffer();
-                    if (triple.getSubject() < 0) {
-                        if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
-                            sub.append(" AND kg" + help + ".sub != " + "kg" + help + ".obj");
-                        }
-                        if (triple.getSubject() == rule.getHead().getSubject()) {
-                            sub.append(" AND kg" + help + ".sub = " + ogTriple.getSubject());
-                        } else if (triple.getSubject() == rule.getHead().getObject()) {
-                            sub.append(" AND kg" + help + ".sub = " + ogTriple.getObject());
-                        }
-                        //Check if equal with head
-                    } else {
-                        sub.append(" AND kg" + help + ".sub = " + triple.getSubject());
-                    }
-                    //Create WHERE Statements
-                    obj = new StringBuffer();
-                    if (triple.getObject() >= 0) {
-                        obj = new StringBuffer(" AND kg" + help + ".obj = " + triple.getObject());
-                    } else {
-                        if (triple.getObject() == rule.getHead().getSubject()) {
-                            obj.append(" AND kg" + help + ".obj = " + ogTriple.getSubject());
-                        } else if (triple.getObject() == rule.getHead().getObject()) {
-                            obj.append(" AND kg" + help + ".obj = " + ogTriple.getObject());
-                        }
-                    }
-                    pre = new StringBuffer(" AND kg" + help + ".pre = " + triple.getPredicate());
-                    where.append(sub);
-                    where.append(pre);
-                    where.append(obj);
-                    help++;
-                }
-                for (int i = 0; i< rule.getBody().size(); ++i){
-                    for (int j = i+1; j < rule.getBody().size(); ++j){
-                        r1 = rule.getBody().get(i);
-                        r2 = rule.getBody().get(j);
-                        if(r1.getSubject() < 0 ){
-                            if(r1.getSubject() == r2.getSubject()){
-                                where.append(" AND k" + i + ".sub = k" + j + ".sub");
-                            }
-                            if(r1.getSubject() == r2.getObject()){
-                                where.append(" AND k" + i + ".sub = k" + j + ".obj");
-                            }
-                        }
-                        if(r1.getObject() < 0){
-                            if (r1.getObject() == r2.getObject()){
-                                where.append(" AND k" + i + ".obj = k" + j + ".obj");
-                            }
-                            if(r1.getObject() == r2.getSubject()){
-                                where.append(" AND k" + i + ".sub = k" + j + ".sub");
-                            }
-                        }
-                    }
-                }
-                sql.append(select);
-                sql.append(where);
-                sql.append(sqlEnd);
-                //System.out.println(sql);
-                //stmt = con.prepareStatement(sql.toString());
-                //stmt.setString(1, rule.toString());
-                //rs = stmt.executeQuery();
-                //System.out.println("Success");
-        /*while (rs.next()) {
-          //System.out.println("Found: ");
-          //System.out.println(rs.getString("case"));
-        }*/
-            }
-            //System.out.println(sql.toString());
-            long elapsedTime1 = System.nanoTime();
-            System.out.println("Dauer für StringBuffer zusammenfügen: " + ((elapsedTime1 - startTime1) / 1000000) + "ms");
-            System.out.println(sql.toString());
-            long startTime = System.nanoTime();
-            stmt = con.prepareStatement(sql.toString());
-            rs = stmt.executeQuery();
-            long elapsedTime = System.nanoTime();
-            System.out.println("Dauer nur für Anfrage: " + ((elapsedTime - startTime) / 1000000) + "ms");
-            long startTime2 = System.nanoTime();
-            while (rs.next()) {
-                if (rs.getString("?column?") != null) {
-                    foundRules.append(rs.getString("?column?") + "\n");
-                }
-                //System.out.println("Found: ");
-                //System.out.println(rs.getString("case"));
-            }
-            rs.close();
-            long elapsedTime2 = System.nanoTime();
-            System.out.println("Dauer nur für rsNext: " + ((elapsedTime2 - startTime2) / 1000000) + "ms");
-        } catch (SQLException e) {
-            //e.printStackTrace();
-        }
-        return foundRules;
-    }
-
     /**
      * Change from testRulesUnionAll: Also shorter selects, without exists
      *
@@ -812,142 +544,156 @@ public class DBFuncs {
     public static StringBuffer testRulesUnionAllShorterSelect(List<Rule> filteredRules, Triple ogTriple) {
         long startTime1 = System.nanoTime();
         StringBuffer foundRules = new StringBuffer();
+        int objHelp, subHelp;
         boolean first, first2;
         Triple r1, r2;
         ResultSet rs;
-        try {
-            Statement stmt = con.createStatement();
-            StringBuffer sql, sqlEnd;
-            sql = new StringBuffer();
-            StringBuffer sub, pre, obj;
-            StringBuffer select, where;
-            int help;
-            boolean firstR = true;
-            for (Rule rule : filteredRules) {
-                first = true;
-                first2 = true;
-                if (firstR) {
-                    sql.append("(");
-                    firstR = false;
+        StringBuffer sql, sqlEnd;
+        sql = new StringBuffer();
+        StringBuffer sub, pre, obj;
+        StringBuffer select, where;
+        int help;
+        boolean firstR = true;
+        for (Rule rule : filteredRules) {
+            if (rule.getBody().size() == 0) {
+                continue;
+            }
+            first = true;
+            first2 = true;
+            if (firstR) {
+                sql.append("(");
+                firstR = false;
+            } else {
+                sql.append(" UNION ALL (");
+            }
+
+            sqlEnd = new StringBuffer(" LIMIT 1) "); //TODO Hash key hier rein
+            select = new StringBuffer("SELECT " + rule.getId() + " FROM ");
+            where = new StringBuffer(" WHERE");
+            help = 0;
+            for (Triple triple : rule.getBody()) {
+                objHelp = -99;
+                subHelp = -99;
+                /** TODO Idea to create SQL Statements with Intersects and not with joins
+                 if (first){
+                 first = false;
+                 }else {
+                 sql.append(" INTERSECT ");
+                 }
+                 **/
+
+                //Create FROM statements
+                if (first) {
+                    select.append(Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " k" + help);
+                    first = false;
                 } else {
-                    sql.append(" UNION ALL (");
+                    select.append(", " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " k" + help);
+                }
+                //Predicate
+                pre = new StringBuffer(" AND k" + help + ".pre = " + triple.getPredicate());
+                //Object
+                obj = new StringBuffer();
+                if (triple.getObject() >= 0) {
+                    obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
+                    objHelp = triple.getObject();
+                } else {
+                    if (triple.getObject() == rule.getHead().getSubject()) {
+                        obj.append(" AND k" + help + ".obj = " + ogTriple.getSubject());
+                    } else if (triple.getObject() == rule.getHead().getObject()) {
+                        obj.append(" AND k" + help + ".obj = " + ogTriple.getObject());
+                    }
                 }
 
-                sqlEnd = new StringBuffer(" LIMIT 1) "); //TODO Hash key hier rein
-                select = new StringBuffer("SELECT " + rule.getId() + " FROM ");
-                where = new StringBuffer(" WHERE");
-                help = 0;
-                for (Triple triple : rule.getBody()) {
-                    /** TODO Idea to create SQL Statements with Intersects and not with joins
-                     if (first){
-                     first = false;
-                     }else {
-                     sql.append(" INTERSECT ");
-                     }
-                     **/
 
-                    //Create FROM statements
-                    if (first) {
-                        select.append(Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " k" + help);
-                        first = false;
-                    } else {
-                        select.append(", " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " k" + help);
-                    }
-
-                    //Create WHERE Statements
-                    sub = new StringBuffer();
-                    if (triple.getSubject() < 0) {
-                        if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
-                            if (first2) {
-                                first2 = false;
-                                sub.append(" k" + help + ".sub != " + "k" + help + ".obj");
-                            } else {
-                                sub.append(" AND k" + help + ".sub != " + "k" + help + ".obj");
-                            }
-
-                        }
-                        if (triple.getSubject() == rule.getHead().getSubject()) {
-                            if (first2) {
-                                first2 = false;
-                                sub.append(" k" + help + ".sub = " + ogTriple.getSubject());
-                            } else {
-                                sub.append(" AND k" + help + ".sub = " + ogTriple.getSubject());
-                            }
-                        } else if (triple.getSubject() == rule.getHead().getObject()) {
-                            if (first2) {
-                                first2 = false;
-                                sub.append(" k" + help + ".sub = " + ogTriple.getObject());
-                            } else {
-                                sub.append(" AND k" + help + ".sub = " + ogTriple.getObject());
-                            }
-                        }
-                        //Check if equal with head
-                    } else {
+                //Create WHERE Statements
+                sub = new StringBuffer();
+                if (triple.getSubject() < 0) {
+                    if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
                         if (first2) {
                             first2 = false;
-                            sub.append(" k" + help + ".sub = " + triple.getSubject());
+                            sub.append(" k" + help + ".sub != " + "k" + help + ".obj");
                         } else {
-                            sub.append(" AND k" + help + ".sub = " + triple.getSubject());
+                            sub.append(" AND k" + help + ".sub != " + "k" + help + ".obj");
                         }
 
                     }
-                    //Create WHERE Statements
-                    obj = new StringBuffer();
-                    if (triple.getObject() >= 0) {
-                        obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
+                    if (triple.getSubject() == rule.getHead().getSubject()) {
+                        if (first2) {
+                            first2 = false;
+                            sub.append(" k" + help + ".sub = " + ogTriple.getSubject());
+                        } else {
+                            sub.append(" AND k" + help + ".sub = " + ogTriple.getSubject());
+                        }
+                    } else if (triple.getSubject() == rule.getHead().getObject()) {
+                        if (first2) {
+                            first2 = false;
+                            sub.append(" k" + help + ".sub = " + ogTriple.getObject());
+                        } else {
+                            sub.append(" AND k" + help + ".sub = " + ogTriple.getObject());
+                        }
+                    }
+                    //Check if equal with head
+                } else {
+                    if (first2) {
+                        first2 = false;
+                        sub.append(" k" + help + ".sub = " + triple.getSubject());
                     } else {
-                        if (triple.getObject() == rule.getHead().getSubject()) {
-                            obj.append(" AND k" + help + ".obj = " + ogTriple.getSubject());
-                        } else if (triple.getObject() == rule.getHead().getObject()) {
-                            obj.append(" AND k" + help + ".obj = " + ogTriple.getObject());
+                        sub.append(" AND k" + help + ".sub = " + triple.getSubject());
+                    }
+
+                }
+                //Create WHERE Statements
+
+
+                where.append(sub);
+                where.append(pre);
+                where.append(obj);
+                help++;
+            }
+            for (int i = 0; i < rule.getBody().size(); ++i) {
+                for (int j = i + 1; j < rule.getBody().size(); ++j) {
+                    r1 = rule.getBody().get(i);
+                    r2 = rule.getBody().get(j);
+                    if (r1.getSubject() < 0) {
+                        if (r1.getSubject() == r2.getSubject()) {
+                            where.append(" AND k" + i + ".sub = k" + j + ".sub");
+                        }
+                        if (r1.getSubject() == r2.getObject()) {
+                            where.append(" AND k" + i + ".sub = k" + j + ".obj");
                         }
                     }
-                    pre = new StringBuffer(" AND k" + help + ".pre = " + triple.getPredicate());
-                    where.append(sub);
-                    where.append(pre);
-                    where.append(obj);
-                    help++;
-                }
-                for (int i = 0; i< rule.getBody().size(); ++i){
-                    for (int j = i+1; j < rule.getBody().size(); ++j){
-                        r1 = rule.getBody().get(i);
-                        r2 = rule.getBody().get(j);
-                        if(r1.getSubject() < 0 ){
-                            if(r1.getSubject() == r2.getSubject()){
-                                where.append(" AND k" + i + ".sub = k" + j + ".sub");
-                            }
-                            if(r1.getSubject() == r2.getObject()){
-                                where.append(" AND k" + i + ".sub = k" + j + ".obj");
-                            }
+                    if (r1.getObject() < 0) {
+                        if (r1.getObject() == r2.getObject()) {
+                            where.append(" AND k" + i + ".obj = k" + j + ".obj");
                         }
-                        if(r1.getObject() < 0){
-                            if (r1.getObject() == r2.getObject()){
-                                where.append(" AND k" + i + ".obj = k" + j + ".obj");
-                            }
-                            if(r1.getObject() == r2.getSubject()){
-                                where.append(" AND k" + i + ".sub = k" + j + ".sub");
-                            }
+                        if (r1.getObject() == r2.getSubject()) {
+                            where.append(" AND k" + i + ".sub = k" + j + ".sub");
                         }
                     }
                 }
-                sql.append(select);
-                sql.append(where);
-                sql.append(sqlEnd);
-                //System.out.println(sql);
-                //stmt = con.prepareStatement(sql.toString());
-                //stmt.setString(1, rule.toString());
-                //rs = stmt.executeQuery();
-                //System.out.println("Success");
+            }
+
+            sql.append(select);
+            sql.append(where);
+            sql.append(sqlEnd);
+            //System.out.println(sql);
+            //stmt = con.prepareStatement(sql.toString());
+            //stmt.setString(1, rule.toString());
+            //rs = stmt.executeQuery();
+            //System.out.println("Success");
         /*while (rs.next()) {
           //System.out.println("Found: ");
           //System.out.println(rs.getString("case"));
         }*/
-            }
+        }
+        //System.out.println(sql);
+        try {
             //System.out.println(sql.toString());
             long elapsedTime1 = System.nanoTime();
             //System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
             //System.out.println("SQL "+ sql.toString());
             long startTime = System.nanoTime();
+            Statement stmt = con.createStatement();
             rs = stmt.executeQuery(sql.toString());
             long elapsedTime = System.nanoTime();
             //System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
@@ -963,7 +709,10 @@ public class DBFuncs {
             long elapsedTime2 = System.nanoTime();
             //System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
         } catch (SQLException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            //System.out.println(e.getMessage());
+            //System.out.println(e.getSQLState());
+            //System.exit(0);
         }
         return foundRules;
     }
@@ -987,6 +736,9 @@ public class DBFuncs {
             int help;
             boolean firstR = true;
             for (Rule rule : filteredRules) {
+                if (rule.getBody().size() == 0) {
+                    continue;
+                }
                 first = true;
                 first2 = true;
                 if (firstR) {
@@ -1062,23 +814,23 @@ public class DBFuncs {
                     where.append(obj);
                     help++;
                 }
-                for (int i = 0; i< rule.getBody().size(); ++i){
-                    for (int j = i+1; j < rule.getBody().size(); ++j){
+                for (int i = 0; i < rule.getBody().size(); ++i) {
+                    for (int j = i + 1; j < rule.getBody().size(); ++j) {
                         r1 = rule.getBody().get(i);
                         r2 = rule.getBody().get(j);
-                        if(r1.getSubject() < 0 ){
-                            if(r1.getSubject() == r2.getSubject()){
+                        if (r1.getSubject() < 0) {
+                            if (r1.getSubject() == r2.getSubject()) {
                                 where.append(" AND k" + i + ".sub = k" + j + ".sub");
                             }
-                            if(r1.getSubject() == r2.getObject()){
+                            if (r1.getSubject() == r2.getObject()) {
                                 where.append(" AND k" + i + ".sub = k" + j + ".obj");
                             }
                         }
-                        if(r1.getObject() < 0){
-                            if (r1.getObject() == r2.getObject()){
+                        if (r1.getObject() < 0) {
+                            if (r1.getObject() == r2.getObject()) {
                                 where.append(" AND k" + i + ".obj = k" + j + ".obj");
                             }
-                            if(r1.getObject() == r2.getSubject()){
+                            if (r1.getObject() == r2.getSubject()) {
                                 where.append(" AND k" + i + ".sub = k" + j + ".sub");
                             }
                         }
@@ -1126,7 +878,16 @@ public class DBFuncs {
         return foundRules;
     }
 
-    public static StringBuffer testRulesSimpleViews(List<Rule> filteredRules, Triple ogTriple){
+    public static StringBuffer testRulesSimpleViews(List<Rule> filteredRules, Triple ogTriple) {
+        for(Rule rule : filteredRules){
+
+        }
+
+
+
+
+
+
         return null;
     }
 
@@ -1218,7 +979,7 @@ public class DBFuncs {
                         } else {
                             sub.append(" AND k" + help + ".sub != " + "k" + help + ".obj");
                         }
-                    }else if(triple.getObject() == triple.getSubject()){
+                    } else if (triple.getObject() == triple.getSubject()) {
                         if (first2) {
                             first2 = false;
                             sub.append(" k" + help + ".sub = " + "k" + help + ".obj");
@@ -1240,16 +1001,16 @@ public class DBFuncs {
                 if (first2) {
                     first2 = false;
                     pre.append(" k" + help + ".pre = " + triple.getPredicate());
-                }else {
+                } else {
                     pre.append(" AND k" + help + ".pre = " + triple.getPredicate());
                 }
                 //Create WHERE Statements
                 obj = new StringBuffer();
                 if (triple.getObject() >= 0) {
-                    if (first2){
+                    if (first2) {
                         first2 = false;
                         obj = new StringBuffer(" k" + help + ".obj = " + triple.getObject());
-                    }else {
+                    } else {
                         obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
                     }
                 }
@@ -1267,10 +1028,169 @@ public class DBFuncs {
         return sql;
     }
 
+    public static StringBuffer viewSqlStatementSingleRule(Rule rule) {
+        boolean first, first2, first3;
+        StringBuffer sql, sqlEnd;
+        sql = new StringBuffer();
+        StringBuffer sub, pre, obj;
+        StringBuffer select, where;
+        StringBuffer variables = new StringBuffer();
+        StringBuffer from = new StringBuffer();
+        int help;
+        first = true;
+        first2 = true;
+        first3 = true;
+        where = new StringBuffer(" WHERE");
+        help = 1;
+        select = new StringBuffer();
+        for (Triple triple : rule.getBody()) {
+            //Create FROM statements
+            if (first) {
+                from.append(Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " k" + help);
+                first = false;
+            } else {
+                from.append(", " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " k" + help);
+            }
+
+            //Create WHERE Statements
+            sub = new StringBuffer();
+            if (triple.getSubject() < 0) {
+                if (first3) {
+                    variables.append("k" + help + ".sub AS sub"+help);
+                    first3 = false;
+                } else {
+                    variables.append(", k" + help + ".sub AS sub"+help);
+                }
+                if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
+                    if (first2) {
+                        first2 = false;
+                        sub.append(" k" + help + ".sub != " + "k" + help + ".obj");
+                    } else {
+                        sub.append(" AND k" + help + ".sub != " + "k" + help + ".obj");
+                    }
+                } else if (triple.getObject() == triple.getSubject()) {
+                    if (first2) {
+                        first2 = false;
+                        sub.append(" k" + help + ".sub = " + "k" + help + ".obj");
+                    } else {
+                        sub.append(" AND k" + help + ".sub = " + "k" + help + ".obj");
+                    }
+                }
+                //Check if equal with head
+            } else {
+                if (first2) {
+                    first2 = false;
+                    sub.append(" k" + help + ".sub = " + triple.getSubject());
+                } else {
+                    sub.append(" AND k" + help + ".sub = " + triple.getSubject());
+                }
+
+            }
+            pre = new StringBuffer();
+            if (first2) {
+                first2 = false;
+                pre.append(" k" + help + ".pre = " + triple.getPredicate());
+            } else {
+                pre.append(" AND k" + help + ".pre = " + triple.getPredicate());
+            }
+            //Create WHERE Statements
+            obj = new StringBuffer();
+            if (triple.getObject() >= 0) {
+                if (first2) {
+                    first2 = false;
+                    obj = new StringBuffer(" k" + help + ".obj = " + triple.getObject());
+                } else {
+                    obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
+                }
+            } else {
+                if (first3) {
+                    variables.append("k" + help + ".obj AS obj"+help);
+                    first3 = false;
+                } else {
+                    variables.append(", k" + help + ".obj AS obj"+help);
+                }
+            }
+            where.append(sub);
+            where.append(pre);
+            where.append(obj);
+            help++;
+        }
+        select.append("SELECT " + variables + " FROM ");
+        sql.append(select);
+        sql.append(from);
+        sql.append(where);
+        System.out.println(rule);
+        System.out.println(sql);
+        return sql;
+    }
+
+
     /**
      * Function to create a normal view for every rule.
      */
     public static void createNormalViewForRule(RandomRules randomRules) {
+        try {
+            String sql;
+            long startTime = System.nanoTime();
+            long elapsedTime;
+            long count = 0;
+            Statement stmt = con.createStatement();
+            ArrayList<Rule> ruleArrayList = new ArrayList<>();
+
+            HashMap<Key2Int, ArrayList<Rule>> objBound = randomRules.getObjBound();
+            HashMap<Key3Int, ArrayList<Rule>> bothBound = randomRules.getBothBound();
+            HashMap<Integer, ArrayList<Rule>> noBoundEqual = randomRules.getNoBoundEqual();
+            HashMap<Key2Int, ArrayList<Rule>> subBound = randomRules.getSubBound();
+            HashMap<Integer, ArrayList<Rule>> noBoundUnequal = randomRules.getNoBoundUnequal();
+
+            for (Map.Entry<Key2Int, ArrayList<Rule>> entry : objBound.entrySet()) {
+                ruleArrayList.addAll(entry.getValue());
+            }
+            for (Map.Entry<Key2Int, ArrayList<Rule>> entry : subBound.entrySet()) {
+                ruleArrayList.addAll(entry.getValue());
+            }
+            for (Map.Entry<Key3Int, ArrayList<Rule>> entry : bothBound.entrySet()) {
+                ruleArrayList.addAll(entry.getValue());
+            }
+            for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundEqual.entrySet()) {
+                ruleArrayList.addAll(entry.getValue());
+            }
+            for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundUnequal.entrySet()) {
+                ruleArrayList.addAll(entry.getValue());
+            }
+
+            for (Rule rule : ruleArrayList) {
+                sql = "DROP VIEW IF EXISTS o" + rule.getId() + ";";
+                stmt.addBatch(sql);
+                sql = "CREATE VIEW o" + rule.getId() + " as " + viewSqlStatementSingleRule(rule);
+                //System.out.println(sql);
+                stmt.addBatch(sql);
+                count++;
+                if (count % 2000 == 0 || count == ruleArrayList.size()) {
+                    stmt.executeBatch();
+                    stmt.clearBatch();
+                    elapsedTime = System.nanoTime() - startTime;
+                    startTime = System.nanoTime();
+                    System.out.println(
+                            "ObjBound: Inserted " + count + " of " + ruleArrayList.size() + " ; Time: " + (elapsedTime / 1000000)
+                                    + "ms");
+                    con.commit();
+                }
+            }
+            stmt.executeBatch();
+            con.commit();
+            stmt.close();
+            System.out.println("Success");
+            System.out.println("Normal Views have been generated");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Function to create a normal view for every rule.
+     */
+    public static void createNormalViewForRuleType(RandomRules randomRules) {
         try {
             String sql;
             long startTime = System.nanoTime();
@@ -1310,7 +1230,7 @@ public class DBFuncs {
                 ArrayList<Rule> ruleList = entry.getValue();
                 //sql = "DROP VIEW IF EXISTS s" + key.hashCode() + ";";
                 //stmt.addBatch(sql);
-                sql = "CREATE VIEW s" + key + " as "+ viewSqlStatement(ruleList);
+                sql = "CREATE VIEW s" + key + " as " + viewSqlStatement(ruleList);
                 //System.out.println(sql);
                 stmt.addBatch(sql);
                 stmt.addBatch(sql);
@@ -1332,7 +1252,7 @@ public class DBFuncs {
                 ArrayList<Rule> ruleList = entry.getValue();
                 //sql = "DROP VIEW IF EXISTS b" + key.toString() + ";";
                 //stmt.addBatch(sql);
-                sql = "CREATE VIEW b" + key.toString() + " as "+ viewSqlStatement(ruleList);
+                sql = "CREATE VIEW b" + key.toString() + " as " + viewSqlStatement(ruleList);
                 //System.out.println(sql);
                 stmt.addBatch(sql);
                 count++;
@@ -1353,7 +1273,7 @@ public class DBFuncs {
                 ArrayList<Rule> ruleList = entry.getValue();
                 //sql = "DROP VIEW IF EXISTS e" + key.toString() + ";";
                 //stmt.addBatch(sql);
-                sql = "CREATE VIEW e" + key + " as "+ viewSqlStatement(ruleList);
+                sql = "CREATE VIEW e" + key + " as " + viewSqlStatement(ruleList);
                 //System.out.println(sql);
                 stmt.addBatch(sql);
                 count++;
@@ -1374,7 +1294,7 @@ public class DBFuncs {
                 ArrayList<Rule> ruleList = entry.getValue();
                 //sql = "DROP VIEW IF EXISTS u" + key.toString() + ";";
                 //stmt.addBatch(sql);
-                sql = "CREATE VIEW u" + key + " as "+ viewSqlStatement(ruleList);
+                sql = "CREATE VIEW u" + key + " as " + viewSqlStatement(ruleList);
                 //System.out.println(sql);
                 stmt.addBatch(sql);
                 count++;

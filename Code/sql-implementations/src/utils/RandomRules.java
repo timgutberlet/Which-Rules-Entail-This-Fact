@@ -213,7 +213,9 @@ public class RandomRules {
             filteredRulesStrings.add(line);
           }
         }
-
+        if(rule.getBody().size() == 0){
+          continue;
+        }
 
         //Beide ungebunden & ungleich
         if (rule.getHead().getObject()<0 && rule.getHead().getSubject() <0 && rule.getHead().getObject() != rule.getHead().getSubject()){
@@ -263,7 +265,7 @@ public class RandomRules {
       }
       System.out.println("Import finished");
       reader.close();
-      if(Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews")){
+      if(Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews") && Config.getStringValue("REFILL_TABLES").equals("YES")){
         DBFuncs.createNormalViewForRule(this);
       }
     } catch (IOException e) {
@@ -363,11 +365,7 @@ public class RandomRules {
     //System.out.println("Zeit für Regelsuche: " + ((elapsedTime - startTime) / 1000000) + " ms");
     startTime = System.nanoTime();
     StringBuffer stringBuffer = new StringBuffer();
-    if(Config.getStringValue("TESTRULES_METHOD").equals("testRules")){
-      stringBuffer = DBFuncs.testRules(filteredRules, triple);
-    }else if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesUnionAll")){
-      stringBuffer = DBFuncs.testRulesUnionAll(filteredRules, triple);
-    }else if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesUnionAllShorterSelect")){
+    if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesUnionAllShorterSelect")){
       stringBuffer = DBFuncs.testRulesUnionAllShorterSelect(filteredRules, triple);
     }else if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesUnionAllShorterSelectViewsForRelations")){
       stringBuffer = DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple);
