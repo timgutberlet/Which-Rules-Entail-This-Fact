@@ -370,7 +370,10 @@ public class RandomRules {
     }else if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesUnionAllShorterSelectViewsForRelations")){
       stringBuffer = DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple);
     }else if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews")){
-      stringBuffer = DBFuncs.testRulesSimpleViews(filteredRules, triple);
+      ArrayList<Integer> resultList = DBFuncs.testRulesSimpleViews(filteredRules, triple);
+      for(int i : resultList){
+        stringBuffer.append(i + "\n");
+      }
     }else if (Config.getStringValue("TESTRULES_METHOD").equals("")){
 
     }else if (Config.getStringValue("TESTRULES_METHOD").equals("")){
@@ -461,12 +464,12 @@ public class RandomRules {
     long elapsedTime;
     for (Triple triple : queryTriples){
       queries++;
-      found.append("Query: " + triple.toString() + " : " + searchByTriple(triple).toString() +" \n");
-      //System.out.println("Query: " + triple.toString() + " : " + searchByTriple(triple));
+      //found.append("Query: " + triple.toString() + " : " + searchByTriple(triple).toString() +" \n");
+      System.out.println("Query: " + triple.toString() + " : " + searchByTriple(triple));
       //searchByTriple(triple);
       //searchByTriple(triple);
       //System.out.println("--------------------------------------------");
-      if(queries % 100 == 0){
+      if(queries % 10 == 0){
         elapsedTime = System.nanoTime();
         //System.out.println(found);
         //System.out.println("");
