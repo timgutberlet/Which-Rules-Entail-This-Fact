@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.util.*;
 
 import config.Config;
+import config.Debug;
 import models.Key2Int;
 import models.Key3Int;
 import models.Rule;
@@ -542,10 +543,8 @@ public class DBFuncs {
      * @param filteredRules
      * @param ogTriple
      */
-    public static StringBuffer testRulesUnionAllShorterSelect(List<Rule> filteredRules, Triple ogTriple) {
-        long startTime1 = System.nanoTime();
-        StringBuffer foundRules = new StringBuffer();
-        int objHelp, subHelp;
+    public static ArrayList<Integer> testRulesUnionAllShorterSelect(List<Rule> filteredRules, Triple ogTriple) {
+        ArrayList<Integer> foundRules = new ArrayList<>();
         boolean first, first2;
         Triple r1, r2;
         ResultSet rs;
@@ -573,15 +572,6 @@ public class DBFuncs {
             where = new StringBuffer(" WHERE");
             help = 0;
             for (Triple triple : rule.getBody()) {
-                objHelp = -99;
-                subHelp = -99;
-                /** TODO Idea to create SQL Statements with Intersects and not with joins
-                 if (first){
-                 first = false;
-                 }else {
-                 sql.append(" INTERSECT ");
-                 }
-                 **/
 
                 //Create FROM statements
                 if (first) {
@@ -596,7 +586,6 @@ public class DBFuncs {
                 obj = new StringBuffer();
                 if (triple.getObject() >= 0) {
                     obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
-                    objHelp = triple.getObject();
                 } else {
                     if (triple.getObject() == rule.getHead().getSubject()) {
                         obj.append(" AND k" + help + ".obj = " + ogTriple.getSubject());
@@ -673,47 +662,21 @@ public class DBFuncs {
                     }
                 }
             }
-
             sql.append(select);
             sql.append(where);
             sql.append(sqlEnd);
-            //System.out.println(sql);
-            //stmt = con.prepareStatement(sql.toString());
-            //stmt.setString(1, rule.toString());
-            //rs = stmt.executeQuery();
-            //System.out.println("Success");
-        /*while (rs.next()) {
-          //System.out.println("Found: ");
-          //System.out.println(rs.getString("case"));
-        }*/
         }
-        //System.out.println(sql);
         try {
-            //System.out.println(sql.toString());
-            long elapsedTime1 = System.nanoTime();
-            //System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
-            //System.out.println("SQL "+ sql.toString());
-            long startTime = System.nanoTime();
             Statement stmt = con.createStatement();
             rs = stmt.executeQuery(sql.toString());
-            long elapsedTime = System.nanoTime();
-            //System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
-            long startTime2 = System.nanoTime();
             while (rs.next()) {
                 if (rs.getString("?column?") != null) {
-                    foundRules.append(rs.getString("?column?") + "\n");
+                    foundRules.add(rs.getInt("?column?"));
                 }
-                //System.out.println("Found: ");
-                //System.out.println(rs.getString("case"));
             }
             rs.close();
-            long elapsedTime2 = System.nanoTime();
-            //System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
         } catch (SQLException e) {
-            //e.printStackTrace();
-            //System.out.println(e.getMessage());
-            //System.out.println(e.getSQLState());
-            //System.exit(0);
+            Debug.printMessage(e, e.getMessage());
         }
         return foundRules;
     }
@@ -721,9 +684,9 @@ public class DBFuncs {
     /**
      * test Rules Function, that uses additional Views for each possible relation to implement more integration
      */
-    public static StringBuffer testRulesUnionAllShorterSelectViewsForRelations(List<Rule> filteredRules, Triple ogTriple) {
+    public static ArrayList<Integer> testRulesUnionAllShorterSelectViewsForRelations(List<Rule> filteredRules, Triple ogTriple) {
         //long startTime1 = System.nanoTime();
-        StringBuffer foundRules = new StringBuffer();
+        ArrayList<Integer> foundRules = new ArrayList<>();
         boolean first, first2;
         Triple r1, r2;
 
@@ -749,20 +712,59 @@ public class DBFuncs {
                     sql.append(" UNION ALL (");
                 }
 
-                sqlEnd = new StringBuffer(" LIMIT 1) "); //TODO Hash key hier rein
+                sqlEnd = new StringBuffer(" LIMIT 1) ");
                 select = new StringBuffer("SELECT " + rule.getId() + " FROM ");
                 where = new StringBuffer(" WHERE");
                 help = 0;
                 for (Triple triple : rule.getBody()) {
 
-                    //Create FROM statements
-                    if (first) {
-                        select.append("v" + triple.getPredicate() + " k" + help);
-                        first = false;
-                    } else {
-                        select.append(", " + "v" + triple.getPredicate() + " k" + help);
+                    switch(Config.getStringValue("PREDICATE_VIEW")) {
+                        case "viewsForPredicate":
+                            if(triple.getSubject() >= 0){
+                                if (first) {
+                                    select.append("r" + triple.getPredicate() + " k" + help);
+                                    first = false;
+                                } else {
+                                    select.append(", " + "r" + triple.getPredicate() + " k" + help);
+                                }
+                            }else if (triple.getObject() >= 0){
+                                if (first) {
+                                    select.append("l" + triple.getPredicate() + " k" + help);
+                                    first = false;
+                                } else {
+                                    select.append(", " + "l" + triple.getPredicate() + " k" + help);
+                                }
+                            }else if (triple.getSubject() == rule.getHead().getSubject() || triple.getSubject() == rule.getHead().getObject()){
+                                if (first) {
+                                    select.append("l" + triple.getPredicate() + " k" + help);
+                                    first = false;
+                                } else {
+                                    select.append(", " + "l" + triple.getPredicate() + " k" + help);
+                                }
+                            }else if (triple.getObject() == rule.getHead().getSubject() || triple.getObject() == rule.getHead().getObject()){
+                                if (first) {
+                                    select.append("r" + triple.getPredicate() + " k" + help);
+                                    first = false;
+                                } else {
+                                    select.append(", " + "r" + triple.getPredicate() + " k" + help);
+                                }
+                            }
+                            break;
+                        case "viewsForPredicateNoIndex":
+                        case "viewsForPredicateSubObj":
+                        case "viewsForPredicateObjSub":
+                            if (first) {
+                                select.append("v" + triple.getPredicate() + " k" + help);
+                                first = false;
+                            } else {
+                                select.append(", " + "v" + triple.getPredicate() + " k" + help);
+                            }
+                            break;
+                        case "viewsForPredicateHashIndex":
+                            Debug.printMessage("viewsForPredicateHashIndex not implemented yet");
+                            break;
+                        default:
                     }
-
                     //Create WHERE Statements
                     sub = new StringBuffer();
                     if (triple.getSubject() < 0) {
@@ -841,30 +843,16 @@ public class DBFuncs {
                 sql.append(where);
                 sql.append(sqlEnd);
             }
-
-            long elapsedTime1 = System.nanoTime();
-            //System.out.println("Dauer für StringBuffer zusammenfügen: " +((elapsedTime1-startTime1)/1000000) + "ms" );
-            //System.out.println("SQL "+ sql.toString());
-            long startTime = System.nanoTime();
             rs = stmt.executeQuery(sql.toString());
-            long elapsedTime = System.nanoTime();
-            //System.out.println("Dauer nur für Anfrage: " +((elapsedTime-startTime)/1000000) + "ms" );
-            long startTime2 = System.nanoTime();
             while (rs.next()) {
                 if (rs.getString("?column?") != null) {
-                    foundRules.append(rs.getString("?column?") + "\n");
+                    foundRules.add(rs.getInt("?column?"));
                 }
-                //System.out.println("Found: ");
-                //System.out.println(rs.getString("case"));
             }
             rs.close();
-            //long elapsedTime2 = System.nanoTime();
-            //System.out.println("Dauer nur für rsNext: " +((elapsedTime2-startTime2)/1000000) + "ms" );
         } catch (SQLException e) {
-            //e.printStackTrace();
-            //System.out.println("Fehler");
+            Debug.printMessage(e, e.getMessage());
         }
-        //System.out.println("Done");
         return foundRules;
     }
 
@@ -954,10 +942,6 @@ public class DBFuncs {
         return null;
     }
 
-    public void viewsForRule() {
-
-    }
-
     /**
      * Function to create a materialized view for every Relation possible
      */
@@ -970,6 +954,106 @@ public class DBFuncs {
             Statement stmt = con.createStatement();
             for (Integer integer : predicateList) {
                 sql = "DROP MATERIALIZED VIEW IF EXISTS v" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "DROP MATERIALIZED VIEW IF EXISTS l" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "create materialized view  l" + integer.toString() + " as \n" +
+                        "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
+                count++;
+                stmt.addBatch(sql);
+                sql = "CREATE UNIQUE INDEX l" + integer + "Index ON v" + integer + " (sub, obj);";
+                stmt.addBatch(sql);
+                sql = "ALTER MATERIALIZED VIEW l" + integer + " CLUSTER ON v" + integer + "Index;";
+                stmt.addBatch(sql);
+                //
+                sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer + ";";
+                stmt.addBatch(sql);
+                sql = "create materialized view  r" + integer.toString() + " as \n" +
+                        "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
+                count++;
+                //System.out.println(triple.toString());
+                stmt.addBatch(sql);
+                sql = "CREATE UNIQUE INDEX r" + integer + "Index ON v" + integer + " (obj, sub);";
+                stmt.addBatch(sql);
+                sql = "ALTER MATERIALIZED VIEW r" + integer + " CLUSTER ON v" + integer + "Index;";
+                stmt.addBatch(sql);
+                //
+                if (count % 10 == 0 || count == predicateList.size()) {
+                    stmt.executeBatch();
+                    stmt.clearBatch();
+                    elapsedTime = System.nanoTime() - startTime;
+                    startTime = System.nanoTime();
+                    System.out.println(
+                            "Inserted " + count + " of " + predicateList.size() + " ; Time: " + (elapsedTime / 1000000)
+                                    + "ms");
+                }
+            }
+            stmt.executeBatch();
+            con.commit();
+            stmt.close();
+            System.out.println("Success");
+
+            System.out.println("Data has been inserted");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void viewsForPredicateNoIndex(List<Integer> predicateList) {
+        try {
+            String sql;
+            long startTime = System.nanoTime();
+            long elapsedTime;
+            long count = 0;
+            Statement stmt = con.createStatement();
+            for (Integer integer : predicateList) {
+                sql = "DROP MATERIALIZED VIEW IF EXISTS v" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "DROP MATERIALIZED VIEW IF EXISTS l" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "create materialized view  v" + integer.toString() + " as \n" +
+                        "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
+                stmt.addBatch(sql);
+                count++;
+                //System.out.println(triple.toString());
+                if (count % 10 == 0 || count == predicateList.size()) {
+                    stmt.executeBatch();
+                    stmt.clearBatch();
+                    elapsedTime = System.nanoTime() - startTime;
+                    startTime = System.nanoTime();
+                    System.out.println(
+                            "Inserted " + count + " of " + predicateList.size() + " ; Time: " + (elapsedTime / 1000000)
+                                    + "ms");
+                }
+            }
+            stmt.executeBatch();
+            con.commit();
+            stmt.close();
+            System.out.println("Success");
+
+            System.out.println("Data has been inserted");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void viewsForPredicateSubObj(List<Integer> predicateList) {
+        try {
+            String sql;
+            long startTime = System.nanoTime();
+            long elapsedTime;
+            long count = 0;
+            Statement stmt = con.createStatement();
+            for (Integer integer : predicateList) {
+                sql = "DROP MATERIALIZED VIEW IF EXISTS v" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "DROP MATERIALIZED VIEW IF EXISTS l" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer.toString() + ";";
                 stmt.addBatch(sql);
                 sql = "create materialized view  v" + integer.toString() + " as \n" +
                         "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
@@ -1000,6 +1084,91 @@ public class DBFuncs {
             e.printStackTrace();
         }
     }
+
+    public static void viewsForPredicateObjSub(List<Integer> predicateList) {
+        try {
+            String sql;
+            long startTime = System.nanoTime();
+            long elapsedTime;
+            long count = 0;
+            Statement stmt = con.createStatement();
+            for (Integer integer : predicateList) {
+                sql = "DROP MATERIALIZED VIEW IF EXISTS v" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "DROP MATERIALIZED VIEW IF EXISTS l" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "create materialized view  v" + integer.toString() + " as \n" +
+                        "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
+                count++;
+                //System.out.println(triple.toString());
+                stmt.addBatch(sql);
+                sql = "CREATE UNIQUE INDEX v" + integer + "Index ON v" + integer + " (obj, sub);";
+                stmt.addBatch(sql);
+                sql = "ALTER MATERIALIZED VIEW v" + integer + " CLUSTER ON v" + integer + "Index;";
+                stmt.addBatch(sql);
+                if (count % 10 == 0 || count == predicateList.size()) {
+                    stmt.executeBatch();
+                    stmt.clearBatch();
+                    elapsedTime = System.nanoTime() - startTime;
+                    startTime = System.nanoTime();
+                    System.out.println(
+                            "Inserted " + count + " of " + predicateList.size() + " ; Time: " + (elapsedTime / 1000000)
+                                    + "ms");
+                }
+            }
+            stmt.executeBatch();
+            con.commit();
+            stmt.close();
+            System.out.println("Success");
+
+            System.out.println("Data has been inserted");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void viewsForPredicateHashIndex(List<Integer> predicateList) {
+        try {
+            String sql;
+            long startTime = System.nanoTime();
+            long elapsedTime;
+            long count = 0;
+            Statement stmt = con.createStatement();
+            for (Integer integer : predicateList) {
+                sql = "DROP MATERIALIZED VIEW IF EXISTS v" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "create materialized view  v" + integer + " as \n" +
+                        "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
+                count++;
+                //System.out.println(triple.toString());
+                stmt.addBatch(sql);
+                sql = "CREATE UNIQUE INDEX v" + integer + "Index ON v" + integer + " (obj, sub);";
+                stmt.addBatch(sql);
+                sql = "ALTER MATERIALIZED VIEW v" + integer + " CLUSTER ON v" + integer + "Index;";
+                stmt.addBatch(sql);
+                if (count % 10 == 0 || count == predicateList.size()) {
+                    stmt.executeBatch();
+                    stmt.clearBatch();
+                    elapsedTime = System.nanoTime() - startTime;
+                    startTime = System.nanoTime();
+                    System.out.println(
+                            "Inserted " + count + " of " + predicateList.size() + " ; Time: " + (elapsedTime / 1000000)
+                                    + "ms");
+                }
+            }
+            stmt.executeBatch();
+            con.commit();
+            stmt.close();
+            System.out.println("Success");
+
+            System.out.println("Data has been inserted");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
     public static StringBuffer viewSqlStatement(ArrayList<Rule> rulesList) {
@@ -1226,7 +1395,8 @@ public class DBFuncs {
                 sql = "DROP VIEW IF EXISTS o" + rule.getId() + ";";
                 stmt.addBatch(sql);
                 sql = "CREATE VIEW o" + rule.getId() + " as " + viewSqlStatementSingleRule(rule);
-                //System.out.println(sql);
+                System.out.println(rule);
+                System.out.println(sql);
                 stmt.addBatch(sql);
                 count++;
                 if (count % 2000 == 0 || count == ruleArrayList.size()) {

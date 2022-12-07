@@ -152,8 +152,25 @@ public class DbFill {
       DBFuncs.insertPredicates(predicateIndex);
       DBFuncs.insertObjects(objectIndex);
       List<Integer> predicateList = predicateIndex.values().stream().toList();
-      DBFuncs.viewsForPredicate(predicateList);
-      System.out.println("Vocubalry filled");
+      switch(Config.getStringValue("PREDICATE_VIEW")) {
+        case "viewsForPredicate":
+          DBFuncs.viewsForPredicate(predicateList);
+        break;
+        case "viewsForPredicateNoIndex":
+          DBFuncs.viewsForPredicateNoIndex(predicateList);
+          break;
+        case "viewsForPredicateSubObj":
+          DBFuncs.viewsForPredicateSubObj(predicateList);
+          break;
+        case "viewsForPredicateObjSub":
+          DBFuncs.viewsForPredicateObjSub(predicateList);
+          break;
+        case "viewsForPredicateHashIndex":
+          DBFuncs.viewsForPredicateHashIndex(predicateList);
+          break;
+        default:
+      }
+      System.out.println("Vocabulary filled");
   }
 
   public void setIndexes(){
