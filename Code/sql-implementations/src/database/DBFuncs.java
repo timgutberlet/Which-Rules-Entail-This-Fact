@@ -695,7 +695,7 @@ public class DBFuncs {
             sql.append(where);
             sql.append(sqlEnd);
         }
-        System.out.println(sql);
+        //System.out.println(sql);
         try {
             Statement stmt = con.createStatement();
             rs = stmt.executeQuery(sql.toString());
