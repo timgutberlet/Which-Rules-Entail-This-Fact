@@ -14,6 +14,7 @@ import models.*;
  * @author timgutberlet
  */
 public class RandomRules {
+    private HashMap<Integer, Integer> ruleHashMap = new HashMap<>();
     private HashMap<Integer, RuleTime> ruleTimeHashMap =  new HashMap<>();
     private HashMap<String, Integer> subjectIndex;
     private HashMap<String, Integer> predicateIndex;
@@ -359,7 +360,7 @@ public class RandomRules {
                 resultList = DBFuncs.testRulesFunction(filteredRules, triple);
                 break;
             case "optimizedQuantileAnalysis":
-                resultList = DBFuncs.optimizedQuantileAnalysis(filteredRules, triple);
+                resultList = DBFuncs.optimizedQuantileAnalysis(filteredRules, triple, ruleHashMap);
                 break;
             default:
                 resultList = null;
@@ -600,14 +601,44 @@ public class RandomRules {
             helpList.add(entry.getValue());
         }
         Collections.sort(helpList);
-        for(int i = 0;  i < Config.getIntValue("QUANTIL_LEARN_COUNT"); i++){
+        int i = 0;
+        for(RuleTime ruleTime  : helpList){
             System.out.println(" ");
-            System.out.println(helpList.get(i).max());
-            System.out.println(helpList.get(i).sum());
-            System.out.println(helpList.get(i).getCount());
-            System.out.println(helpList.get(i).getRule());
-            ruleList.add(helpList.get(i).getRule());
+            System.out.println(ruleTime.max());
+            System.out.println(ruleTime.sum());
+            System.out.println(ruleTime.getCount());
+            System.out.println(ruleTime.getRule());
+            for(Triple t : ruleTime.getRule().getBody()){
+                if(t.getObject() >= 0 || t.getSubject() >= 0){
+                    ruleList.add(ruleTime.getRule());
+                    i++;
+                    break;
+                }
+            }
+            if (i ==Config.getIntValue("QUANTIL_LEARN_COUNT")){
+                break;
+            }
         }
         DBFuncs.viewsForQuantiles(ruleList);
+        Boolean sub = false, obj = false;
+        for(Rule rule : ruleList){
+            for(Triple t : rule.getBody()){
+                if(t.getSubject() == rule.getHead().getSubject() || t.getObject() == rule.getHead().getSubject()){
+                    sub = true;
+                }
+                if(t.getSubject() == rule.getHead().getObject() || t.getObject() == rule.getHead().getObject()){
+                    obj = true;
+                }
+            }
+            if(sub && obj){
+                ruleHashMap.put(rule.getId(), 0);
+            }else if (sub){
+                ruleHashMap.put(rule.getId(), 1);
+            }else if(obj){
+                ruleHashMap.put(rule.getId(), -1);
+            }else {
+                Debug.printMessage("Error");
+            }
+        }
     }
 }
