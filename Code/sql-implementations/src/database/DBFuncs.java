@@ -1865,7 +1865,7 @@ public class DBFuncs {
                 sql = "ALTER MATERIALIZED VIEW r" + integer + " CLUSTER ON r" + integer + "Index;";
                 stmt.addBatch(sql);
                 //
-                if (count % 10 == 0 || count == predicateList.size()) {
+                if (count % 7 == 0 || count == predicateList.size()) {
                     stmt.executeBatch();
                     stmt.clearBatch();
                     elapsedTime = System.nanoTime() - startTime;
