@@ -360,6 +360,9 @@ public class RandomRules {
             case "testRulesFunction":
                 resultList = DBFuncs.testRulesFunction(filteredRules, triple);
                 break;
+            case "optimizedQuantileAnalysis":
+                resultList = DBFuncs.optimizedQuantileAnalysis(filteredRules, triple);
+                break;
             default:
                 resultList = null;
                 Debug.printMessage("Keine Methode ausgewählt");
@@ -468,7 +471,10 @@ public class RandomRules {
             elapsedTime = System.nanoTime() - startTime;
             resultMap.get(triple).setTime(elapsedTime);
             queries++;
-            if (queries % 10 == 0) {
+            //System.out.println(triple);
+            //resultMap.get(triple).getRuleList().forEach(e -> System.out.println(e.toString()));
+            //System.out.println(elapsedTime / 1000000);
+            if (queries % 100 == 0) {
                 elapsedTime2 = System.nanoTime();
                 System.out.println("Gesamtzeit: " + ((elapsedTime2 - startTime2) / 1000000) + " ms");
                 System.out.println("Durchschnittszeit: " + (((elapsedTime2 - startTime2) / 1000000) / queries) + " ms");

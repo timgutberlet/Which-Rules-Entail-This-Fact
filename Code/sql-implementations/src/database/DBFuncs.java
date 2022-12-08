@@ -599,15 +599,6 @@ public class DBFuncs {
                 //Create WHERE Statements
                 sub = new StringBuffer();
                 if (triple.getSubject() < 0) {
-                    if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
-                        if (first2) {
-                            first2 = false;
-                            sub.append(" k" + help + ".sub != " + "k" + help + ".obj");
-                        } else {
-                            sub.append(" AND k" + help + ".sub != " + "k" + help + ".obj");
-                        }
-
-                    }
                     if (triple.getSubject() == rule.getHead().getSubject()) {
                         if (first2) {
                             first2 = false;
@@ -718,7 +709,6 @@ public class DBFuncs {
                 where = new StringBuffer(" WHERE");
                 help = 0;
                 for (Triple triple : rule.getBody()) {
-
                     switch (Config.getStringValue("PREDICATE_VIEW")) {
                         case "viewsForPredicate":
                             if (triple.getSubject() >= 0) {
@@ -748,6 +738,13 @@ public class DBFuncs {
                                     first = false;
                                 } else {
                                     select.append(", " + "r" + triple.getPredicate() + " k" + help);
+                                }
+                            } else{
+                                if (first) {
+                                    select.append("l" + triple.getPredicate() + " k" + help);
+                                    first = false;
+                                } else {
+                                    select.append(", " + "l" + triple.getPredicate() + " k" + help);
                                 }
                             }
                             break;
@@ -806,12 +803,27 @@ public class DBFuncs {
                     //Create WHERE Statements
                     obj = new StringBuffer();
                     if (triple.getObject() >= 0) {
-                        obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
+                        if (first2) {
+                            first2 = false;
+                            obj = new StringBuffer(" k" + help + ".obj = " + triple.getObject());
+                        } else {
+                            obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
+                        }
                     } else {
                         if (triple.getObject() == rule.getHead().getSubject()) {
-                            obj.append(" AND k" + help + ".obj = " + ogTriple.getSubject());
+                            if (first2) {
+                                first2 = false;
+                                obj.append(" k" + help + ".obj = " + ogTriple.getSubject());
+                            } else {
+                                obj.append(" AND k" + help + ".obj = " + ogTriple.getSubject());
+                            }
                         } else if (triple.getObject() == rule.getHead().getObject()) {
-                            obj.append(" AND k" + help + ".obj = " + ogTriple.getObject());
+                            if (first2) {
+                                first2 = false;
+                                obj.append(" k" + help + ".obj = " + ogTriple.getObject());
+                            } else {
+                                obj.append(" AND k" + help + ".obj = " + ogTriple.getObject());
+                            }
                         }
                     }
                     where.append(sub);
@@ -835,7 +847,7 @@ public class DBFuncs {
                                 where.append(" AND k" + i + ".obj = k" + j + ".obj");
                             }
                             if (r1.getObject() == r2.getSubject()) {
-                                where.append(" AND k" + i + ".sub = k" + j + ".sub");
+                                where.append(" AND k" + i + ".obj = k" + j + ".sub");
                             }
                         }
                     }
@@ -844,6 +856,7 @@ public class DBFuncs {
                 sql.append(where);
                 sql.append(sqlEnd);
             }
+            //System.out.println(sql.toString());
             rs = stmt.executeQuery(sql.toString());
             while (rs.next()) {
                 if (rs.getString("?column?") != null) {
@@ -852,10 +865,207 @@ public class DBFuncs {
             }
             rs.close();
         } catch (SQLException e) {
+            e.printStackTrace();
             Debug.printMessage(e, e.getMessage());
         }
         return foundRules;
     }
+
+    public static ArrayList<Integer> optimizedQuantileAnalysis(List<Rule> filteredRules, Triple ogTriple) {
+        //long startTime1 = System.nanoTime();
+        ArrayList<Integer> foundRules = new ArrayList<>();
+        boolean first, first2;
+        Triple r1, r2;
+
+        ResultSet rs;
+        try {
+            Statement stmt = con.createStatement();
+            StringBuffer sql, sqlEnd;
+            sql = new StringBuffer();
+            StringBuffer sub, obj;
+            StringBuffer select, where;
+            int help;
+            boolean firstR = true;
+            for (Rule rule : filteredRules) {
+                if (rule.getBody().size() == 0) {
+                    continue;
+                }
+                first = true;
+                first2 = true;
+                if (firstR) {
+                    sql.append("(");
+                    firstR = false;
+                } else {
+                    sql.append(" UNION ALL (");
+                }
+
+                sqlEnd = new StringBuffer(" LIMIT 1) ");
+                select = new StringBuffer("SELECT " + rule.getId() + " FROM ");
+                where = new StringBuffer(" WHERE");
+                help = 0;
+                for (Triple triple : rule.getBody()) {
+                    switch (Config.getStringValue("PREDICATE_VIEW")) {
+                        case "viewsForPredicate":
+                            if (triple.getSubject() >= 0) {
+                                if (first) {
+                                    select.append("r" + triple.getPredicate() + " k" + help);
+                                    first = false;
+                                } else {
+                                    select.append(", " + "r" + triple.getPredicate() + " k" + help);
+                                }
+                            } else if (triple.getObject() >= 0) {
+                                if (first) {
+                                    select.append("l" + triple.getPredicate() + " k" + help);
+                                    first = false;
+                                } else {
+                                    select.append(", " + "l" + triple.getPredicate() + " k" + help);
+                                }
+                            } else if (triple.getSubject() == rule.getHead().getSubject() || triple.getSubject() == rule.getHead().getObject()) {
+                                if (first) {
+                                    select.append("l" + triple.getPredicate() + " k" + help);
+                                    first = false;
+                                } else {
+                                    select.append(", " + "l" + triple.getPredicate() + " k" + help);
+                                }
+                            } else if (triple.getObject() == rule.getHead().getSubject() || triple.getObject() == rule.getHead().getObject()) {
+                                if (first) {
+                                    select.append("r" + triple.getPredicate() + " k" + help);
+                                    first = false;
+                                } else {
+                                    select.append(", " + "r" + triple.getPredicate() + " k" + help);
+                                }
+                            } else{
+                                if (first) {
+                                    select.append("l" + triple.getPredicate() + " k" + help);
+                                    first = false;
+                                } else {
+                                    select.append(", " + "l" + triple.getPredicate() + " k" + help);
+                                }
+                            }
+                            break;
+                        case "viewsForPredicateNoIndex":
+                        case "viewsForPredicateSubObj":
+                        case "viewsForPredicateObjSub":
+                            if (first) {
+                                select.append("v" + triple.getPredicate() + " k" + help);
+                                first = false;
+                            } else {
+                                select.append(", " + "v" + triple.getPredicate() + " k" + help);
+                            }
+                            break;
+                        case "viewsForPredicateHashIndex":
+                            Debug.printMessage("viewsForPredicateHashIndex not implemented yet");
+                            break;
+                        default:
+                    }
+                    //Create WHERE Statements
+                    sub = new StringBuffer();
+                    if (triple.getSubject() < 0) {
+                        if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
+                            if (first2) {
+                                first2 = false;
+                                sub.append(" k" + help + ".sub != " + "k" + help + ".obj");
+                            } else {
+                                sub.append(" AND k" + help + ".sub != " + "k" + help + ".obj");
+                            }
+                        }
+                        if (triple.getSubject() == rule.getHead().getSubject()) {
+                            if (first2) {
+                                first2 = false;
+                                sub.append(" k" + help + ".sub = " + ogTriple.getSubject());
+                            } else {
+                                sub.append(" AND k" + help + ".sub = " + ogTriple.getSubject());
+                            }
+                        } else if (triple.getSubject() == rule.getHead().getObject()) {
+                            if (first2) {
+                                first2 = false;
+                                sub.append(" k" + help + ".sub = " + ogTriple.getObject());
+                            } else {
+                                sub.append(" AND k" + help + ".sub = " + ogTriple.getObject());
+                            }
+
+                        }
+                        //Check if equal with head
+                    } else {
+                        if (first2) {
+                            first2 = false;
+                            sub.append(" k" + help + ".sub = " + triple.getSubject());
+                        } else {
+                            sub.append(" AND k" + help + ".sub = " + triple.getSubject());
+                        }
+
+                    }
+                    //Create WHERE Statements
+                    obj = new StringBuffer();
+                    if (triple.getObject() >= 0) {
+                        if (first2) {
+                            first2 = false;
+                            obj = new StringBuffer(" k" + help + ".obj = " + triple.getObject());
+                        } else {
+                            obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
+                        }
+                    } else {
+                        if (triple.getObject() == rule.getHead().getSubject()) {
+                            if (first2) {
+                                first2 = false;
+                                obj.append(" k" + help + ".obj = " + ogTriple.getSubject());
+                            } else {
+                                obj.append(" AND k" + help + ".obj = " + ogTriple.getSubject());
+                            }
+                        } else if (triple.getObject() == rule.getHead().getObject()) {
+                            if (first2) {
+                                first2 = false;
+                                obj.append(" k" + help + ".obj = " + ogTriple.getObject());
+                            } else {
+                                obj.append(" AND k" + help + ".obj = " + ogTriple.getObject());
+                            }
+                        }
+                    }
+                    where.append(sub);
+                    where.append(obj);
+                    help++;
+                }
+                for (int i = 0; i < rule.getBody().size(); ++i) {
+                    for (int j = i + 1; j < rule.getBody().size(); ++j) {
+                        r1 = rule.getBody().get(i);
+                        r2 = rule.getBody().get(j);
+                        if (r1.getSubject() < 0) {
+                            if (r1.getSubject() == r2.getSubject()) {
+                                where.append(" AND k" + i + ".sub = k" + j + ".sub");
+                            }
+                            if (r1.getSubject() == r2.getObject()) {
+                                where.append(" AND k" + i + ".sub = k" + j + ".obj");
+                            }
+                        }
+                        if (r1.getObject() < 0) {
+                            if (r1.getObject() == r2.getObject()) {
+                                where.append(" AND k" + i + ".obj = k" + j + ".obj");
+                            }
+                            if (r1.getObject() == r2.getSubject()) {
+                                where.append(" AND k" + i + ".obj = k" + j + ".sub");
+                            }
+                        }
+                    }
+                }
+                sql.append(select);
+                sql.append(where);
+                sql.append(sqlEnd);
+            }
+            //System.out.println(sql.toString());
+            rs = stmt.executeQuery(sql.toString());
+            while (rs.next()) {
+                if (rs.getString("?column?") != null) {
+                    foundRules.add(rs.getInt("?column?"));
+                }
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            Debug.printMessage(e, e.getMessage());
+        }
+        return foundRules;
+    }
+
 
     public static ArrayList<Integer> testRulesSimpleViews(List<Rule> filteredRules, Triple ogTriple) {
         int bodyCount;
@@ -968,8 +1178,6 @@ public class DBFuncs {
                 } else {
                     where.append(" AND k" + count + ".sub = " + t.getSubject());
                 }
-
-
             } else {
                 if (head.getSubject() == t.getSubject()) {
                     if (first) {
@@ -1025,7 +1233,7 @@ public class DBFuncs {
         sql.append(where);
         sql.append(" LIMIT 1;RETURN;\n" +
                 "    END;\n" +
-                "    $$ LANGUAGE 'plpgsql';");
+                "    $$ LANGUAGE 'plpgsql' PARALLEL SAFE;");
         return sql;
     }
 
@@ -1089,12 +1297,12 @@ public class DBFuncs {
         for (Rule rule : rules) {
             if (first) {
                 first = false;
-                sql.append("SELECT f" + rule.getId() + "(" + rule.getHead().getSubject() + "," + rule.getHead().getObject() + ") AS res ");
+                sql.append("(SELECT f" + rule.getId() + "(" + triple.getSubject() + "," + triple.getObject() + ") AS res)");
             } else {
-                sql.append("UNION ALL SELECT f" + rule.getId() + "(" + rule.getHead().getSubject() + "," + rule.getHead().getObject() + ") AS res ");
+                sql.append(" UNION ALL (SELECT f" + rule.getId() + "(" + triple.getSubject() + "," + triple.getObject() + ") AS res)");
             }
         }
-        //System.out.println(sql);
+        System.out.println(sql);
         ArrayList<Integer> foundRules = new ArrayList<>();
         try {
             Statement stmt = con.createStatement();
@@ -1107,7 +1315,7 @@ public class DBFuncs {
             }
             rs.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
         return foundRules;
     }
@@ -1134,9 +1342,9 @@ public class DBFuncs {
                         "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
                 count++;
                 stmt.addBatch(sql);
-                sql = "CREATE UNIQUE INDEX l" + integer + "Index ON v" + integer + " (sub, obj);";
+                sql = "CREATE UNIQUE INDEX l" + integer + "Index ON l" + integer + " (sub, obj);";
                 stmt.addBatch(sql);
-                sql = "ALTER MATERIALIZED VIEW l" + integer + " CLUSTER ON v" + integer + "Index;";
+                sql = "ALTER MATERIALIZED VIEW l" + integer + " CLUSTER ON l" + integer + "Index;";
                 stmt.addBatch(sql);
                 //
                 sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer + ";";
@@ -1146,9 +1354,9 @@ public class DBFuncs {
                 count++;
                 //System.out.println(triple.toString());
                 stmt.addBatch(sql);
-                sql = "CREATE UNIQUE INDEX r" + integer + "Index ON v" + integer + " (obj, sub);";
+                sql = "CREATE UNIQUE INDEX r" + integer + "Index ON r" + integer + " (obj, sub);";
                 stmt.addBatch(sql);
-                sql = "ALTER MATERIALIZED VIEW r" + integer + " CLUSTER ON v" + integer + "Index;";
+                sql = "ALTER MATERIALIZED VIEW r" + integer + " CLUSTER ON r" + integer + "Index;";
                 stmt.addBatch(sql);
                 //
                 if (count % 10 == 0 || count == predicateList.size()) {
@@ -1565,8 +1773,8 @@ public class DBFuncs {
                 sql = "DROP VIEW IF EXISTS o" + rule.getId() + ";";
                 stmt.addBatch(sql);
                 sql = "CREATE VIEW o" + rule.getId() + " as " + viewSqlStatementSingleRule(rule);
-                System.out.println(rule);
-                System.out.println(sql);
+                //System.out.println(rule);
+                //System.out.println(sql);
                 stmt.addBatch(sql);
                 count++;
                 if (count % 2000 == 0 || count == ruleArrayList.size()) {
