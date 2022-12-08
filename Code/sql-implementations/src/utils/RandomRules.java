@@ -264,6 +264,11 @@ public class RandomRules {
             if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews") && Config.getStringValue("REFILL_TABLES").equals("YES")) {
                 DBFuncs.createNormalViewForRule(this);
             }
+            System.out.println("Check for Create Functions");
+            if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesFunction") && Config.getStringValue("REFILL_TABLES").equals("YES")) {
+                DBFuncs.createFunctions(this);
+            }
+            System.out.println("Executed");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -351,6 +356,9 @@ public class RandomRules {
                 break;
             case "testRulesSimpleViews":
                 resultList = DBFuncs.testRulesSimpleViews(filteredRules, triple);
+                break;
+            case "testRulesFunction":
+                resultList = DBFuncs.testRulesFunction(filteredRules, triple);
                 break;
             default:
                 resultList = null;
@@ -451,17 +459,19 @@ public class RandomRules {
         //rules.forEach(rule -> System.out.println(rule));
         long queries = 0;
         long startTime = System.nanoTime();
-        long elapsedTime = 0;
+        long elapsedTime;
+        long startTime2 = System.nanoTime();
+        long elapsedTime2;
         for (Triple triple : queryTriples) {
             startTime = System.nanoTime();
             resultMap.put(triple, new TimeTuple(searchByTriple(triple)));
             elapsedTime = System.nanoTime() - startTime;
             resultMap.get(triple).setTime(elapsedTime);
             queries++;
-            System.out.println("Pro Query: " + ((System.nanoTime() - startTime) / 1000000) + "ms");
-            if (queries % 100 == 0) {
-                System.out.println("Gesamtzeit: " + ((elapsedTime) / 1000000) + " ms");
-                System.out.println("Durchschnittszeit: " + (((elapsedTime) / 1000000) / queries) + " ms");
+            if (queries % 10 == 0) {
+                elapsedTime2 = System.nanoTime();
+                System.out.println("Gesamtzeit: " + ((elapsedTime2 - startTime2) / 1000000) + " ms");
+                System.out.println("Durchschnittszeit: " + (((elapsedTime2 - startTime2) / 1000000) / queries) + " ms");
                 System.out.println("Abfragen: " + queries);
             }
         }
