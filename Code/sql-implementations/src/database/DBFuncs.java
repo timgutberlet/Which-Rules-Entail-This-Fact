@@ -579,16 +579,36 @@ public class DBFuncs {
                     select.append(", " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " k" + help);
                 }
                 //Predicate
-                pre = new StringBuffer(" AND k" + help + ".pre = " + triple.getPredicate());
+                if (first2) {
+                    pre = new StringBuffer(" k" + help + ".pre = " + triple.getPredicate());
+                    first2 = false;
+                } else {
+                    pre = new StringBuffer(" AND k" + help + ".pre = " + triple.getPredicate());
+                }
                 //Object
                 obj = new StringBuffer();
                 if (triple.getObject() >= 0) {
-                    obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
+                    if (first2) {
+                        obj = new StringBuffer(" k" + help + ".obj = " + triple.getObject());
+                        first2 = false;
+                    } else {
+                        obj = new StringBuffer(" AND k" + help + ".obj = " + triple.getObject());
+                    }
                 } else {
                     if (triple.getObject() == rule.getHead().getSubject()) {
-                        obj.append(" AND k" + help + ".obj = " + ogTriple.getSubject());
+                        if (first2) {
+                            obj.append(" k" + help + ".obj = " + ogTriple.getSubject());
+                            first2 = false;
+                        } else {
+                            obj.append(" AND k" + help + ".obj = " + ogTriple.getSubject());
+                        }
                     } else if (triple.getObject() == rule.getHead().getObject()) {
-                        obj.append(" AND k" + help + ".obj = " + ogTriple.getObject());
+                        if (first2) {
+                            obj.append(" k" + help + ".obj = " + ogTriple.getObject());
+                            first2 = false;
+                        } else {
+                            obj.append(" AND k" + help + ".obj = " + ogTriple.getObject());
+                        }
                     }
                 }
 
@@ -624,9 +644,9 @@ public class DBFuncs {
                 //Create WHERE Statements
 
 
-                where.append(sub);
                 where.append(pre);
                 where.append(obj);
+                where.append(sub);
                 help++;
             }
             for (int i = 0; i < rule.getBody().size(); ++i) {
@@ -635,18 +655,38 @@ public class DBFuncs {
                     r2 = rule.getBody().get(j);
                     if (r1.getSubject() < 0) {
                         if (r1.getSubject() == r2.getSubject()) {
-                            where.append(" AND k" + i + ".sub = k" + j + ".sub");
+                            if (first2) {
+                                first2 = false;
+                                where.append(" k" + i + ".sub = k" + j + ".sub");
+                            } else {
+                                where.append(" AND k" + i + ".sub = k" + j + ".sub");
+                            }
                         }
                         if (r1.getSubject() == r2.getObject()) {
-                            where.append(" AND k" + i + ".sub = k" + j + ".obj");
+                            if (first2) {
+                                first2 = false;
+                                where.append(" k" + i + ".sub = k" + j + ".obj");
+                            } else {
+                                where.append(" AND k" + i + ".sub = k" + j + ".obj");
+                            }
                         }
                     }
                     if (r1.getObject() < 0) {
                         if (r1.getObject() == r2.getObject()) {
-                            where.append(" AND k" + i + ".obj = k" + j + ".obj");
+                            if (first2) {
+                                first2 = false;
+                                where.append(" k" + i + ".obj = k" + j + ".obj");
+                            } else {
+                                where.append(" AND k" + i + ".obj = k" + j + ".obj");
+                            }
                         }
                         if (r1.getObject() == r2.getSubject()) {
-                            where.append(" AND k" + i + ".sub = k" + j + ".sub");
+                            if (first2) {
+                                first2 = false;
+                                where.append(" k" + i + ".sub = k" + j + ".sub");
+                            } else {
+                                where.append(" AND k" + i + ".sub = k" + j + ".sub");
+                            }
                         }
                     }
                 }
@@ -655,6 +695,7 @@ public class DBFuncs {
             sql.append(where);
             sql.append(sqlEnd);
         }
+        System.out.println(sql);
         try {
             Statement stmt = con.createStatement();
             rs = stmt.executeQuery(sql.toString());
@@ -665,6 +706,7 @@ public class DBFuncs {
             }
             rs.close();
         } catch (SQLException e) {
+            e.printStackTrace();
             Debug.printMessage(e, e.getMessage());
         }
         return foundRules;
@@ -825,18 +867,41 @@ public class DBFuncs {
                         r2 = rule.getBody().get(j);
                         if (r1.getSubject() < 0) {
                             if (r1.getSubject() == r2.getSubject()) {
-                                where.append(" AND k" + i + ".sub = k" + j + ".sub");
+                                if (first2) {
+                                    first2 = false;
+                                    where.append(" k" + i + ".sub = k" + j + ".sub");
+                                } else {
+                                    where.append(" AND k" + i + ".sub = k" + j + ".sub");
+                                }
+
                             }
                             if (r1.getSubject() == r2.getObject()) {
-                                where.append(" AND k" + i + ".sub = k" + j + ".obj");
+                                if (first2) {
+                                    first2 = false;
+                                    where.append(" k" + i + ".sub = k" + j + ".obj");
+                                } else {
+                                    where.append(" AND k" + i + ".sub = k" + j + ".obj");
+                                }
                             }
                         }
                         if (r1.getObject() < 0) {
                             if (r1.getObject() == r2.getObject()) {
-                                where.append(" AND k" + i + ".obj = k" + j + ".obj");
+                                if (first2) {
+                                    first2 = false;
+                                    where.append(" k" + i + ".obj = k" + j + ".obj");
+                                } else {
+                                    where.append(" AND k" + i + ".obj = k" + j + ".obj");
+                                }
+
                             }
                             if (r1.getObject() == r2.getSubject()) {
-                                where.append(" AND k" + i + ".obj = k" + j + ".sub");
+                                if (first2) {
+                                    first2 = false;
+                                    where.append(" k" + i + ".obj = k" + j + ".sub");
+                                } else {
+                                    where.append(" AND k" + i + ".obj = k" + j + ".sub");
+                                }
+
                             }
                         }
                     }
@@ -1474,7 +1539,7 @@ public class DBFuncs {
                     sql.append(sqlEnd);
                 }
                 }
-                System.out.println(sql.toString());
+                //System.out.println(sql.toString());
                 rs = stmt.executeQuery(sql.toString());
                 while (rs.next()) {
                     if (rs.getString("?column?") != null) {
