@@ -493,7 +493,7 @@ public class RandomRules {
     }
     public static void quantilCalc(ArrayList<Long> timeList){
         Collections.sort(timeList);
-        timeList.forEach(aLong -> System.out.println(aLong));
+        //timeList.forEach(aLong -> System.out.println(aLong));
         double help;
         double quantile = 0.05;
         for(double i = quantile; i <= 1; i += quantile){
@@ -622,23 +622,7 @@ public class RandomRules {
         DBFuncs.viewsForQuantiles(ruleList);
         Boolean sub = false, obj = false;
         for(Rule rule : ruleList){
-            for(Triple t : rule.getBody()){
-                if(t.getSubject() == rule.getHead().getSubject() || t.getObject() == rule.getHead().getSubject()){
-                    sub = true;
-                }
-                if(t.getSubject() == rule.getHead().getObject() || t.getObject() == rule.getHead().getObject()){
-                    obj = true;
-                }
-            }
-            if(sub && obj){
-                ruleHashMap.put(rule.getId(), 0);
-            }else if (sub){
-                ruleHashMap.put(rule.getId(), 1);
-            }else if(obj){
-                ruleHashMap.put(rule.getId(), -1);
-            }else {
-                Debug.printMessage("Error");
-            }
+            ruleHashMap.put(rule.getId(), rule.getBound());
         }
     }
 }

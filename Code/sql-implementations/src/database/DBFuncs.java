@@ -1248,10 +1248,13 @@ public class DBFuncs {
                 sql = new StringBuffer("CREATE UNIQUE INDEX x" + rule.getId() + "Index ON x" + rule.getId());
                 if (subSet && objSet) {
                     sql.append("(sub, obj);");
+                    rule.setBound(0);
                 } else if (subSet && !objSet) {
                     sql.append("(sub);");
+                    rule.setBound(1);
                 } else if (!subSet && objSet) {
                     sql.append("(obj);");
+                    rule.setBound(-1);
                 } else {
                     Debug.printMessage("Error in creating indizes for Optimized Materialized Rules");
                 }

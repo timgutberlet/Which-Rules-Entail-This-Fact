@@ -12,6 +12,16 @@ public class Rule {
   private List<Triple> body;
   private Integer id;
 
+  private Integer bound;
+
+  public Integer getBound() {
+    return bound;
+  }
+
+  public void setBound(Integer bound) {
+    this.bound = bound;
+  }
+
   /**
    * Costructor for setting
    * @param head Triple representation of Head
