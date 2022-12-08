@@ -1839,33 +1839,33 @@ public class DBFuncs {
             Statement stmt = con.createStatement();
             for (Integer integer : predicateList) {
                 sql = "DROP MATERIALIZED VIEW IF EXISTS v" + integer.toString() + " CASCADE;";
-                stmt.addBatch(sql);
+                //stmt.addBatch(sql);
                 sql = "DROP MATERIALIZED VIEW IF EXISTS l" + integer.toString() + " CASCADE;";
-                stmt.addBatch(sql);
+                //stmt.addBatch(sql);
                 sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer.toString() + " CASCADE;";
-                stmt.addBatch(sql);
+                //stmt.addBatch(sql);
                 sql = "create materialized view  l" + integer.toString() + " as \n" +
                         "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
                 count++;
-                stmt.addBatch(sql);
+                //stmt.addBatch(sql);
                 sql = "CREATE UNIQUE INDEX l" + integer + "Index ON l" + integer + " (sub, obj);";
-                stmt.addBatch(sql);
+                //stmt.addBatch(sql);
                 sql = "ALTER MATERIALIZED VIEW l" + integer + " CLUSTER ON l" + integer + "Index;";
-                stmt.addBatch(sql);
+                //stmt.addBatch(sql);
                 //
                 sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer + ";";
-                stmt.addBatch(sql);
+                //stmt.addBatch(sql);
                 sql = "create materialized view  r" + integer.toString() + " as \n" +
                         "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
                 count++;
                 //System.out.println(triple.toString());
-                stmt.addBatch(sql);
+                //stmt.addBatch(sql);
                 sql = "CREATE UNIQUE INDEX r" + integer + "Index ON r" + integer + " (obj, sub);";
-                stmt.addBatch(sql);
+                //stmt.addBatch(sql);
                 sql = "ALTER MATERIALIZED VIEW r" + integer + " CLUSTER ON r" + integer + "Index;";
-                stmt.addBatch(sql);
+                //stmt.addBatch(sql);
                 //
-                if (count % 7 == 0 || count == predicateList.size()) {
+                /*if (count % 1 == 0 || count == predicateList.size()) {
                     stmt.executeBatch();
                     stmt.clearBatch();
                     elapsedTime = System.nanoTime() - startTime;
@@ -1873,11 +1873,11 @@ public class DBFuncs {
                     System.out.println(
                             "Inserted " + count + " of " + predicateList.size() + " ; Time: " + (elapsedTime / 1000000)
                                     + "ms");
-                }
+                }*/
             }
-            stmt.executeBatch();
-            con.commit();
-            stmt.close();
+            //stmt.executeBatch();
+            //con.commit();
+            //stmt.close();
             System.out.println("Success");
 
             System.out.println("Data has been inserted");
