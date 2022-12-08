@@ -6,10 +6,7 @@ import database.DBFuncs;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import models.*;
 
@@ -17,6 +14,7 @@ import models.*;
  * @author timgutberlet
  */
 public class RandomRules {
+    private HashMap<Integer, RuleTime> ruleTimeHashMap =  new HashMap<>();
     private HashMap<String, Integer> subjectIndex;
     private HashMap<String, Integer> predicateIndex;
     private HashMap<String, Integer> objectIndex;
@@ -474,7 +472,7 @@ public class RandomRules {
             //System.out.println(triple);
             //resultMap.get(triple).getRuleList().forEach(e -> System.out.println(e.toString()));
             //System.out.println(elapsedTime / 1000000);
-            if (queries % 100 == 0) {
+            if (queries % 10 == 0) {
                 elapsedTime2 = System.nanoTime();
                 System.out.println("Gesamtzeit: " + ((elapsedTime2 - startTime2) / 1000000) + " ms");
                 System.out.println("Durchschnittszeit: " + (((elapsedTime2 - startTime2) / 1000000) / queries) + " ms");
@@ -534,19 +532,82 @@ public class RandomRules {
     /**
      * Zweite Variante wo alle Abfragen in einem SQL Statement / wenigen zusammengefasst werden
      */
-    public void startQuery2() {
-        List<Triple> queryTriples = importQueryTriples();
-        //rules.forEach(rule -> System.out.println(rule));
+    public void learnQuery(ArrayList<Triple> queryTriples) {
+        HashMap<Triple, TimeTuple> resultMap = new HashMap<>();
         long queries = 0;
-        long startTime = System.nanoTime();
-        long elapsedTime;
+        long startTime2 = System.nanoTime();
+        long elapsedTime2;
         for (Triple triple : queryTriples) {
+            learnQuerySearch(triple);
             queries++;
-            searchByTriple(triple);
+            if (queries % 10 == 0) {
+                elapsedTime2 = System.nanoTime();
+                System.out.println("Gesamtzeit: " + ((elapsedTime2 - startTime2) / 1000000) + " ms");
+                System.out.println("Durchschnittszeit: " + (((elapsedTime2 - startTime2) / 1000000) / queries) + " ms");
+                System.out.println("Abfragen: " + queries);
+            }
         }
-        elapsedTime = System.nanoTime();
-        System.out.println("Gesamtzeit: " + ((elapsedTime - startTime) / 1000000) + " ms");
-        System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime) / 1000000) / queries) + " ms");
-        System.out.println("Abfragen: " + queries);
+        quantilOptimize();
+    }
+
+    public void learnQuerySearch(Triple triple) {
+        Integer key;
+        Key3Int key3Int;
+        Key2Int key2IntSub, key2IntObj;
+        ArrayList<Rule> ruleSet;
+        List<Rule> filteredRules = new ArrayList<>();
+        key = triple.getPredicate();
+        key2IntSub = new Key2Int(triple.getSubject(), triple.getPredicate());
+        key3Int = new Key3Int(triple.getSubject(), triple.getPredicate(), triple.getObject());
+        key2IntObj = new Key2Int(triple.getPredicate(), triple.getObject());
+        if (triple.getSubject() == triple.getObject()) {
+            ruleSet = noBoundEqual.get(key);
+            if (ruleSet != null) {
+                filteredRules.addAll(ruleSet);
+            }
+        } else {
+            ruleSet = noBoundUnequal.get(key.hashCode());
+            if (ruleSet != null) {
+                filteredRules.addAll(ruleSet);
+            }
+        }
+        ruleSet = bothBound.get(key3Int.hashCode());
+        if (ruleSet != null) {
+            filteredRules.addAll(ruleSet);
+        }
+
+        ruleSet = subBound.get(key2IntSub.hashCode());
+        if (ruleSet != null) {
+            filteredRules.addAll(ruleSet);
+        }
+        ruleSet = objBound.get(key2IntObj);
+        if (ruleSet != null) {
+            filteredRules.addAll(ruleSet);
+        }
+        for(Rule rule :  filteredRules){
+            if(ruleTimeHashMap.containsKey(rule.getId())){
+                ruleTimeHashMap.get(rule.getId()).addTime(DBFuncs.timePerRule(rule, triple));
+            }else {
+                ruleTimeHashMap.put(rule.getId(), new RuleTime(DBFuncs.timePerRule(rule, triple) ,rule));
+            }
+        }
+    }
+
+    public void quantilOptimize(){
+        ArrayList<RuleTime> helpList = new ArrayList<>();
+        ArrayList<Rule> ruleList = new ArrayList<>();
+        for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()){
+            helpList.add(entry.getValue());
+        }
+        Collections.sort(helpList);
+        for(int i = 0;  i < Config.getIntValue("QUANTIL_LEARN_COUNT"); i++){
+            System.out.println(" ");
+            System.out.println(helpList.get(i).max());
+            System.out.println(helpList.get(i).sum());
+            System.out.println(helpList.get(i).getCount());
+            System.out.println(helpList.get(i).getRule());
+            ruleList.add(helpList.get(i).getRule());
+        }
+        DBFuncs.viewsForQuantiles(ruleList);
     }
 }

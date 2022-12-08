@@ -17,6 +17,8 @@ public class DbFill {
   private HashMap<String, Integer> predicateIndex;
   private HashMap<String, Integer> objectIndex;
 
+  private ArrayList<Triple> sampleTriples =  new ArrayList<>();
+
   public HashMap<String, Integer> getObjectIndex() {
     return objectIndex;
   }
@@ -29,6 +31,10 @@ public class DbFill {
     return subjectIndex;
   }
 
+  public ArrayList<Triple> getSampleTriples() {
+    return sampleTriples;
+  }
+
   /**
    * Fills the KnowledgeGraph Table with all rows given in the knowledgegraph text file
    */
@@ -36,6 +42,7 @@ public class DbFill {
     String file = Config.getStringValue("KNOWLEDGEGRAPH");
     //DBFuncs.deleteKG();
     BufferedReader reader;
+    Triple t;
     try {
       // java.io.InputStream
       reader = new BufferedReader(new FileReader(file));
@@ -56,7 +63,11 @@ public class DbFill {
         subH = subjectIndex.get(subject);
         predH = predicateIndex.get(predicate);
         objH = objectIndex.get(object);
-        kgList.add(new Triple(subH, predH, objH));
+        t = new Triple(subH, predH, objH);
+        kgList.add(t);
+        if(count % 10 == 0 && sampleTriples.size() < Config.getIntValue("QUANTIL_LEARN_TRIPLES") ){
+          sampleTriples.add(t);
+        }
       }
       DBFuncs.deleteKG();
       DBFuncs.insertKnowledgegraph(kgList);

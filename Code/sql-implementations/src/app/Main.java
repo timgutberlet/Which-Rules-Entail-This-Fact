@@ -37,6 +37,9 @@ public class Main {
     }
     RandomRules randomRules = new RandomRules(dbFill.getSubjectIndex(), dbFill.getPredicateIndex(), dbFill.getObjectIndex());
     System.out.println("RandomRules Set");
+    if(Config.getStringValue("TESTRULES_METHOD").equals("optimizedQuantileAnalysis") && Config.getStringValue("REFILL_TABLES").equals("YES")){
+      randomRules.learnQuery(dbFill.getSampleTriples());
+    }
     randomRules.startQuery();
 
     //CreateDB.createKnowledgeGraphDB();
