@@ -517,9 +517,9 @@ public class RandomRules {
             sum += l;
         }
         average = sum / timeList.size();
-        System.out.println("Average: " + (average / 1000000) + " ms");
-        System.out.println("Min: " + (min / 1000000) + " ms");
-        System.out.println("Max: " + (max / 1000000) + " ms");
+        System.out.println("Average: " + ((double)average / 1000000D) + " ms");
+        System.out.println("Min: " + ((double)min / 1000000D) + " ms");
+        System.out.println("Max: " + ((double)max / 1000000D) + " ms");
     }
     public static boolean isFloat(double value) {
         int dec = (int)value;
