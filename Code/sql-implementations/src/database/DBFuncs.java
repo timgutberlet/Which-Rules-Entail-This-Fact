@@ -1347,13 +1347,12 @@ public class DBFuncs {
             e.printStackTrace();
         }
     }
-
-    public static ArrayList<Integer> optimizedQuantileAnalysis(List<Rule> filteredRules, Triple ogTriple, HashMap<Integer, Integer> ruleHashMap) {
+    public static ArrayList<Integer> optimizedQuantileAnalysis (List<Rule> filteredRules, Triple ogTriple, HashMap<Integer, Integer> ruleHashMap){
         //long startTime1 = System.nanoTime();
         ArrayList<Integer> foundRules = new ArrayList<>();
         boolean first, first2;
         Triple r1, r2;
-        int iZahl;
+
         ResultSet rs;
         try {
             Statement stmt = con.createStatement();
@@ -1361,6 +1360,7 @@ public class DBFuncs {
             sql = new StringBuffer();
             StringBuffer sub, obj;
             StringBuffer select, where;
+            int iZahl;
             int help;
             boolean firstR = true;
             for (Rule rule : filteredRules) {
@@ -1375,17 +1375,18 @@ public class DBFuncs {
                 } else {
                     sql.append(" UNION ALL (");
                 }
-                if (ruleHashMap.containsKey(rule.getId())) {
+                if (rule.isLearned()) {
                     iZahl = rule.getBound();
                     StringBuffer sqlOpt = new StringBuffer();
                     if (iZahl == 0) {
                         sqlOpt.append("SELECT " + rule.getId() + " FROM x" + rule.getId() + " WHERE sub = " + ogTriple.getSubject() + " AND obj = " + ogTriple.getObject() + " LIMIT 1)");
                     } else if (iZahl == 1) {
                         sqlOpt.append("SELECT " + rule.getId() + " FROM x" + rule.getId() + " WHERE sub = " + ogTriple.getSubject() + " LIMIT 1)");
-                    } else {
+                    } else if (iZahl == -1){
                         sqlOpt.append("SELECT " + rule.getId() + " FROM x" + rule.getId() + " WHERE obj = " + ogTriple.getObject() + " LIMIT 1)");
                     }
                     sql.append(sqlOpt);
+                    //System.out.println(sqlOpt);
                 } else {
                     sqlEnd = new StringBuffer(" LIMIT 1) ");
                     select = new StringBuffer("SELECT " + rule.getId() + " FROM ");
@@ -1449,14 +1450,6 @@ public class DBFuncs {
                         //Create WHERE Statements
                         sub = new StringBuffer();
                         if (triple.getSubject() < 0) {
-                            if (triple.getObject() < 0 && triple.getObject() != triple.getSubject()) {
-                                if (first2) {
-                                    first2 = false;
-                                    sub.append(" k" + help + ".sub != " + "k" + help + ".obj");
-                                } else {
-                                    sub.append(" AND k" + help + ".sub != " + "k" + help + ".obj");
-                                }
-                            }
                             if (triple.getSubject() == rule.getHead().getSubject()) {
                                 if (first2) {
                                     first2 = false;
@@ -1519,18 +1512,41 @@ public class DBFuncs {
                             r2 = rule.getBody().get(j);
                             if (r1.getSubject() < 0) {
                                 if (r1.getSubject() == r2.getSubject()) {
-                                    where.append(" AND k" + i + ".sub = k" + j + ".sub");
+                                    if (first2) {
+                                        first2 = false;
+                                        where.append(" k" + i + ".sub = k" + j + ".sub");
+                                    } else {
+                                        where.append(" AND k" + i + ".sub = k" + j + ".sub");
+                                    }
+
                                 }
                                 if (r1.getSubject() == r2.getObject()) {
-                                    where.append(" AND k" + i + ".sub = k" + j + ".obj");
+                                    if (first2) {
+                                        first2 = false;
+                                        where.append(" k" + i + ".sub = k" + j + ".obj");
+                                    } else {
+                                        where.append(" AND k" + i + ".sub = k" + j + ".obj");
+                                    }
                                 }
                             }
                             if (r1.getObject() < 0) {
                                 if (r1.getObject() == r2.getObject()) {
-                                    where.append(" AND k" + i + ".obj = k" + j + ".obj");
+                                    if (first2) {
+                                        first2 = false;
+                                        where.append(" k" + i + ".obj = k" + j + ".obj");
+                                    } else {
+                                        where.append(" AND k" + i + ".obj = k" + j + ".obj");
+                                    }
+
                                 }
                                 if (r1.getObject() == r2.getSubject()) {
-                                    where.append(" AND k" + i + ".obj = k" + j + ".sub");
+                                    if (first2) {
+                                        first2 = false;
+                                        where.append(" k" + i + ".obj = k" + j + ".sub");
+                                    } else {
+                                        where.append(" AND k" + i + ".obj = k" + j + ".sub");
+                                    }
+
                                 }
                             }
                         }
@@ -1539,23 +1555,21 @@ public class DBFuncs {
                     sql.append(where);
                     sql.append(sqlEnd);
                 }
+            }
+            //System.out.println(sql.toString());
+            rs = stmt.executeQuery(sql.toString());
+            while (rs.next()) {
+                if (rs.getString("?column?") != null) {
+                    foundRules.add(rs.getInt("?column?"));
                 }
-                //System.out.println(sql.toString());
-                rs = stmt.executeQuery(sql.toString());
-                while (rs.next()) {
-                    if (rs.getString("?column?") != null) {
-                        foundRules.add(rs.getInt("?column?"));
-                    }
-                }
-                rs.close();
+            }
+            rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
             Debug.printMessage(e, e.getMessage());
         }
         return foundRules;
     }
-
-
     public static ArrayList<Integer> testRulesSimpleViews(List<Rule> filteredRules, Triple ogTriple) {
         int bodyCount;
         int ruleID;

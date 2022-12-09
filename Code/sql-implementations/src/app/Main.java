@@ -39,6 +39,8 @@ public class Main {
     System.out.println("RandomRules Set");
     if(Config.getStringValue("TESTRULES_METHOD").equals("optimizedQuantileAnalysis") && Config.getStringValue("REFILL_TABLES").equals("YES")){
       randomRules.learnQuery(dbFill.getSampleTriples());
+    } else if(Config.getStringValue("TESTRULES_METHOD").equals("optimizedQuantileAnalysis") && Config.getStringValue("REFILL_TABLES").equals("YES")){
+      randomRules.learnRules();
     }
     randomRules.startQuery();
 

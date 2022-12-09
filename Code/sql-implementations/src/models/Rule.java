@@ -13,6 +13,8 @@ public class Rule {
   private Integer id;
 
   private Integer bound;
+  private boolean isLearned = false;
+
 
   public Integer getBound() {
     return bound;
@@ -20,6 +22,14 @@ public class Rule {
 
   public void setBound(Integer bound) {
     this.bound = bound;
+  }
+
+  public void setLearned(){
+    isLearned = true;
+  }
+
+  public boolean isLearned() {
+    return isLearned;
   }
 
   /**

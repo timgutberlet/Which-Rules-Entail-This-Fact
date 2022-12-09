@@ -505,7 +505,7 @@ public class RandomRules {
             if(isFloat(i * timeList.size())){
                 help = timeList.get((int) Math.floor(i * timeList.size()));
             }else {
-                help = 0.5 * ((timeList.get( (int)(timeList.size() * quantile)-1)) + timeList.get((int)(timeList.size() * i)));
+                help = 0.5 * ((timeList.get((int)(timeList.size() * quantile)-1)) + timeList.get((int)(timeList.size() * i)));
             }
             System.out.println((double) Math.round(i * 100)/100 + "% : " + (help/1000000) + " ms");
         }
@@ -539,7 +539,6 @@ public class RandomRules {
      * Zweite Variante wo alle Abfragen in einem SQL Statement / wenigen zusammengefasst werden
      */
     public void learnQuery(ArrayList<Triple> queryTriples) {
-        HashMap<Triple, TimeTuple> resultMap = new HashMap<>();
         long queries = 0;
         long startTime2 = System.nanoTime();
         long elapsedTime2;
@@ -609,12 +608,18 @@ public class RandomRules {
         }
         Collections.sort(helpList);
         int i = 0;
+        int count = 0;
         for(RuleTime ruleTime  : helpList){
             System.out.println(" ");
             System.out.println(ruleTime.max());
             System.out.println(ruleTime.sum());
             System.out.println(ruleTime.getCount());
             System.out.println(ruleTime.getRule());
+            count++;
+            if(count == Config.getIntValue("QUANTIL_LEARN_COUNT")){
+                System.out.println("Learned: " + i);
+                System.out.println("Count: " + count);
+            }
             for(Triple t : ruleTime.getRule().getBody()){
                 if(t.getObject() >= 0 || t.getSubject() >= 0){
                     ruleList.add(ruleTime.getRule());
@@ -627,11 +632,92 @@ public class RandomRules {
             }
         }
         quantilCalc(timeList);
-        //System.exit(0);
         DBFuncs.viewsForQuantiles(ruleList);
-        Boolean sub = false, obj = false;
         for(Rule rule : ruleList){
-            ruleHashMap.put(rule.getId(), rule.getBound());
+            rule.setLearned();
+            System.out.println(rule);
+            System.out.println(rule.getBound());
+            System.out.println(rule.isLearned());
+        }
+        rulePreSave(ruleList);
+    }
+    public void learnRules(){
+        HashMap<Integer, Rule> ruleMap = new HashMap<>();
+        for (Map.Entry<Key2Int, ArrayList<Rule>> entry : objBound.entrySet()) {
+            for(Rule r: entry.getValue()){
+                ruleMap.put(r.getId(), r);
+            }
+        }
+        for (Map.Entry<Key2Int, ArrayList<Rule>> entry : subBound.entrySet()) {
+            for(Rule r: entry.getValue()){
+                ruleMap.put(r.getId(), r);
+            }
+        }
+        for (Map.Entry<Key3Int, ArrayList<Rule>> entry : bothBound.entrySet()) {
+            for(Rule r: entry.getValue()){
+                ruleMap.put(r.getId(), r);
+            }
+        }
+        for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundEqual.entrySet()) {
+            for(Rule r: entry.getValue()){
+                ruleMap.put(r.getId(), r);
+            }
+        }
+        for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundUnequal.entrySet()) {
+            for(Rule r: entry.getValue()){
+                ruleMap.put(r.getId(), r);
+            }
+        }
+        rulePreRead(ruleMap);
+    }
+    public void rulePreSave(ArrayList<Rule> rules){
+        String fileString = Config.getStringValue("RULEPRESAVE");
+        File file = new File(fileString);
+        FileWriter fr = null;
+        BufferedWriter br = null;
+        try{
+            fr = new FileWriter(file);
+            br = new BufferedWriter(fr);
+            for(Rule r : rules){
+                String dataWithNewLine=r.getId() +" " + r.getBound() +System.getProperty("line.separator");
+                br.write(dataWithNewLine);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally{
+            try {
+                br.close();
+                fr.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+    public void rulePreRead(HashMap<Integer, Rule> ruleMap){
+        String file = Config.getStringValue("RULEPRESAVE");
+        String[] importList;
+        int ruleID, bound;
+        Rule r;
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            for (String line; (line = reader.readLine()) != null; ) {
+                importList = line.split("\\s+");
+                if (importList.length == 2) {
+                    ruleID = Integer.valueOf(importList[0]);
+                    bound = Integer.valueOf(importList[1]);
+                    if(ruleMap.containsKey(ruleID)){
+                        r = ruleMap.get(ruleID);
+                        r.setLearned();
+                        r.setBound(bound);
+                    }
+                } else {
+                    System.out.println("Error while reading QueryTriples");
+                }
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
