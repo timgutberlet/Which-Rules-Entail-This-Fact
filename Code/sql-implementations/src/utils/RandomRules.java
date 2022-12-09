@@ -527,7 +527,7 @@ public class RandomRules {
         System.out.println("Min: " + ((double)min / 1000000D) + " ms");
         System.out.println("Max: " + ((double)max / 1000000D) + " ms");
     }
-    public static void quantilCalcSum(ArrayList<Long> timeList){
+    public static void quantilCalcSum(ArrayList<Double> timeList){
         Collections.sort(timeList);
         timeList.forEach(aLong -> System.out.println(aLong));
         double help;
@@ -542,9 +542,9 @@ public class RandomRules {
             System.out.println((double) Math.round(i * 100)/100 + "% : " + (help) + " ms");
         }
 
-        Long average, sum = 0L;
-        Long max = 0L, min = Long.MAX_VALUE;
-        for(long l : timeList){
+        Double average, sum = 0D;
+        Double max = 0D, min = Double.MAX_VALUE;
+        for(Double l : timeList){
             if(l > max){
                 max = l;
             }
@@ -557,7 +557,7 @@ public class RandomRules {
         System.out.println("Average: " + ((double)average ) + " ms");
         System.out.println("Min: " + ((double)min ) + " ms");
         System.out.println("Max: " + ((double)max ) + " ms");
-        //System.exit(0);
+        System.exit(0);
     }
     public static boolean isFloat(double value) {
         int dec = (int)value;
@@ -634,10 +634,10 @@ public class RandomRules {
     public void quantilOptimize(){
         ArrayList<RuleTime> helpList = new ArrayList<>();
         ArrayList<Rule> ruleList = new ArrayList<>();
-        ArrayList<Long> timeList = new ArrayList<>();
+        ArrayList<Double> timeList = new ArrayList<>();
         for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()){
             helpList.add(entry.getValue());
-            timeList.add((long)(entry.getValue().sum()));
+            timeList.add(entry.getValue().sum());
         }
         Collections.sort(helpList);
         int i = 0;
