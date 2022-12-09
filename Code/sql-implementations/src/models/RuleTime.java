@@ -56,9 +56,9 @@ public class RuleTime implements Comparable<RuleTime>{
 
     @Override
     public int compareTo(RuleTime o) {
-        if(this.avg() < o.avg()){
+        if(this.sum() < o.sum()){
             return 1;
-        }else if (this.avg() > o.avg()){
+        }else if (this.sum() > o.sum()){
             return -1;
         }else {
             return 0;
