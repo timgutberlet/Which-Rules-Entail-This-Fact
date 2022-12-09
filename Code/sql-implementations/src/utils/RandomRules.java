@@ -611,21 +611,19 @@ public class RandomRules {
         int count = 0;
         for(RuleTime ruleTime  : helpList){
             System.out.println(" ");
-            System.out.println(ruleTime.max());
+            System.out.println(ruleTime.avg());
             System.out.println(ruleTime.sum());
             System.out.println(ruleTime.getCount());
             System.out.println(ruleTime.getRule());
             count++;
-            if(count == Config.getIntValue("QUANTIL_LEARN_COUNT")){
+            if(count % Config.getIntValue("QUANTIL_LEARN_COUNT") == 0){
                 System.out.println("Learned: " + i);
                 System.out.println("Count: " + count);
+                //System.exit(0);
             }
-            for(Triple t : ruleTime.getRule().getBody()){
-                if(t.getObject() >= 0 || t.getSubject() >= 0){
-                    ruleList.add(ruleTime.getRule());
-                    i++;
-                    break;
-                }
+            if(ruleTime.getRule().getBody().size() == 2) {
+                ruleList.add(ruleTime.getRule());
+                i++;
             }
             if (i ==Config.getIntValue("QUANTIL_LEARN_COUNT")){
                 break;
@@ -633,6 +631,7 @@ public class RandomRules {
         }
         quantilCalc(timeList);
         DBFuncs.viewsForQuantiles(ruleList);
+        System.out.println("RuleList");
         for(Rule rule : ruleList){
             rule.setLearned();
             System.out.println(rule);
