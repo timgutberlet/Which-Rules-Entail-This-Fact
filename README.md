@@ -1,4 +1,4 @@
-# Online Rule Search Database
+# From Facts to Rules using Relational Databases
 Tim Gutberlet (tgutberl@mail.uni-mannheim.de) & Janik Sauerbier (jsauerbi@mail.uni-mannheim.de)
 
 ## Folder structure
