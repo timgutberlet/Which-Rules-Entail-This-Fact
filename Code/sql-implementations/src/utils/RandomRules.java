@@ -173,7 +173,12 @@ public class RandomRules {
                 if (Config.getStringValue("FILTER_SIMPLE_RULES").equals("YES")) {
                     continuer = false;
 
-                    if (rule.getHead().getSubject() < 0
+                    if ( rule.getBody().size() == 4) {
+                            continuer = true;
+                            System.out.println(c++ + " Type2: " + rule);
+                    }
+
+                    /*if (rule.getHead().getSubject() < 0
                             && rule.getHead().getObject() < 0
                             && rule.getBody().size() == 1) {
                         if (rule.getHead().getSubject() == rule.getBody().get(0).getSubject()
@@ -198,7 +203,7 @@ public class RandomRules {
                             continuer = true;
                             System.out.println(c++ + " Type3: " + rule);
                         }
-                    }
+                    }*/
 
                     System.out.println(bodyCount++);
 
@@ -493,14 +498,14 @@ public class RandomRules {
     }
     public static void quantilCalc(ArrayList<Long> timeList){
         Collections.sort(timeList);
-        //timeList.forEach(aLong -> System.out.println(aLong));
+        timeList.forEach(aLong -> System.out.println(aLong));
         double help;
         double quantile = 0.05;
         for(double i = quantile; i <= 1; i += quantile){
             if(isFloat(i * timeList.size())){
                 help = timeList.get((int) Math.floor(i * timeList.size()));
             }else {
-                help = 0.5 * (timeList.get( (int)(timeList.size() * quantile)-1) + timeList.get((int)(timeList.size() * i)));
+                help = 0.5 * ((timeList.get( (int)(timeList.size() * quantile)-1)) + timeList.get((int)(timeList.size() * i)));
             }
             System.out.println((double) Math.round(i * 100)/100 + "% : " + (help/1000000) + " ms");
         }
@@ -622,7 +627,7 @@ public class RandomRules {
             }
         }
         quantilCalc(timeList);
-        System.exit(0);
+        //System.exit(0);
         DBFuncs.viewsForQuantiles(ruleList);
         Boolean sub = false, obj = false;
         for(Rule rule : ruleList){

@@ -1327,7 +1327,7 @@ public class DBFuncs {
                 sql = new StringBuffer("ALTER MATERIALIZED VIEW x" + rule.getId() + " CLUSTER ON x" + rule.getId() + "Index;");
                 stmt.addBatch(sql.toString());
                 count++;
-                if (count % 1 == 10 || count == rules.size()) {
+                if (count % 2 == 0 || count == rules.size()) {
                     stmt.executeBatch();
                     stmt.clearBatch();
                     elapsedTime = System.nanoTime() - startTime;
@@ -1353,7 +1353,7 @@ public class DBFuncs {
         ArrayList<Integer> foundRules = new ArrayList<>();
         boolean first, first2;
         Triple r1, r2;
-
+        int iZahl;
         ResultSet rs;
         try {
             Statement stmt = con.createStatement();
@@ -1376,10 +1376,11 @@ public class DBFuncs {
                     sql.append(" UNION ALL (");
                 }
                 if (ruleHashMap.containsKey(rule.getId())) {
+                    iZahl = rule.getBound();
                     StringBuffer sqlOpt = new StringBuffer();
-                    if (ruleHashMap.get(rule.getId()) == 0) {
+                    if (iZahl == 0) {
                         sqlOpt.append("SELECT " + rule.getId() + " FROM x" + rule.getId() + " WHERE sub = " + ogTriple.getSubject() + " AND obj = " + ogTriple.getObject() + " LIMIT 1)");
-                    } else if (ruleHashMap.get(rule.getId()) == 1) {
+                    } else if (iZahl == 1) {
                         sqlOpt.append("SELECT " + rule.getId() + " FROM x" + rule.getId() + " WHERE sub = " + ogTriple.getSubject() + " LIMIT 1)");
                     } else {
                         sqlOpt.append("SELECT " + rule.getId() + " FROM x" + rule.getId() + " WHERE obj = " + ogTriple.getObject() + " LIMIT 1)");
