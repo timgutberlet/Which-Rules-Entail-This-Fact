@@ -637,7 +637,7 @@ public class RandomRules {
         ArrayList<Double> timeList = new ArrayList<>();
         for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()){
             helpList.add(entry.getValue());
-            timeList.add(entry.getValue().sum());
+            timeList.add(entry.getValue().avg());
         }
         Collections.sort(helpList);
         int i = 0;
