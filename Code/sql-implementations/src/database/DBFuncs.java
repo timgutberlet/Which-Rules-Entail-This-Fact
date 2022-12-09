@@ -1327,7 +1327,7 @@ public class DBFuncs {
                 sql = new StringBuffer("ALTER MATERIALIZED VIEW x" + rule.getId() + " CLUSTER ON x" + rule.getId() + "Index;");
                 stmt.addBatch(sql.toString());
                 count++;
-                if (count % 1 == 0 || count == rules.size()) {
+                if (count % 1 == 10 || count == rules.size()) {
                     stmt.executeBatch();
                     stmt.clearBatch();
                     elapsedTime = System.nanoTime() - startTime;

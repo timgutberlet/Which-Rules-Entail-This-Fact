@@ -50,6 +50,10 @@ public class RuleTime implements Comparable<RuleTime>{
         return max;
     }
 
+    public double avg(){
+        return this.sum()/this.timeList.size();
+    }
+
     @Override
     public int compareTo(RuleTime o) {
         if(this.sum() < o.sum()){

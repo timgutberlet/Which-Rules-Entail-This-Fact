@@ -597,8 +597,10 @@ public class RandomRules {
     public void quantilOptimize(){
         ArrayList<RuleTime> helpList = new ArrayList<>();
         ArrayList<Rule> ruleList = new ArrayList<>();
+        ArrayList<Long> timeList = new ArrayList<>();
         for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()){
             helpList.add(entry.getValue());
+            timeList.add((long)(entry.getValue().avg() * 1000000));
         }
         Collections.sort(helpList);
         int i = 0;
@@ -619,6 +621,8 @@ public class RandomRules {
                 break;
             }
         }
+        quantilCalc(timeList);
+        System.exit(0);
         DBFuncs.viewsForQuantiles(ruleList);
         Boolean sub = false, obj = false;
         for(Rule rule : ruleList){
