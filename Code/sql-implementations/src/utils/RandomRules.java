@@ -557,7 +557,7 @@ public class RandomRules {
         System.out.println("Average: " + ((double)average ) + " ms");
         System.out.println("Min: " + ((double)min ) + " ms");
         System.out.println("Max: " + ((double)max ) + " ms");
-        System.exit(0);
+        //System.exit(0);
     }
     public static boolean isFloat(double value) {
         int dec = (int)value;
