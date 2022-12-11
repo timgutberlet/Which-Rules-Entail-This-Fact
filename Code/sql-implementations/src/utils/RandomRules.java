@@ -261,7 +261,7 @@ public class RandomRules {
                 };
             }
             System.out.println("Rule Import finished");
-            System.exit(0);
+            //System.exit(0);
             reader.close();
             if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews") && Config.getStringValue("REFILL_TABLES").equals("YES")) {
                 DBFuncs.createNormalViewForRule(this);
