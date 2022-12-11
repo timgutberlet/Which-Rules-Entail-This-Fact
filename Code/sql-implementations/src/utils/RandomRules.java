@@ -14,6 +14,7 @@ import models.*;
  * @author timgutberlet
  */
 public class RandomRules {
+    private int ruleLearnCount = 0;
     private ArrayList<Triple> validationTriples = new ArrayList<>();
     private HashMap<Integer, RuleTime> ruleTimeHashMap = new HashMap<>();
     private HashMap<String, Integer> subjectIndex;
@@ -57,6 +58,7 @@ public class RandomRules {
 
     public void importRules() {
         Key3Int key3Int;
+        int atomCounter = 0;
         Key2Int key2Int;
         String file = Config.getStringValue("RULES_PATH");
         Rule rule;
@@ -249,7 +251,10 @@ public class RandomRules {
                 }
 
                 rule.setId(counter++);
-                System.out.println(counter);
+                //System.out.println(counter);
+                if(rule.getBody().size() == 2) {
+                    System.out.println("2 Atom rules " + atomCounter++);
+                };
             }
             System.out.println("Rule Import finished");
             reader.close();
@@ -697,10 +702,9 @@ public class RandomRules {
         if (ruleSet != null) {
             filteredRules.addAll(ruleSet);
         }
-        int i = 0;
         for (Rule rule : filteredRules) {
             if(rule.getBody().size() == 2){
-                System.out.println(i++);
+                System.out.println(ruleLearnCount++);
                 if (ruleTimeHashMap.containsKey(rule.getId())) {
                     ruleTimeHashMap.get(rule.getId()).addTime(DBFuncs.timePerRule(rule, triple));
                 } else {
@@ -724,7 +728,8 @@ public class RandomRules {
                 helpList.add(entry.getValue());
                 timeList.add(entry.getValue().sum());
             }
-            if(i == (ruleCount*0.05)){
+            //if(i == (ruleCount*0.05)){
+            if(i == 15){
                 break;
             }
         }
@@ -734,8 +739,8 @@ public class RandomRules {
             ruleList.add(ruleTime.getRule());
             preProcessedRules.put(ruleTime.getRule().getId(), ruleTime.getRule());
         }
-        rulePreSave(ruleList);
         DBFuncs.viewsForQuantiles(ruleList);
+        rulePreSave(ruleList);
         System.out.println("Quantil Calc old Rule learning");
         quantilCalcSum(timeList);
         printPriciestRuleTimes(timeList);
