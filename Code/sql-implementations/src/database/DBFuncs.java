@@ -715,7 +715,7 @@ public class DBFuncs {
                     sql.append(sqlEnd);
                 }
             }
-            System.out.println(sql.toString());
+            //System.out.println(sql.toString());
             rs = stmt.executeQuery(sql.toString());
             while (rs.next()) {
                 if (rs.getString("?column?") != null) {
