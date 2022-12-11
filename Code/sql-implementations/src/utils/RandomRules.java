@@ -640,7 +640,7 @@ public class RandomRules {
         System.out.println("Average: " + ((double) average) + " ms");
         System.out.println("Min: " + ((double) min) + " ms");
         System.out.println("Max: " + ((double) max) + " ms");
-        System.exit(0);
+        //System.exit(0);
     }
 
     public static boolean isFloat(double value) {
@@ -753,7 +753,7 @@ public class RandomRules {
         System.out.println("Quantil Calc new Rule Learning");
         quantilCalcSum(learnedTimelist);
         printPriciestRuleTimes(learnedTimelist);
-        //System.exit(0);
+        System.exit(0);
     }
 
     public void printPriciestRuleTimes(ArrayList<Double> timeList){
