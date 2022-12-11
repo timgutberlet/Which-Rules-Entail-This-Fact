@@ -83,23 +83,41 @@ public class DBFuncs {
             sql = "DELETE FROM " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE");
             stmt = con.createStatement();
             stmt.executeQuery(sql);
+            con.commit();
         } catch (SQLException e) {
         }
     }
 
-    public static void deleteIndizes() {
+    public static void deleteSubjects() {
         Statement stmt;
         String sql;
         try {
-            sql = "DELETE FROM subjects";
+            sql = "DELETE FROM subjects;";
             stmt = con.createStatement();
             stmt.executeQuery(sql);
-            sql = "DELETE FROM predicates";
+            con.commit();
+        } catch (SQLException e) {
+        }
+    }
+    public static void deletePredicates() {
+        Statement stmt;
+        String sql;
+        try {
+            sql = "DELETE FROM predicates;";
             stmt = con.createStatement();
             stmt.executeQuery(sql);
-            sql = "DELETE FROM objects";
+            con.commit();
+        } catch (SQLException e) {
+        }
+    }
+    public static void deleteObjects() {
+        Statement stmt;
+        String sql;
+        try {
+            sql = "DELETE FROM objects;";
             stmt = con.createStatement();
             stmt.executeQuery(sql);
+            con.commit();
         } catch (SQLException e) {
         }
     }

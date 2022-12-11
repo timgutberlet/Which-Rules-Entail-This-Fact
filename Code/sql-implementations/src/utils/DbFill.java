@@ -196,7 +196,9 @@ public class DbFill {
     System.out.println("Vocabulary filled");
   }
   public void fillIndizes() {
-    DBFuncs.deleteIndizes();
+    DBFuncs.deleteSubjects();
+    DBFuncs.deletePredicates();
+    DBFuncs.deleteObjects();
     DBFuncs.setSubjectIndex(subjectIndex);
     DBFuncs.setPredicateIndex(predicateIndex);
     DBFuncs.setObjectIndex(objectIndex);
