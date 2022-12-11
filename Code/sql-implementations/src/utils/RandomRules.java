@@ -14,8 +14,7 @@ import models.*;
  * @author timgutberlet
  */
 public class RandomRules {
-    private HashMap<Integer, Integer> ruleHashMap = new HashMap<>();
-    private HashMap<Integer, RuleTime> ruleTimeHashMap =  new HashMap<>();
+    private HashMap<Integer, RuleTime> ruleTimeHashMap = new HashMap<>();
     private HashMap<String, Integer> subjectIndex;
     private HashMap<String, Integer> predicateIndex;
     private HashMap<String, Integer> objectIndex;
@@ -44,6 +43,8 @@ public class RandomRules {
     public HashMap<Integer, ArrayList<Rule>> getNoBoundEqual() {
         return noBoundEqual;
     }
+
+    private int ruleCount;
 
     public RandomRules(HashMap<String, Integer> subjectIndex,
                        HashMap<String, Integer> predicateIndex, HashMap<String, Integer> objectIndex) {
@@ -120,24 +121,12 @@ public class RandomRules {
                                     objectID);
                             body.add(tripleHelp);
                         }
-                        //tailList.add(new Triple(Integer.parseInt(bodySubject), Integer.parseInt(delE(bodyObject)), Integer.parseInt(bodyPredicate)));
                     }
                 }
-                //Uncomment this, if you also want to inlcude empty rules
-        /*else {
-          tripleHelp = new Triple(DBFuncs.getSubjectID(bodySubject), DBFuncs.getPredicateID(bodyPredicate),
-              DBFuncs.getObjectID(bodyObject));
-          body.add(tripleHelp);
-          System.out.println(tripleHelp);
-        }*/
                 help1 = first.split("\\(", 2)[1].split(",", 2);
                 if (help1.length > 1) {
                     headSubject = help1[0];
                     headObject = help1[1].substring(0, help1[1].length() - 1);
-                }
-                //System.out.println(headPredicate + " : " + headSubject + " " + headObject + " <= " + second);
-                if (headSubject.length() == 1) {
-
                 }
                 if (headSubject.length() == 1) {
                     subjectID = Variables.getID(headSubject);
@@ -173,9 +162,9 @@ public class RandomRules {
                 if (Config.getStringValue("FILTER_SIMPLE_RULES").equals("YES")) {
                     continuer = false;
 
-                    if ( rule.getBody().size() == 4) {
-                            continuer = true;
-                            System.out.println(c++ + " Type2: " + rule);
+                    if (rule.getBody().size() == 4) {
+                        continuer = true;
+                        System.out.println(c++ + " Type2: " + rule);
                     }
 
                     /*if (rule.getHead().getSubject() < 0
@@ -260,8 +249,6 @@ public class RandomRules {
 
                 rule.setId(counter++);
                 System.out.println(counter);
-
-                //ruleList.add(new Rule(head, body));
             }
             System.out.println("Import finished");
             reader.close();
@@ -273,6 +260,7 @@ public class RandomRules {
                 DBFuncs.createFunctions(this);
             }
             System.out.println("Executed");
+            ruleCount = counter;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -314,63 +302,49 @@ public class RandomRules {
         return string;
     }
 
-    public ArrayList<Integer> searchByTripleNative(Triple triple){
+    public ArrayList<Integer> searchByTripleNative(Triple triple) {
         ArrayList<Rule> filteredRules = new ArrayList<>();
+        ArrayList<Integer> resultList = new ArrayList<>();
         for (Map.Entry<Key2Int, ArrayList<Rule>> entry : objBound.entrySet()) {
-            for(Rule r: entry.getValue()){
-                if(triple.getPredicate() == r.getHead().getPredicate() && triple.getObject() == r.getHead().getObject()){
-                    filteredRules.add(r);
-                }
+            for (Rule r : entry.getValue()) {
+                filteredRules.add(r);
+                resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+
             }
+            filteredRules.clear();
         }
         for (Map.Entry<Key2Int, ArrayList<Rule>> entry : subBound.entrySet()) {
-            for(Rule r: entry.getValue()){
-                if(triple.getPredicate() == r.getHead().getPredicate() && triple.getSubject() == r.getHead().getSubject()){
-                    filteredRules.add(r);
-                }
+            for (Rule r : entry.getValue()) {
+                filteredRules.add(r);
+                resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+
             }
+            filteredRules.clear();
         }
         for (Map.Entry<Key3Int, ArrayList<Rule>> entry : bothBound.entrySet()) {
-            for(Rule r: entry.getValue()){
-                if(triple.getPredicate() == r.getHead().getPredicate() && triple.getObject() == r.getHead().getObject() && triple.getSubject() == r.getHead().getSubject()){
-                    filteredRules.add(r);
-                }
+            for (Rule r : entry.getValue()) {
+                filteredRules.add(r);
+                resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+
             }
+            filteredRules.clear();
         }
         for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundEqual.entrySet()) {
-            for(Rule r: entry.getValue()){
-                if(triple.getSubject() == triple.getObject() && triple.getPredicate() == r.getHead().getPredicate()){
-                    filteredRules.add(r);
-                }
+            for (Rule r : entry.getValue()) {
+                filteredRules.add(r);
+                resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+
             }
+            filteredRules.clear();
         }
         for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundUnequal.entrySet()) {
-            for(Rule r: entry.getValue()){
-                if(triple.getSubject() != triple.getObject() && triple.getPredicate() == r.getHead().getPredicate()){
-                    filteredRules.add(r);
-                }
+            for (Rule r : entry.getValue()) {
+                filteredRules.add(r);
+                resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
             }
+            filteredRules.clear();
         }
-        ArrayList<Integer> resultList;
-        switch (Config.getStringValue("TESTRULES_METHOD")) {
-            case "testRulesUnionAllShorterSelect":
-                resultList = DBFuncs.testRulesUnionAllShorterSelect(filteredRules, triple);
-                break;
-            case "optimizedQuantileAnalysis":
-            case "testRulesUnionAllShorterSelectViewsForRelations":
-                resultList = DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple);
-                break;
-            case "testRulesSimpleViews":
-                resultList = DBFuncs.testRulesSimpleViews(filteredRules, triple);
-                break;
-            case "testRulesFunction":
-                resultList = DBFuncs.testRulesFunction(filteredRules, triple);
-                break;
-            default:
-                resultList = null;
-                Debug.printMessage("Keine Methode ausgewählt");
 
-        }
         return resultList;
     }
 
@@ -436,7 +410,7 @@ public class RandomRules {
     public static void main(String[] args) {
         System.out.println(isFloat(3.5));
         System.out.println(isFloat(3L));
-        System.out.println(isFloat(0.5*4));
+        System.out.println(isFloat(0.5 * 4));
         ArrayList<Long> timeList = new ArrayList<>();
         timeList.add(3L);
         timeList.add(3L);
@@ -548,12 +522,13 @@ public class RandomRules {
         System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime) / 1000000) / queries) + " ms");
         System.out.println("Abfragen: " + queries);
         ArrayList<Long> timeList = new ArrayList<>();
-        for(TimeTuple timeTuple : resultMap.values()){
+        for (TimeTuple timeTuple : resultMap.values()) {
             timeList.add(timeTuple.getTime());
         }
         quantilCalc(timeList);
 
     }
+
     public void startQueryNative() {
         List<Triple> queryTriples = importQueryTriples();
         System.out.println("Testing Method: " + Config.getStringValue("TESTRULES_METHOD"));
@@ -585,78 +560,81 @@ public class RandomRules {
         System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime) / 1000000) / queries) + " ms");
         System.out.println("Abfragen: " + queries);
         ArrayList<Long> timeList = new ArrayList<>();
-        for(TimeTuple timeTuple : resultMap.values()){
+        for (TimeTuple timeTuple : resultMap.values()) {
             timeList.add(timeTuple.getTime());
         }
         quantilCalc(timeList);
 
     }
-    public static void quantilCalc(ArrayList<Long> timeList){
+
+    public static void quantilCalc(ArrayList<Long> timeList) {
         Collections.sort(timeList);
         timeList.forEach(aLong -> System.out.println(aLong));
         double help;
         double quantile = 0.05;
-        for(double i = quantile; i <= 1; i += quantile){
-            if(isFloat(i * timeList.size())){
+        for (double i = quantile; i <= 1; i += quantile) {
+            if (isFloat(i * timeList.size())) {
                 help = timeList.get((int) Math.floor(i * timeList.size()));
-            }else {
-                help = 0.5 * ((timeList.get((int)(timeList.size() * i)-1)) + timeList.get((int)(timeList.size() * i)));
+            } else {
+                help = 0.5 * ((timeList.get((int) (timeList.size() * i) - 1)) + timeList.get((int) (timeList.size() * i)));
 
             }
-            System.out.println((double) Math.round(i * 100)/100 + "% : " + (help/1000000) + " ms");
+            System.out.println((double) Math.round(i * 100) / 100 + "% : " + (help / 1000000) + " ms");
         }
 
         Long average, sum = 0L;
         Long max = 0L, min = Long.MAX_VALUE;
-        for(long l : timeList){
-            if(l > max){
+        for (long l : timeList) {
+            if (l > max) {
                 max = l;
             }
-            if(l < min){
+            if (l < min) {
                 min = l;
             }
             sum += l;
         }
         average = sum / timeList.size();
-        System.out.println("Average: " + ((double)average / 1000000D) + " ms");
-        System.out.println("Min: " + ((double)min / 1000000D) + " ms");
-        System.out.println("Max: " + ((double)max / 1000000D) + " ms");
+        System.out.println("Average: " + ((double) average / 1000000D) + " ms");
+        System.out.println("Min: " + ((double) min / 1000000D) + " ms");
+        System.out.println("Max: " + ((double) max / 1000000D) + " ms");
     }
-    public static void quantilCalcSum(ArrayList<Double> timeList){
+
+    public static void quantilCalcSum(ArrayList<Double> timeList) {
         Collections.sort(timeList);
         timeList.forEach(aLong -> System.out.println(aLong));
         double help;
         double quantile = 0.05;
-        for(double i = quantile; i <= 1; i += quantile){
-            if(isFloat(i * timeList.size())){
+        for (double i = quantile; i <= 1; i += quantile) {
+            if (isFloat(i * timeList.size())) {
                 help = timeList.get((int) Math.floor(i * timeList.size()));
-            }else {
-                help = 0.5 * ((timeList.get((int)(timeList.size() * i)-1)) + timeList.get((int)(timeList.size() * i)));
+            } else {
+                help = 0.5 * ((timeList.get((int) (timeList.size() * i) - 1)) + timeList.get((int) (timeList.size() * i)));
 
             }
-            System.out.println((double) Math.round(i * 100)/100 + "% : " + (help) + " ms");
+            System.out.println((double) Math.round(i * 100) / 100 + "% : " + (help) + " ms");
         }
 
         Double average, sum = 0D;
         Double max = 0D, min = Double.MAX_VALUE;
-        for(Double l : timeList){
-            if(l > max){
+        for (Double l : timeList) {
+            if (l > max) {
                 max = l;
             }
-            if(l < min){
+            if (l < min) {
                 min = l;
             }
             sum += l;
         }
         average = sum / timeList.size();
-        System.out.println("Average: " + ((double)average ) + " ms");
-        System.out.println("Min: " + ((double)min ) + " ms");
-        System.out.println("Max: " + ((double)max ) + " ms");
+        System.out.println("Average: " + ((double) average) + " ms");
+        System.out.println("Min: " + ((double) min) + " ms");
+        System.out.println("Max: " + ((double) max) + " ms");
         //System.exit(0);
     }
+
     public static boolean isFloat(double value) {
-        int dec = (int)value;
-        if(value - dec != 0) {
+        int dec = (int) value;
+        if (value - dec != 0) {
             return true;
         } else {
             return false;
@@ -717,50 +695,43 @@ public class RandomRules {
         if (ruleSet != null) {
             filteredRules.addAll(ruleSet);
         }
-        for(Rule rule :  filteredRules){
-            if(ruleTimeHashMap.containsKey(rule.getId())){
+        for (Rule rule : filteredRules) {
+            if (ruleTimeHashMap.containsKey(rule.getId())) {
                 ruleTimeHashMap.get(rule.getId()).addTime(DBFuncs.timePerRule(rule, triple));
-            }else {
-                ruleTimeHashMap.put(rule.getId(), new RuleTime(DBFuncs.timePerRule(rule, triple) ,rule));
+            } else {
+                ruleTimeHashMap.put(rule.getId(), new RuleTime(DBFuncs.timePerRule(rule, triple), rule));
             }
         }
     }
 
-    public void quantilOptimize(){
+    public void quantilOptimize() {
         ArrayList<RuleTime> helpList = new ArrayList<>();
         ArrayList<Rule> ruleList = new ArrayList<>();
         ArrayList<Double> timeList = new ArrayList<>();
-        for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()){
+        for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()) {
             helpList.add(entry.getValue());
             timeList.add(entry.getValue().avg());
         }
         Collections.sort(helpList);
         int i = 0;
-        int count = 0;
-        for(RuleTime ruleTime  : helpList){
+        for (RuleTime ruleTime : helpList) {
             System.out.println(" ");
             System.out.println(ruleTime.avg());
             System.out.println(ruleTime.sum());
             System.out.println(ruleTime.getCount());
             System.out.println(ruleTime.getRule());
-            count++;
-            if(count % Config.getIntValue("QUANTIL_LEARN_COUNT") == 0){
-                System.out.println("Learned: " + i);
-                System.out.println("Count: " + count);
-                //System.exit(0);
-            }
-            if(ruleTime.getRule().getBody().size() == 2) {
+            if (ruleTime.getRule().getBody().size() == 2) {
                 ruleList.add(ruleTime.getRule());
                 i++;
             }
-            if (i ==Config.getIntValue("QUANTIL_LEARN_COUNT")){
+            if (i == ruleCount) {
                 break;
             }
         }
         quantilCalcSum(timeList);
         DBFuncs.viewsForQuantiles(ruleList);
         System.out.println("RuleList");
-        for(Rule rule : ruleList){
+        for (Rule rule : ruleList) {
             rule.setLearned();
             System.out.println(rule);
             System.out.println(rule.getBound());
@@ -768,50 +739,52 @@ public class RandomRules {
         }
         rulePreSave(ruleList);
     }
-    public void learnRules(){
+
+    public void learnRules() {
         HashMap<Integer, Rule> ruleMap = new HashMap<>();
         for (Map.Entry<Key2Int, ArrayList<Rule>> entry : objBound.entrySet()) {
-            for(Rule r: entry.getValue()){
+            for (Rule r : entry.getValue()) {
                 ruleMap.put(r.getId(), r);
             }
         }
         for (Map.Entry<Key2Int, ArrayList<Rule>> entry : subBound.entrySet()) {
-            for(Rule r: entry.getValue()){
+            for (Rule r : entry.getValue()) {
                 ruleMap.put(r.getId(), r);
             }
         }
         for (Map.Entry<Key3Int, ArrayList<Rule>> entry : bothBound.entrySet()) {
-            for(Rule r: entry.getValue()){
+            for (Rule r : entry.getValue()) {
                 ruleMap.put(r.getId(), r);
             }
         }
         for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundEqual.entrySet()) {
-            for(Rule r: entry.getValue()){
+            for (Rule r : entry.getValue()) {
                 ruleMap.put(r.getId(), r);
             }
         }
         for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundUnequal.entrySet()) {
-            for(Rule r: entry.getValue()){
+            for (Rule r : entry.getValue()) {
                 ruleMap.put(r.getId(), r);
             }
         }
         rulePreRead(ruleMap);
     }
-    public void rulePreSave(ArrayList<Rule> rules){
+
+    public void rulePreSave(ArrayList<Rule> rules) {
         String fileString = Config.getStringValue("RULEPRESAVE");
         File file = new File(fileString);
         FileWriter fr = null;
         BufferedWriter br = null;
-        try{
+        try {
             fr = new FileWriter(file);
             br = new BufferedWriter(fr);
-            for(Rule r : rules){
-                String dataWithNewLine=r.getId() +" " + r.getBound() +System.getProperty("line.separator");
+            for (Rule r : rules) {
+                String dataWithNewLine = r.getId() + " " + r.getBound() + System.getProperty("line.separator");
                 br.write(dataWithNewLine);
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }finally{
+        } finally {
             try {
                 br.close();
                 fr.close();
@@ -821,7 +794,8 @@ public class RandomRules {
         }
 
     }
-    public void rulePreRead(HashMap<Integer, Rule> ruleMap){
+
+    public void rulePreRead(HashMap<Integer, Rule> ruleMap) {
         String file = Config.getStringValue("RULEPRESAVE");
         String[] importList;
         int ruleID, bound;
@@ -833,7 +807,7 @@ public class RandomRules {
                 if (importList.length == 2) {
                     ruleID = Integer.valueOf(importList[0]);
                     bound = Integer.valueOf(importList[1]);
-                    if(ruleMap.containsKey(ruleID)){
+                    if (ruleMap.containsKey(ruleID)) {
                         r = ruleMap.get(ruleID);
                         r.setLearned();
                         r.setBound(bound);
