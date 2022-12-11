@@ -315,58 +315,61 @@ public class RandomRules {
     }
 
     public ArrayList<Integer> searchByTripleNative(Triple triple){
-        int count = 0;
-        ArrayList<Integer> resultList =  new ArrayList<>();
         ArrayList<Rule> filteredRules = new ArrayList<>();
         for (Map.Entry<Key2Int, ArrayList<Rule>> entry : objBound.entrySet()) {
             for(Rule r: entry.getValue()){
                 if(triple.getPredicate() == r.getHead().getPredicate() && triple.getObject() == r.getHead().getObject()){
                     filteredRules.add(r);
-                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
-                    //System.out.println(count++);
                 }
-                filteredRules.clear();
             }
         }
         for (Map.Entry<Key2Int, ArrayList<Rule>> entry : subBound.entrySet()) {
             for(Rule r: entry.getValue()){
                 if(triple.getPredicate() == r.getHead().getPredicate() && triple.getSubject() == r.getHead().getSubject()){
                     filteredRules.add(r);
-                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
-                    //System.out.println(count++);
                 }
-                filteredRules.clear();
             }
         }
         for (Map.Entry<Key3Int, ArrayList<Rule>> entry : bothBound.entrySet()) {
             for(Rule r: entry.getValue()){
                 if(triple.getPredicate() == r.getHead().getPredicate() && triple.getObject() == r.getHead().getObject() && triple.getSubject() == r.getHead().getSubject()){
                     filteredRules.add(r);
-                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
-                    //System.out.println(count++);
                 }
-                filteredRules.clear();
             }
         }
         for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundEqual.entrySet()) {
             for(Rule r: entry.getValue()){
                 if(triple.getSubject() == triple.getObject() && triple.getPredicate() == r.getHead().getPredicate()){
                     filteredRules.add(r);
-                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
-                    //System.out.println(count++);
                 }
-                filteredRules.clear();
             }
         }
         for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundUnequal.entrySet()) {
             for(Rule r: entry.getValue()){
                 if(triple.getSubject() != triple.getObject() && triple.getPredicate() == r.getHead().getPredicate()){
                     filteredRules.add(r);
-                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
-                    //System.out.println(count++);
                 }
-                filteredRules.clear();
             }
+        }
+        ArrayList<Integer> resultList;
+        switch (Config.getStringValue("TESTRULES_METHOD")) {
+            case "testRulesUnionAllShorterSelect":
+                resultList = DBFuncs.testRulesUnionAllShorterSelect(filteredRules, triple);
+                break;
+            case "optimizedQuantileAnalysis":
+            case "testRulesUnionAllShorterSelectViewsForRelations":
+                resultList = DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple);
+                break;
+            case "testRulesSimpleViews":
+                resultList = DBFuncs.testRulesSimpleViews(filteredRules, triple);
+                break;
+            case "testRulesFunction":
+                resultList = DBFuncs.testRulesFunction(filteredRules, triple);
+                break;
+            default:
+                resultList = null;
+                Debug.printMessage("Keine Methode ausgewählt");
+
         }
         return resultList;
     }
