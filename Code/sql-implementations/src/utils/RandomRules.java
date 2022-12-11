@@ -58,7 +58,8 @@ public class RandomRules {
 
     public void importRules() {
         Key3Int key3Int;
-        int atomCounter = 0;
+        int twoAtomCounter = 0;
+        int threeAtomCounter = 0;
         Key2Int key2Int;
         String file = Config.getStringValue("RULES_PATH");
         Rule rule;
@@ -253,10 +254,14 @@ public class RandomRules {
                 rule.setId(counter++);
                 //System.out.println(counter);
                 if(rule.getBody().size() == 2) {
-                    System.out.println("2 Atom rules " + atomCounter++);
+                    System.out.println("2 Atom rules " + twoAtomCounter++);
+                };
+                if(rule.getBody().size() == 3) {
+                    System.out.println("3 Atom rules " + threeAtomCounter++);
                 };
             }
             System.out.println("Rule Import finished");
+            System.exit(0);
             reader.close();
             if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews") && Config.getStringValue("REFILL_TABLES").equals("YES")) {
                 DBFuncs.createNormalViewForRule(this);
