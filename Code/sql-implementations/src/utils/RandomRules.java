@@ -58,8 +58,11 @@ public class RandomRules {
 
     public void importRules() {
         Key3Int key3Int;
+        int oneAtomCounter = 0;
         int twoAtomCounter = 0;
         int threeAtomCounter = 0;
+        int fourAtomCounter = 0;
+        int fiveAtomCounter = 0;
         Key2Int key2Int;
         String file = Config.getStringValue("RULES_PATH");
         Rule rule;
@@ -253,14 +256,28 @@ public class RandomRules {
 
                 rule.setId(counter++);
                 //System.out.println(counter);
+                if(rule.getBody().size() == 1) {
+                    oneAtomCounter++;
+                };
                 if(rule.getBody().size() == 2) {
-                    System.out.println("2 Atom rules " + twoAtomCounter++);
+                    twoAtomCounter++;
                 };
                 if(rule.getBody().size() == 3) {
-                    System.out.println("3 Atom rules " + threeAtomCounter++);
+                    threeAtomCounter++;
+                };
+                if(rule.getBody().size() == 4) {
+                    fourAtomCounter++;
+                };
+                if(rule.getBody().size() == 5) {
+                    fiveAtomCounter++;
                 };
             }
-            System.out.println("Rule Import finished");
+                System.out.println("1 Atom rules " + oneAtomCounter);
+                System.out.println("2 Atom rules " + twoAtomCounter);
+                System.out.println("3 Atom rules " + threeAtomCounter);
+                System.out.println("4 Atom rules " + fourAtomCounter);
+                System.out.println("5 Atom rules " + fiveAtomCounter);
+                System.out.println("Rule Import finished");
             //System.exit(0);
             reader.close();
             if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews") && Config.getStringValue("REFILL_TABLES").equals("YES")) {
