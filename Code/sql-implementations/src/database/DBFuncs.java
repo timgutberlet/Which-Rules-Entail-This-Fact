@@ -87,6 +87,23 @@ public class DBFuncs {
         }
     }
 
+    public static void deleteIndizes() {
+        Statement stmt;
+        String sql;
+        try {
+            sql = "DELETE FROM subjects";
+            stmt = con.createStatement();
+            stmt.executeQuery(sql);
+            sql = "DELETE FROM predicates";
+            stmt = con.createStatement();
+            stmt.executeQuery(sql);
+            sql = "DELETE FROM objects";
+            stmt = con.createStatement();
+            stmt.executeQuery(sql);
+        } catch (SQLException e) {
+        }
+    }
+
 
     /**
      * Used for testing
