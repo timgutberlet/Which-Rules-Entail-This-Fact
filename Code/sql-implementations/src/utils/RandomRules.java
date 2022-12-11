@@ -195,7 +195,7 @@ public class RandomRules {
                         }
                     }*/
 
-                    System.out.println(bodyCount++);
+                    //System.out.println(bodyCount++);
 
                     if (!continuer) {
                         continue;
@@ -251,7 +251,7 @@ public class RandomRules {
                 rule.setId(counter++);
                 System.out.println(counter);
             }
-            System.out.println("Import finished");
+            System.out.println("Rule Import finished");
             reader.close();
             if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews") && Config.getStringValue("REFILL_TABLES").equals("YES")) {
                 DBFuncs.createNormalViewForRule(this);
@@ -697,11 +697,15 @@ public class RandomRules {
         if (ruleSet != null) {
             filteredRules.addAll(ruleSet);
         }
+        int i = 0;
         for (Rule rule : filteredRules) {
-            if (ruleTimeHashMap.containsKey(rule.getId())) {
-                ruleTimeHashMap.get(rule.getId()).addTime(DBFuncs.timePerRule(rule, triple));
-            } else {
-                ruleTimeHashMap.put(rule.getId(), new RuleTime(DBFuncs.timePerRule(rule, triple), rule));
+            if(rule.getBody().size() == 2){
+                System.out.println(i++);
+                if (ruleTimeHashMap.containsKey(rule.getId())) {
+                    ruleTimeHashMap.get(rule.getId()).addTime(DBFuncs.timePerRule(rule, triple));
+                } else {
+                    ruleTimeHashMap.put(rule.getId(), new RuleTime(DBFuncs.timePerRule(rule, triple), rule));
+                }
             }
         }
     }
@@ -711,15 +715,16 @@ public class RandomRules {
         ArrayList<RuleTime> helpList = new ArrayList<>();
         ArrayList<Rule> ruleList = new ArrayList<>();
         ArrayList<Double> timeList = new ArrayList<>();
-        ArrayList<Double> learnedTimelist = new ArrayList<>();
+        ArrayList<Double> learnedTimelist;
         int i = 0;
+        System.out.println("Rule Count: " + ruleCount);
         for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()) {
             if(entry.getValue().getRule().getBody().size() == 2) {
                 i++;
                 helpList.add(entry.getValue());
-                timeList.add(entry.getValue().avg());
+                timeList.add(entry.getValue().sum());
             }
-            if(i == ruleCount){
+            if(i == (ruleCount*0.05)){
                 break;
             }
         }

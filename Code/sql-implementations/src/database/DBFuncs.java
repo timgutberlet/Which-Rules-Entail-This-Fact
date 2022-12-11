@@ -890,12 +890,12 @@ public class DBFuncs {
             sql.append(where);
             sql.append(sqlEnd);
 
-            //System.out.println(sql.toString());
+            System.out.println("Getting the time for a rule: " + sql.toString());
             String planningTime = "";
             String executionTime = "";
             rs = stmt.executeQuery(sql.toString());
             while (rs.next()) {
-                //System.out.println(rs.getString("QUERY PLAN"));
+                System.out.println(rs.getString("QUERY PLAN"));
                 if (rs.getString("QUERY PLAN").startsWith("Planning Time:")) {
                     planningTime = rs.getString("QUERY PLAN");
                 }
@@ -1116,9 +1116,11 @@ public class DBFuncs {
                 System.out.println(sql);
                 stmt.addBatch(sql.toString());
                 sql = new StringBuffer("CREATE UNIQUE INDEX x" + rule.getId() + "Index ON x" + rule.getId());
+                System.out.println("Subset, Objectset: " + subSet + ", " + objSet);
                 if (subSet && objSet) {
                     sql.append("(sub, obj);");
                     rule.setBound(0);
+                    System.out.println();
                 } else if (subSet && !objSet) {
                     sql.append("(sub);");
                     rule.setBound(1);
@@ -1128,6 +1130,7 @@ public class DBFuncs {
                 } else {
                     Debug.printMessage("Error in creating indizes for Optimized Materialized Rules");
                 }
+                System.out.println("Real Rule Bound : "+ rule.getBound());
                 stmt.addBatch(sql.toString());
                 sql = new StringBuffer("ALTER MATERIALIZED VIEW x" + rule.getId() + " CLUSTER ON x" + rule.getId() + "Index;");
                 stmt.addBatch(sql.toString());
