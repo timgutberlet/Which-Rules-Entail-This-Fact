@@ -629,7 +629,7 @@ public class RandomRules {
         System.out.println("Average: " + ((double) average) + " ms");
         System.out.println("Min: " + ((double) min) + " ms");
         System.out.println("Max: " + ((double) max) + " ms");
-        //System.exit(0);
+        System.exit(0);
     }
 
     public static boolean isFloat(double value) {
@@ -708,34 +708,22 @@ public class RandomRules {
         ArrayList<RuleTime> helpList = new ArrayList<>();
         ArrayList<Rule> ruleList = new ArrayList<>();
         ArrayList<Double> timeList = new ArrayList<>();
-        for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()) {
-            helpList.add(entry.getValue());
-            timeList.add(entry.getValue().avg());
-        }
-        Collections.sort(helpList);
         int i = 0;
-        for (RuleTime ruleTime : helpList) {
-            System.out.println(" ");
-            System.out.println(ruleTime.avg());
-            System.out.println(ruleTime.sum());
-            System.out.println(ruleTime.getCount());
-            System.out.println(ruleTime.getRule());
-            if (ruleTime.getRule().getBody().size() == 2) {
-                ruleList.add(ruleTime.getRule());
+        for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()) {
+            if(entry.getValue().getRule().getBody().size() == 2) {
                 i++;
+                helpList.add(entry.getValue());
+                timeList.add(entry.getValue().avg());
             }
-            if (i == ruleCount) {
+            if(i == ruleCount){
                 break;
             }
         }
+        Collections.sort(helpList);
         quantilCalcSum(timeList);
         DBFuncs.viewsForQuantiles(ruleList);
-        System.out.println("RuleList");
         for (Rule rule : ruleList) {
             rule.setLearned();
-            System.out.println(rule);
-            System.out.println(rule.getBound());
-            System.out.println(rule.isLearned());
         }
         rulePreSave(ruleList);
     }
