@@ -192,7 +192,13 @@ public class DbFill {
         break;
       default:
     }
+    fillIndizes();
     System.out.println("Vocabulary filled");
+  }
+  public void fillIndizes() {
+    DBFuncs.setSubjectIndex(subjectIndex);
+    DBFuncs.setPredicateIndex(predicateIndex);
+    DBFuncs.setObjectIndex(objectIndex);
   }
 
   public void setIndexes() {

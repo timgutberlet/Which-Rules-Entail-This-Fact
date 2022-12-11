@@ -99,6 +99,100 @@ public class DBFuncs {
         //r.getBody().add(new Triple(-2, 3, -1));
         //createFunctionsBothUnbound(r);
     }
+    public static void setSubjectIndex(HashMap<String, Integer> map){
+        try {
+        PreparedStatement stmt;
+            String sql =
+                    "INSERT INTO subjects(id, txt) VALUES (?,?)";
+            stmt = con.prepareStatement(sql);
+            long startTime = System.nanoTime();
+            long elapsedTime;
+            long count = 0;
+        for(Map.Entry<String, Integer> entry : map.entrySet()){
+                    count++;
+                    stmt.setInt(1, entry.getValue());
+                    stmt.setString(2, entry.getKey());
+                    stmt.addBatch();
+                    if (count % 500 == 0 || count == map.size()) {
+                        stmt.executeBatch();
+                        stmt.clearBatch();
+                        elapsedTime = System.nanoTime() - startTime;
+                        startTime = System.nanoTime();
+                        System.out.println(
+                                "Inserted Subjects " + count + " of " + map.size() + " ; Time: " + (elapsedTime / 1000000)
+                                        + "ms");
+                    }
+        }
+        stmt.executeBatch();
+        con.commit();
+        stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void setPredicateIndex(HashMap<String, Integer> map){
+        try {
+            PreparedStatement stmt;
+            String sql =
+                    "INSERT INTO predicates(id, txt) VALUES (?,?)";
+            stmt = con.prepareStatement(sql);
+            long startTime = System.nanoTime();
+            long elapsedTime;
+            long count = 0;
+            for(Map.Entry<String, Integer> entry : map.entrySet()){
+                count++;
+                stmt.setInt(1, entry.getValue());
+                stmt.setString(2, entry.getKey());
+                stmt.addBatch();
+                if (count % 500 == 0 || count == map.size()) {
+                    stmt.executeBatch();
+                    stmt.clearBatch();
+                    elapsedTime = System.nanoTime() - startTime;
+                    startTime = System.nanoTime();
+                    System.out.println(
+                            "Inserted Predicates " + count + " of " + map.size() + " ; Time: " + (elapsedTime / 1000000)
+                                    + "ms");
+                }
+            }
+            stmt.executeBatch();
+            con.commit();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void setObjectIndex(HashMap<String, Integer> map){
+        try {
+            PreparedStatement stmt;
+            String sql =
+                    "INSERT INTO objects(id, txt) VALUES (?,?)";
+            stmt = con.prepareStatement(sql);
+            long startTime = System.nanoTime();
+            long elapsedTime;
+            long count = 0;
+            for(Map.Entry<String, Integer> entry : map.entrySet()){
+                count++;
+                stmt.setInt(1, entry.getValue());
+                stmt.setString(2, entry.getKey());
+                stmt.addBatch();
+                if (count % 500 == 0 || count == map.size()) {
+                    stmt.executeBatch();
+                    stmt.clearBatch();
+                    elapsedTime = System.nanoTime() - startTime;
+                    startTime = System.nanoTime();
+                    System.out.println(
+                            "Inserted Objects " + count + " of " + map.size() + " ; Time: " + (elapsedTime / 1000000)
+                                    + "ms");
+                }
+            }
+            stmt.executeBatch();
+            con.commit();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Get Subject Index
