@@ -1528,47 +1528,66 @@ public class DBFuncs {
             long elapsedTime;
             long count = 0;
             Statement stmt = con.createStatement();
-            for (Integer integer : predicateList) {
-                sql = "DROP MATERIALIZED VIEW IF EXISTS v" + integer.toString() + " CASCADE;";
-                //stmt.addBatch(sql);
-                sql = "DROP MATERIALIZED VIEW IF EXISTS l" + integer.toString() + " CASCADE;";
-                //stmt.addBatch(sql);
-                sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer.toString() + " CASCADE;";
-                //stmt.addBatch(sql);
-                sql = "create materialized view  l" + integer.toString() + " as \n" +
-                        "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
+            for(int i = 0; i < 200000; i++){
+                sql = "DROP MATERIALIZED VIEW IF EXISTS x" + i +";";
+                stmt.addBatch(sql);
                 count++;
-                //stmt.addBatch(sql);
-                sql = "CREATE UNIQUE INDEX l" + integer + "Index ON l" + integer + " (sub, obj);";
-                //stmt.addBatch(sql);
-                sql = "ALTER MATERIALIZED VIEW l" + integer + " CLUSTER ON l" + integer + "Index;";
-                //stmt.addBatch(sql);
-                //
-                sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer + ";";
-                //stmt.addBatch(sql);
-                sql = "create materialized view  r" + integer.toString() + " as \n" +
-                        "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
-                count++;
-                //System.out.println(triple.toString());
-                //stmt.addBatch(sql);
-                sql = "CREATE UNIQUE INDEX r" + integer + "Index ON r" + integer + " (obj, sub);";
-                //stmt.addBatch(sql);
-                sql = "ALTER MATERIALIZED VIEW r" + integer + " CLUSTER ON r" + integer + "Index;";
-                //stmt.addBatch(sql);
-                //
-                /*if (count % 1 == 0 || count == predicateList.size()) {
+                if (count % 500 == 0){
                     stmt.executeBatch();
                     stmt.clearBatch();
                     elapsedTime = System.nanoTime() - startTime;
                     startTime = System.nanoTime();
                     System.out.println(
-                            "Inserted " + count + " of " + predicateList.size() + " ; Time: " + (elapsedTime / 1000000)
+                            "Dropped  Materialized View " + count + " of " + "200 000" + " ; Time: " + (elapsedTime / 1000000)
                                     + "ms");
-                }*/
+                    con.commit();
+                }
             }
-            //stmt.executeBatch();
-            //con.commit();
-            //stmt.close();
+            stmt.executeBatch();
+            con.commit();
+            count = 0;
+            startTime = System.nanoTime();
+            for (Integer integer : predicateList) {
+                sql = "DROP MATERIALIZED VIEW IF EXISTS v" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "DROP MATERIALIZED VIEW IF EXISTS l" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer.toString() + ";";
+                stmt.addBatch(sql);
+                sql = "create materialized view  l" + integer.toString() + " as \n" +
+                        "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
+                count++;
+                stmt.addBatch(sql);
+                sql = "CREATE UNIQUE INDEX l" + integer + "Index ON l" + integer + " (sub, obj);";
+                stmt.addBatch(sql);
+                sql = "ALTER MATERIALIZED VIEW l" + integer + " CLUSTER ON l" + integer + "Index;";
+                stmt.addBatch(sql);
+                //
+                sql = "DROP MATERIALIZED VIEW IF EXISTS r" + integer + ";";
+                stmt.addBatch(sql);
+                sql = "create materialized view  r" + integer.toString() + " as \n" +
+                        "select sub, obj from " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE") + " where pre = " + integer + ";";
+                count++;
+                //System.out.println(triple.toString());
+                stmt.addBatch(sql);
+                sql = "CREATE UNIQUE INDEX r" + integer + "Index ON r" + integer + " (obj, sub);";
+                stmt.addBatch(sql);
+                sql = "ALTER MATERIALIZED VIEW r" + integer + " CLUSTER ON r" + integer + "Index;";
+                stmt.addBatch(sql);
+                //
+                if (count % 5 == 0 || count == predicateList.size()) {
+                    stmt.executeBatch();
+                    stmt.clearBatch();
+                    elapsedTime = System.nanoTime() - startTime;
+                    startTime = System.nanoTime();
+                    System.out.println(
+                            "Inserted " + count + " of " + predicateList.size()*2 + " ; Time: " + (elapsedTime / 1000000)
+                                    + "ms");
+                }
+            }
+            stmt.executeBatch();
+            con.commit();
+            stmt.close();
             System.out.println("Success");
 
             System.out.println("Data has been inserted");
