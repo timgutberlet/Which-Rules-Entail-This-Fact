@@ -7,6 +7,7 @@ package models;
  */
 public class Triple {
   private Integer subject, predicate, object;
+  String subString, preString, objString;
 
   /**
    * Constructor for setting a Triple
@@ -14,10 +15,13 @@ public class Triple {
    * @param predicate Integer
    * @param object Integer
    */
-  public Triple(Integer subject, Integer predicate, Integer object){
+  public Triple(Integer subject, Integer predicate, Integer object, String subString, String preString, String objString){
     this.subject = subject;
     this.predicate = predicate;
     this.object = object;
+    this.subString = subString;
+    this.preString = preString;
+    this.objString = objString;
   }
 
   /**
@@ -50,9 +54,16 @@ public class Triple {
    */
   @Override
   public String toString() {
-    return "Triple{" +
+    return "Triple: " +
          subject +
         " " + predicate +
         " " + object;
+  }
+
+  public String toText() {
+    return "Triple: " +
+            subString +
+            " " + preString +
+            " " + objString;
   }
 }

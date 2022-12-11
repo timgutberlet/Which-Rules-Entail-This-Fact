@@ -20,18 +20,18 @@ public class Test {
     Key2Int key2Int1 = new Key2Int(4, 16325);
     Key2Int key2Int2 = new Key2Int(4, 16325);
     Key2Int key2Int3 = new Key2Int(4, 16325);
-    Rule rule = new Rule(new Triple(-24, 4, 16325), new ArrayList<Triple>());
+    //Rule rule = new Rule(new Triple(-24, 4, 16325), new ArrayList<Triple>());
 
     if(!bothBound.containsKey(key2Int1)){
       bothBound.put(key2Int1, new ArrayList<>());
     }
-      bothBound.get(key2Int1).add(rule);
+      //bothBound.get(key2Int1).add(rule);
 
 
     if(!bothBound.containsKey(key2Int2)){
       bothBound.put(key2Int2, new ArrayList<>());
     }
-    bothBound.get(key2Int2).add(rule);
+    //bothBound.get(key2Int2).add(rule);
     System.out.println(bothBound.get(key2Int3));
   }
 }

@@ -13,9 +13,9 @@ import java.util.List;
 import models.Triple;
 
 public class DbFill {
-  private HashMap<String, Integer> subjectIndex;
-  private HashMap<String, Integer> predicateIndex;
-  private HashMap<String, Integer> objectIndex;
+  private HashMap<String, Integer> subjectIndex =  new HashMap<>();
+  private HashMap<String, Integer> predicateIndex =  new HashMap<>();
+  private HashMap<String, Integer> objectIndex =  new HashMap<>();
 
   private ArrayList<Triple> sampleTriples = new ArrayList<>();
 
@@ -53,6 +53,7 @@ public class DbFill {
       List<Triple> kgList = new ArrayList<>();
       String subject, predicate, object;
       Integer subH, predH, objH;
+      int helpCount = 0;
       for (String line; (line = reader.readLine()) != null; ) {
         triple = line.split("\\s");
         subject = triple[0];
@@ -61,9 +62,8 @@ public class DbFill {
         subH = subjectIndex.get(subject);
         predH = predicateIndex.get(predicate);
         objH = objectIndex.get(object);
-        t = new Triple(subH, predH, objH);
+        t = new Triple(subH, predH, objH, subject, predicate, object);
         kgList.add(t);
-
       }
       DBFuncs.deleteKG();
       DBFuncs.insertKnowledgegraph(kgList);
@@ -95,7 +95,7 @@ public class DbFill {
         subH = subjectIndex.get(subject);
         predH = predicateIndex.get(predicate);
         objH = objectIndex.get(object);
-        t = new Triple(subH, predH, objH);
+        t = new Triple(subH, predH, objH, subject, predicate, object);
         System.out.println(t);
         sampleTriples.add(t);
       }
@@ -110,55 +110,32 @@ public class DbFill {
    * Fills the Index Database files
    */
   public void fillVocabulary() {
-    String test = Config.getStringValue("QUERYTRIPLES");
-    //DBFuncs.deleteKG();
+    String kg = Config.getStringValue("KNOWLEDGEGRAPH");
     BufferedReader reader;
     try {
       // java.io.InputStream
-      reader = new BufferedReader(new FileReader(test));
+      reader = new BufferedReader(new FileReader(kg));
       String[] triple;
-      subjectIndex = new HashMap<>();
-      predicateIndex = new HashMap<>();
-      objectIndex = new HashMap<>();
       String subject, predicate, object;
       Integer subC = 0, predC = 0, objC = 0;
-      Integer count = 0;
       for (String line; (line = reader.readLine()) != null; ) {
-        // Process line
-        //System.out.println(line);
         triple = line.split("\\s");
-        //System.out.println(count++ + " - triple: " + triple[0] + ", " + triple[1] +", "+ triple[2]);
         subject = triple[0];
         predicate = triple[1];
         object = triple[2];
-        //Check for subject
         if (!subjectIndex.containsKey(subject)) {
           subjectIndex.put(subject, subC++);
         }
-        //Check for predicte
         if (!predicateIndex.containsKey(predicate)) {
           predicateIndex.put(predicate, predC++);
         }
-        //Check for object
         if (!objectIndex.containsKey(object)) {
           objectIndex.put(object, objC++);
         }
       }
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    String train = Config.getStringValue("KNOWLEDGEGRAPH");
-    try {
+    String query = Config.getStringValue("QUERYTRIPLES");
       // java.io.InputStream
-      reader = new BufferedReader(new FileReader(train));
-      String[] triple;
-      subjectIndex = new HashMap<>();
-      predicateIndex = new HashMap<>();
-      objectIndex = new HashMap<>();
-      String subject, predicate, object;
-      Integer subC = 0, predC = 0, objC = 0;
+      reader = new BufferedReader(new FileReader(query));
       for (String line; (line = reader.readLine()) != null; ) {
         triple = line.split("\\s");
         subject = triple[0];
@@ -174,20 +151,8 @@ public class DbFill {
           objectIndex.put(object, objC++);
         }
       }
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
     String valid = Config.getStringValue("QUANTIL_LEARN_TRIPLES");
-    try {
       reader = new BufferedReader(new FileReader(valid));
-      String[] triple;
-      subjectIndex = new HashMap<>();
-      predicateIndex = new HashMap<>();
-      objectIndex = new HashMap<>();
-      String subject, predicate, object;
-      Integer subC = 0, predC = 0, objC = 0;
       for (String line; (line = reader.readLine()) != null; ) {
         triple = line.split("\\s");
         subject = triple[0];
@@ -208,10 +173,6 @@ public class DbFill {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    DBFuncs.deleteIndizes();
-    DBFuncs.insertSubjects(subjectIndex);
-    DBFuncs.insertPredicates(predicateIndex);
-    DBFuncs.insertObjects(objectIndex);
     List<Integer> predicateList = predicateIndex.values().stream().toList();
     switch (Config.getStringValue("PREDICATE_VIEW")) {
       case "viewsForPredicate":

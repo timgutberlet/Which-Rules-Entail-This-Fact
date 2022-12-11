@@ -50,7 +50,6 @@ public class DBFuncs {
             long count = 0;
             for (Triple triple : list) {
                 count++;
-                //System.out.println(triple.toString());
                 stmt.setInt(1, triple.getSubject());
                 stmt.setInt(2, triple.getPredicate());
                 stmt.setInt(3, triple.getObject());
@@ -69,202 +68,14 @@ public class DBFuncs {
             con.commit();
             stmt.close();
             System.out.println("Success");
-
             System.out.println("Data has been inserted");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    /**
-     * Inserts the vocabulary for subjects
-     *
-     * @param map
-     */
-    public static void insertSubjects(HashMap<String, Integer> map) {
-        PreparedStatement stmt;
-        try {
-            String sql = "INSERT INTO subjects(id, txt) VALUES (?,?)";
-            stmt = con.prepareStatement(sql);
-            long count = 0;
-            for (String txt : map.keySet()) {
-                count++;
-                //System.out.println(triple.toString());
-                stmt.setInt(1, map.get(txt));
-                stmt.setString(2, txt);
-                stmt.addBatch();
-                if (count % 500 == 0 || count == map.size()) {
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            stmt.executeBatch();
-            con.commit();
-            stmt.close();
-            System.out.println("Data has been inserted");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
-    /**
-     * Inserts a predicate with its key in the database
-     *
-     * @param map
-     */
-    public static void insertPredicates(HashMap<String, Integer> map) {
-        PreparedStatement stmt;
-        try {
-            String sql = "INSERT INTO predicates(id, txt) VALUES (?,?)";
-            stmt = con.prepareStatement(sql);
-            long count = 0;
-            for (String txt : map.keySet()) {
-                count++;
-                //System.out.println(triple.toString());
-                stmt.setInt(1, map.get(txt));
-                stmt.setString(2, txt);
-                stmt.addBatch();
-                if (count % 500 == 0 || count == map.size()) {
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            stmt.executeBatch();
-            con.commit();
-            stmt.close();
-            System.out.println("Data has been inserted");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
-    /**
-     * Inserts an Object with its key in the database
-     *
-     * @param map
-     */
-    public static void insertObjects(HashMap<String, Integer> map) {
-        PreparedStatement stmt;
-        try {
-            String sql = "INSERT INTO objects(id, txt) VALUES (?,?)";
-            stmt = con.prepareStatement(sql);
-            long count = 0;
-            for (String txt : map.keySet()) {
-                count++;
-                //System.out.println(triple.toString());
-                stmt.setInt(1, map.get(txt));
-                stmt.setString(2, txt);
-                stmt.addBatch();
-                if (count % 500 == 0 || count == map.size()) {
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            stmt.executeBatch();
-            con.commit();
-            stmt.close();
-            System.out.println("Data has been inserted");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     public static void insertHead(List<Triple> list) {
-     PreparedStatement stmt;
-     int count = 0;
-     try {
-     String sql = "INSERT INTO head(subject, predicate, object) VALUES (?,?,?)";
-     System.out.println("SQL Statement");
-     stmt = con.prepareStatement(sql);
-     long startTime = System.nanoTime();
-     long elapsedTime;
-     for (Triple triple : list){
-     stmt.setInt(1, triple.getSubject());
-     stmt.setInt(2, triple.getPredicate());
-     stmt.setInt(3, triple.getObject());
-     stmt.addBatch();
-     if (count % 1000 == 0 || count == list.size()){
-     stmt.executeBatch();
-     stmt.clearBatch();
-     elapsedTime = System.nanoTime() - startTime;
-     startTime = System.nanoTime();
-     System.out.println("Inserted " + count + " of " + list.size() +" ; Time: "+ (elapsedTime/1000000) + "ms");
-     }
-     count++;
-     }
-     stmt.executeBatch();
-     con.commit();
-
-     System.out.println("Data has been inserted");
-     con.close();
-     } catch (SQLException e) {
-     e.printStackTrace();
-     }
-     }
-
-     public static void insertTail(List<Triple> list) {
-     PreparedStatement stmt;
-     try {
-     con.setAutoCommit(false);
-     String sql = "INSERT INTO tail(subject, predicate, object) VALUES (?,?,?)";
-     System.out.println("SQL Statement");
-     stmt = con.prepareStatement(sql);
-     long startTime = System.nanoTime();
-     long elapsedTime;
-     long count = 0;
-     for (Triple triple : list){
-     count++;
-     stmt.setInt(1, triple.getSubject());
-     stmt.setInt(2, triple.getPredicate());
-     stmt.setInt(3, triple.getObject());
-     stmt.addBatch();
-     if (count% 1000 == 0 || count == list.size()){
-     stmt.executeBatch();
-     stmt.clearBatch();
-     elapsedTime = System.nanoTime() - startTime;
-     startTime = System.nanoTime();
-     System.out.println("Inserted " + count + " of " + list.size() +" ; Time: "+ (elapsedTime/1000000) + "ms");
-     }
-     }
-     stmt.executeBatch();
-     con.commit();
-     System.out.println("Data has been inserted");
-     con.close();
-     } catch (SQLException e) {
-     e.printStackTrace();
-     }
-     }
-     **/
-
-    /**
-     public static void deleteHead(){
-     Statement stmt;
-     String sql = "";
-     try {
-     sql = "DELETE FROM head";
-     stmt =  con.createStatement();
-     stmt.executeQuery(sql);
-     } catch (SQLException e) {
-     }
-     }
-     **/
-    /**
-     public static void deleteTail(){
-     Statement stmt;
-     String sql = "";
-     try {
-     sql = "DELETE FROM Tail";
-     stmt =  con.createStatement();
-     stmt.executeQuery(sql);
-     } catch (SQLException e) {
-     }
-     }
-     **/
-
-    /**
-     * Deletes the in the config.properties specified Knowledgegraph
-     */
     public static void deleteKG() {
         Statement stmt;
         String sql;
@@ -276,156 +87,6 @@ public class DBFuncs {
         }
     }
 
-    /**
-     * Deletes the vocabulary tables where a key is specified to a String
-     */
-    public static void deleteIndizes() {
-        Statement stmt;
-        String sql;
-        try {
-            sql = "DELETE FROM objects; DELETE FROM predicates; DELETE FROM subjects";
-            stmt = con.createStatement();
-            stmt.executeQuery(sql);
-        } catch (SQLException e) {
-        }
-    }
-
-    /**
-     * Reads all data from the Knowledgegraph and prints it
-     */
-    public static void readAllData() {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            String sql = "SELECT * FROM " + Config.getStringValue("KNOWLEDGEGRAPH_TABLE");
-            ps = con.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                int subject = rs.getInt("sub");
-                int predicate = rs.getInt("pre");
-                int object = rs.getInt("obj");
-                System.out.println(subject + " " + predicate + " " + object + "\n");
-            }
-        } catch (SQLException e) {
-            System.out.println(e.toString());
-        } finally {
-            try {
-                rs.close();
-            } catch (SQLException e) {
-                System.out.println(e.toString());
-            }
-        }
-    }
-
-    /**
-     * Returns a subject id, for a subject String that is specified
-     *
-     * @param txt Text where the key searched
-     * @return Returns the ID
-     */
-    public static int getSubjectID(String txt) {
-        PreparedStatement ps;
-        ResultSet rs = null;
-        int id;
-        try {
-            String sql = "SELECT id FROM subjects WHERE txt = ?";
-            ps = con.prepareStatement(sql);
-            ps.setString(1, txt);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                id = rs.getInt("id");
-                return id;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return -99;
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-                return -99;
-            }
-        }
-        System.out.println("Subject ID Not found: " + txt);
-        return -99;
-    }
-
-    /**
-     * Returns the predicate ID for a specified String
-     *
-     * @param txt Specified String
-     * @return Returns the ID
-     */
-    public static int getPredicateID(String txt) {
-        //System.out.println(txt);
-        PreparedStatement ps;
-        ResultSet rs = null;
-        int id;
-        try {
-            String sql = "SELECT id FROM predicates WHERE txt = ?";
-            ps = con.prepareStatement(sql);
-            ps.setString(1, txt);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                id = rs.getInt("id");
-                return id;
-            }
-        } catch (SQLException e) {
-            System.out.println(e);
-        } finally {
-            try {
-                rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                System.out.println(e);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-                return -99;
-            }
-        }
-        System.out.println("Predicate ID Not found: " + txt);
-        return -99;
-    }
-
-    /**
-     * Returns the Object ID for a specified Object
-     *
-     * @param txt Specified String
-     * @return Returns the objectID
-     */
-    public static int getObjectID(String txt) {
-        //System.out.println(txt);
-        PreparedStatement ps;
-        ResultSet rs = null;
-        int id;
-        try {
-            String sql = "SELECT id FROM public.objects WHERE txt = ?";
-            ps = con.prepareStatement(sql);
-            ps.setString(1, txt);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                id = rs.getInt("id");
-                return id;
-            }
-        } catch (SQLException e) {
-            System.out.println(e);
-        } finally {
-            try {
-                rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return -99;
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-                return -99;
-            }
-        }
-        //System.out.println("Object ID Not found: " + txt);
-        return -99;
-    }
 
     /**
      * Used for testing
@@ -433,10 +94,10 @@ public class DBFuncs {
      * @param args
      */
     public static void main(String[] args) {
-        Rule r = new Rule(new Triple(1, 1, -1), new ArrayList<Triple>(), 342);
-        r.getBody().add(new Triple(1, 2, -2));
-        r.getBody().add(new Triple(-2, 3, -1));
-        createFunctionsBothUnbound(r);
+        //Rule r = new Rule(new Triple(1, 1, -1), new ArrayList<Triple>(), 342);
+        //r.getBody().add(new Triple(1, 2, -2));
+        //r.getBody().add(new Triple(-2, 3, -1));
+        //createFunctionsBothUnbound(r);
     }
 
     /**
@@ -934,8 +595,8 @@ public class DBFuncs {
             }
             rs.close();
         } catch (SQLException e) {
-            e.printStackTrace();
-            Debug.printMessage(e, e.getMessage());
+            //e.printStackTrace();
+            //Debug.printMessage(e, e.getMessage());
         }
         return foundRules;
     }
@@ -1120,12 +781,12 @@ public class DBFuncs {
             Double execTime = Double.valueOf(executionTime.split(" ")[2]);
             //System.out.println(pTime);
             //System.out.println(execTime);
-            System.out.println("Time: " + (execTime + pTime) + " ms");
-            if ((pTime + execTime) > 100) {
+            //System.out.println("Time: " + (execTime + pTime) + " ms");
+            /*if ((pTime + execTime) > 100) {
                 System.out.println(ogTriple);
                 System.out.println(rule);
                 System.out.println(sql);
-            }
+            }*/
             return pTime + execTime;
         } catch (SQLException e) {
             e.printStackTrace();
