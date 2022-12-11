@@ -42,7 +42,12 @@ public class Main {
     } else if(Config.getStringValue("TESTRULES_METHOD").equals("optimizedQuantileAnalysis") && Config.getStringValue("REFILL_TABLES").equals("YES")){
       randomRules.learnRules();
     }
-    randomRules.startQuery();
+    if(!Config.getStringValue("NATIVE").equals("YES")){
+      randomRules.startQuery();
+    }else {
+      System.out.println("NATIVE!!!");
+      randomRules.startQueryNative();
+    }
 
     //CreateDB.createKnowledgeGraphDB();
     // DBFuncs.readAllData();

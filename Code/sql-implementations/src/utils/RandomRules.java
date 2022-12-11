@@ -314,6 +314,63 @@ public class RandomRules {
         return string;
     }
 
+    public ArrayList<Integer> searchByTripleNative(Triple triple){
+        int count = 0;
+        ArrayList<Integer> resultList =  new ArrayList<>();
+        ArrayList<Rule> filteredRules = new ArrayList<>();
+        for (Map.Entry<Key2Int, ArrayList<Rule>> entry : objBound.entrySet()) {
+            for(Rule r: entry.getValue()){
+                if(triple.getPredicate() == r.getHead().getPredicate() && triple.getObject() == r.getHead().getObject()){
+                    filteredRules.add(r);
+                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+                    //System.out.println(count++);
+                }
+                filteredRules.clear();
+            }
+        }
+        for (Map.Entry<Key2Int, ArrayList<Rule>> entry : subBound.entrySet()) {
+            for(Rule r: entry.getValue()){
+                if(triple.getPredicate() == r.getHead().getPredicate() && triple.getSubject() == r.getHead().getSubject()){
+                    filteredRules.add(r);
+                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+                    //System.out.println(count++);
+                }
+                filteredRules.clear();
+            }
+        }
+        for (Map.Entry<Key3Int, ArrayList<Rule>> entry : bothBound.entrySet()) {
+            for(Rule r: entry.getValue()){
+                if(triple.getPredicate() == r.getHead().getPredicate() && triple.getObject() == r.getHead().getObject() && triple.getSubject() == r.getHead().getSubject()){
+                    filteredRules.add(r);
+                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+                    //System.out.println(count++);
+                }
+                filteredRules.clear();
+            }
+        }
+        for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundEqual.entrySet()) {
+            for(Rule r: entry.getValue()){
+                if(triple.getSubject() == triple.getObject() && triple.getPredicate() == r.getHead().getPredicate()){
+                    filteredRules.add(r);
+                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+                    //System.out.println(count++);
+                }
+                filteredRules.clear();
+            }
+        }
+        for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundUnequal.entrySet()) {
+            for(Rule r: entry.getValue()){
+                if(triple.getSubject() != triple.getObject() && triple.getPredicate() == r.getHead().getPredicate()){
+                    filteredRules.add(r);
+                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+                    //System.out.println(count++);
+                }
+                filteredRules.clear();
+            }
+        }
+        return resultList;
+    }
+
     public ArrayList<Integer> searchByTriple(Triple triple) {
 
         Integer key;
@@ -327,7 +384,7 @@ public class RandomRules {
         key3Int = new Key3Int(triple.getSubject(), triple.getPredicate(), triple.getObject());
         key2IntObj = new Key2Int(triple.getPredicate(), triple.getObject());
         if (triple.getSubject() == triple.getObject()) {
-            ruleSet = noBoundEqual.get(key);
+            ruleSet = noBoundEqual.get(key.hashCode());
             if (ruleSet != null) {
                 filteredRules.addAll(ruleSet);
             }
@@ -346,7 +403,7 @@ public class RandomRules {
         if (ruleSet != null) {
             filteredRules.addAll(ruleSet);
         }
-        ruleSet = objBound.get(key2IntObj);
+        ruleSet = objBound.get(key2IntObj.hashCode());
         if (ruleSet != null) {
             filteredRules.addAll(ruleSet);
         }
@@ -355,6 +412,7 @@ public class RandomRules {
             case "testRulesUnionAllShorterSelect":
                 resultList = DBFuncs.testRulesUnionAllShorterSelect(filteredRules, triple);
                 break;
+            case "optimizedQuantileAnalysis":
             case "testRulesUnionAllShorterSelectViewsForRelations":
                 resultList = DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple);
                 break;
@@ -363,9 +421,6 @@ public class RandomRules {
                 break;
             case "testRulesFunction":
                 resultList = DBFuncs.testRulesFunction(filteredRules, triple);
-                break;
-            case "optimizedQuantileAnalysis":
-                resultList = DBFuncs.optimizedQuantileAnalysis(filteredRules, triple, ruleHashMap);
                 break;
             default:
                 resultList = null;
@@ -496,6 +551,43 @@ public class RandomRules {
         quantilCalc(timeList);
 
     }
+    public void startQueryNative() {
+        List<Triple> queryTriples = importQueryTriples();
+        System.out.println("Testing Method: " + Config.getStringValue("TESTRULES_METHOD"));
+        HashMap<Triple, TimeTuple> resultMap = new HashMap<>();
+        //rules.forEach(rule -> System.out.println(rule));
+        long queries = 0;
+        long startTime = System.nanoTime();
+        long elapsedTime;
+        long startTime2 = System.nanoTime();
+        long elapsedTime2;
+        for (Triple triple : queryTriples) {
+            startTime = System.nanoTime();
+            resultMap.put(triple, new TimeTuple(searchByTripleNative(triple)));
+            elapsedTime = System.nanoTime() - startTime;
+            resultMap.get(triple).setTime(elapsedTime);
+            queries++;
+            //System.out.println(triple);
+            //resultMap.get(triple).getRuleList().forEach(e -> System.out.println(e.toString()));
+            //System.out.println(elapsedTime / 1000000);
+            if (queries % 5 == 0) {
+                elapsedTime2 = System.nanoTime();
+                System.out.println("Gesamtzeit: " + ((elapsedTime2 - startTime2) / 1000000) + " ms");
+                System.out.println("Durchschnittszeit: " + (((elapsedTime2 - startTime2) / 1000000) / queries) + " ms");
+                System.out.println("Abfragen: " + queries);
+            }
+        }
+        elapsedTime = System.nanoTime();
+        System.out.println("Gesamtzeit: " + ((elapsedTime - startTime) / 1000000) + " ms");
+        System.out.println("Durchschnittszeit: " + (((elapsedTime - startTime) / 1000000) / queries) + " ms");
+        System.out.println("Abfragen: " + queries);
+        ArrayList<Long> timeList = new ArrayList<>();
+        for(TimeTuple timeTuple : resultMap.values()){
+            timeList.add(timeTuple.getTime());
+        }
+        quantilCalc(timeList);
+
+    }
     public static void quantilCalc(ArrayList<Long> timeList){
         Collections.sort(timeList);
         timeList.forEach(aLong -> System.out.println(aLong));
@@ -557,7 +649,7 @@ public class RandomRules {
         System.out.println("Average: " + ((double)average ) + " ms");
         System.out.println("Min: " + ((double)min ) + " ms");
         System.out.println("Max: " + ((double)max ) + " ms");
-        System.exit(0);
+        //System.exit(0);
     }
     public static boolean isFloat(double value) {
         int dec = (int)value;
