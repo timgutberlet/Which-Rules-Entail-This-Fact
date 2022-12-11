@@ -335,44 +335,49 @@ public class RandomRules {
         ArrayList<Integer> resultList = new ArrayList<>();
         for (Map.Entry<Key2Int, ArrayList<Rule>> entry : objBound.entrySet()) {
             for (Rule r : entry.getValue()) {
-                filteredRules.add(r);
-                resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
-
+                if(r.getHead().getObject() == triple.getObject() && triple.getPredicate() == r.getHead().getPredicate()){
+                    filteredRules.add(r);
+                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+                    filteredRules.clear();
+                }
             }
-            filteredRules.clear();
         }
         for (Map.Entry<Key2Int, ArrayList<Rule>> entry : subBound.entrySet()) {
             for (Rule r : entry.getValue()) {
-                filteredRules.add(r);
-                resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
-
+                if(r.getHead().getSubject() == triple.getSubject() && triple.getPredicate() == r.getHead().getPredicate()){
+                    filteredRules.add(r);
+                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+                    filteredRules.clear();
+                }
             }
-            filteredRules.clear();
         }
         for (Map.Entry<Key3Int, ArrayList<Rule>> entry : bothBound.entrySet()) {
             for (Rule r : entry.getValue()) {
-                filteredRules.add(r);
-                resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
-
+                if(r.getHead().getObject() == triple.getObject() && r.getHead().getSubject() == triple.getSubject() && triple.getPredicate() == r.getHead().getPredicate()){
+                    filteredRules.add(r);
+                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+                    filteredRules.clear();
+                }
             }
-            filteredRules.clear();
         }
         for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundEqual.entrySet()) {
             for (Rule r : entry.getValue()) {
-                filteredRules.add(r);
-                resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
-
+                if(triple.getSubject() == triple.getObject() && triple.getPredicate() == r.getHead().getPredicate()){
+                    filteredRules.add(r);
+                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+                    filteredRules.clear();
+                }
             }
-            filteredRules.clear();
         }
         for (Map.Entry<Integer, ArrayList<Rule>> entry : noBoundUnequal.entrySet()) {
             for (Rule r : entry.getValue()) {
-                filteredRules.add(r);
-                resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+                if(triple.getObject() != triple.getSubject() && triple.getPredicate() == r.getHead().getPredicate()){
+                    filteredRules.add(r);
+                    resultList.addAll(DBFuncs.testRulesUnionAllShorterSelectViewsForRelations(filteredRules, triple));
+                    filteredRules.clear();
+                }
             }
-            filteredRules.clear();
         }
-
         return resultList;
     }
 
@@ -539,7 +544,7 @@ public class RandomRules {
             //System.out.println(triple.toText());
             //resultMap.get(triple).getRuleList().forEach(e -> System.out.println(e.toString()));
             //System.out.println(elapsedTime / 1000000);
-            if (queries % 10 == 0) {
+            if (queries % 2 == 0) {
                 elapsedTime2 = System.nanoTime();
                 System.out.println("Gesamtzeit: " + ((elapsedTime2 - startTime2) / 1000000) + " ms");
                 System.out.println("Durchschnittszeit: " + (((elapsedTime2 - startTime2) / 1000000) / queries) + " ms");
