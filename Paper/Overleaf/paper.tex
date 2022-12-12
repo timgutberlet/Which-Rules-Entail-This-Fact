@@ -32,7 +32,7 @@ Janik Sauerbier\footnote{University of Mannheim, \email{jsauerbi@mail.uni-mannhe
 \maketitle
 
 \begin{abstract}
- Retrieving information from knowledge graphs is a highly relevant problem in various fields. This can for example be achieved by learning and applying rules based on the knowledge graphs. In this paper, we focus on the problem of identifying all rules that entail a certain target fact given a knowledge graph and a set of previously learned rules. We specifically aimed to create and analyze an efficient approach using relational database technology including indexing, filtering and pre-processing methods. This problem is relevant in the context of link prediction and explainability. Our experiments demonstrated the efficacy of our approach on different datasets like YAGO3-10, WN18RR and FB15k-237 using rules learned by the bottom up rule learner AnyBURL. 
+ Retrieving information from knowledge graphs is a highly relevant problem in various fields. This can for example be achieved by learning and applying rules based on the knowledge graphs. In this paper, we focus on the problem of identifying all rules that entail a certain target fact given a knowledge graph and a set of previously learned rules. We specifically aimed to create and analyze an efficient approach using relational database technology including indexing, filtering and pre-processing methods. This problem is relevant in the context of link prediction and explainability. Our experiments demonstrated the efficacy of our approach and the effect of various optimizations on different datasets like YAGO3-10, WN18RR and FB15k-237 using rules learned by the bottom up rule learner AnyBURL. 
 \end{abstract}
 \begin{keywords}
 Knowledge graphs \and Relational databases \and Link prediction \and Explainability.
@@ -44,14 +44,14 @@ Knowledge graphs (KGs) are used in different fields from biomedical applications
 Identifying which previously learned rules of a KG entail certain target facts is an important problem for two main reasons. Firstly, it is relevant in the context of the link prediction problem. Prior research indicates that rule-based approaches and embedding models can be used in combination to improve inference quality.\cite{RuleEmbeddingCombination1}\cite{RuleEmbeddingCombination2} There is a significant need for a time-efficient approach which is used to check which rules entail certain facts in that context. Secondly, it is generally helpful to explain the connections between rules and (potential) facts.
 
 
-We want to contribute by creating and analyzing an effective approach to this problem using relational database technology. To achieve those goals, we ran several experiments aimed to illustrate the performance of our approach on different KGs (YAGO3-10, WN18RR and FB15k-237) and to show how different database setups impact the performance in terms of execution time using filtering, indexing and pre-processing methods. For the rule learning, we use AnyBURL, a fast bottom up rule learner for KGs.\cite{AnyBURL19}
+We want to contribute by creating and analyzing an effective approach to this problem using relational database technology. To achieve those goals, we ran several experiments aimed to illustrate the performance of our approach on different KGs (YAGO3-10, WN18RR and FB15k-237). Moreover, we intend to show how different database setups impact the performance in terms of execution time using filtering, indexing and pre-processing methods. For the rule learning, we use AnyBURL, a fast bottom up rule learner for KGs.\cite{AnyBURL19}
 
 \section{Preliminaries} 
 A KG is a set of (subject, relation, object)-triples also called facts. There is a set of entities present as subjects and objects and a set of relations in a KG. Here is an example KG with the entities \(peter\), \(anna\) and \(germany\) and the relations \(livesIn\) and \(marriedTo\).
 
 \[\textbf{KG} = \{marriedTo(anna, peter), bornIn(peter, germany), …\}\]
 
-For our purposes, we are concerned about first-order logic Horn rules, which describe patterns of KGs. These rules consist of a head and a body, where the head consists of one relation and the body consists of one or more relations. Here are two example rules. We capitalize the variables and lowercase the constants representing entities.
+For our purposes, we are concerned about first-order logic Horn rules, which describe patterns of KGs. Here are two example rules. We capitalize the variables and lowercase the constants representing entities.
 
 \begin{equation} \label{eq:rule_1}
 citizenOf(X, germany) \leftarrow bornIn(X, mannheim) 
@@ -60,27 +60,26 @@ citizenOf(X, germany) \leftarrow bornIn(X, mannheim)
 livesIn(X, germany) \leftarrow marriedTo(X, A_1), bornIn(A_1, germany)
 \end{equation}
 
-A grounding of a rule assigns values to all variables of the rule, resulting in a ground term. The problem we are trying to solve is identifying rules that entail certain target facts which are not part of the KG based on the KG and a previously learned set of rules. This means we are interested in groundings where all body atoms are present in the KG and the head atom matches the target fact. To illustrate the problem, think of the following target fact.
+These have a head (e.g., \(citizenOf(X, germany)\)) consisting of one relation and a body (e.g., \(bornIn(X, mannheim)\)) consisting of one or more relations. A grounding of a rule assigns values to all variables of the rule, resulting in a ground term. The problem we are trying to solve is identifying rules that entail certain target facts which are not part of the KG based on the KG and a previously learned set of rules. This means we are interested in groundings where all body atoms are present in the KG and the head atom matches the target fact. To illustrate the problem, think of the following target fact.
 
-\[\textbf{Target Fact} = livesIn(anna, germany)\] 
+\[\textbf{Target fact} = livesIn(anna, germany)\] 
 
-In our example we can start off with excluding rule (\ref{eq:rule_1}) from further investigation as the target fact needs to match the head of the rule. Rule (\ref{eq:rule_2}) has a matching head with \(X = anna\). To investigate whether rule two actually entails the target fact, we need to find matching facts for the rule body from the KG. The KG contains the facts \(marriedTo(anna, peter)\) and \(bornIn(peter, germany)\). Together with the target fact, this results in a grounding for the second rule with \(X = anna\) and \(A_1 = peter\). Therefore, rule two is part of the solution.
+In our example we can start off with excluding rule (\ref{eq:rule_1}) from further investigation as the target fact needs to match the head of the rule. Rule (\ref{eq:rule_2}) has a matching head with \(X = anna\) and entails the target fact if \(\exists A_1 (marriedTo(anna, A_1) \wedge bornIn(A_1, germany))\).The KG contains the facts \(marriedTo(anna, peter)\) and \(bornIn(peter, germany)\). Together with the target fact, this results in a grounding for the second rule with \(X = anna\) and \(A_1 = peter\). Therefore, rule (\ref{eq:rule_2}) is part of the solution.
 
-\section{Proposed Approach}
+\section{Proposed approach}
 
-Our approach was implemented using the open-source object-relational database system PostgreSQL. The basic idea behind our implementation is creating SQL queries for each target fact. The given KG will be stored in one table of the relational database (columns: “sub” for subjects, “pre” for relations and “obj” for objects). The SQL statement consists of \textit{UNION ALL} operations over all sub-queries for the individual rules. The rules are saved in a list and in a loop over all rules, the sub-queries for rules with matching heads are created. To improve this basic idea, we employed several optimizations listed below. This would be the query for the example given in the problem statement:
+Our approach was implemented using the open-source object-relational database system PostgreSQL. The given KG is stored in one table of the relational database (\textit{kg\_table} with columns “sub” for subjects, “pre” for relations and “obj” for objects). The basic idea behind our implementation is creating SQL queries which check whether a certain rule entails a certain target fact. Those individual queries are then combined using \textit{UNION ALL} operations over all rules, where the head matches the target fact. To improve this basic idea, we employed several optimizations listed below. This would be the query for rule (\ref{eq:rule_2}) and the target fact given in the preliminaries:
 
-\textit{(\textbf{SELECT} rule\_1 \textbf{FROM} kg\_table t0,  kg\_table t1 \textbf{WHERE} k0.sub = anna \textbf{AND} k0.obj = k1.sub \textbf{AND} k1.obj = germany \textbf{LIMIT} 1)  \textbf{UNION ALL} (...)}
+\textit{\textbf{SELECT} rule\_1 \textbf{FROM} kg\_table t0,  kg\_table t1 \textbf{WHERE} k0.sub = anna \textbf{AND} k0.obj = k1.sub \textbf{AND} k1.obj = germany \textbf{LIMIT} 1}
 
 
-\subsection{Hash Maps for Rule Pre-filtering} 
+\subsection{Hash Maps for rule pre-filtering} 
 To speed up the pre-filtering of the rules, we sorted the given set of rules into a hash map with five keys based on the rule head type. Three of the head types have fixed entities, either as subject and/or as object [e.g., \textit{r1(e1, X)}, \textit{r1(X, e1)} or \textit{r1(e1, e2)}]. Two of the head types have a variable as subject and as object, either the same variable or different variables [e.g., \textit{r1(X, X)}, \textit{r1(X, Y)}]. Within the respective categories, the rules are again sorted into hash maps based on the relation and the fixed entities. This allows for initial filtering of the rules in O(1).
 
-\subsection{Tables for each Relation}
-We created an alternative approach to having one big table for all facts of the KG. This approach uses one table for each relation in the KG therefore decreasing the individual table size. They only contain two columns for the subject and the object. This solution improved the overall performance by reducing the size of the B-trees of the indexes.
+\subsection{Database structure}
+We created an alternative approach to having one big table for all facts of the KG. This approach uses \textit{one table for each relation} in the KG therefore decreasing the individual table size. They only contain two columns for the subject and the object. This solution improved the overall performance by reducing the size of the B-trees of the indexes.
 
-\subsection{Indexing}
-To speed up the joining of the tables, we duplicated the knowledge graph tables and employed a unique clustered index, once with (subject, object) as key and once with (object, subject) as key. Within the SQL statement, the tables with the order (subject, object) are used in case of a fixed subject and the tables with the order (object, subject) are used in the case of a fixed object or no fixed subject and object. This ensures that an index is used as often as possible. The index speeds up the search and enables the direct access to the table contents through the B-trees.
+To speed up the search and enable direct access to the table contents through the B-trees, we duplicated the knowledge graph tables and employed a \textit{unique clustered index}, once with (subject, object) as key and once with (object, subject) as key. Within the generated SQL statements, the tables with the order (subject, object) are used in case of a fixed subject and the tables with the order (object, subject) are used in the case of a fixed object or no fixed subject and object. This ensures that the indexes are used as efficiently as possible.
 
 \subsection{Pre-processing of expensive Rules}
 As we will illustrate in our experiments, certain rules are way more expensive than others. To address that, we integrated a simple pre-processing method. We gather an independent set of n facts and used them as target facts. The queries were amended with the \textit{EXPLAIN ANALYZE} command to get the execution time for the individual rule sub-queries. Afterwards, we ranked all rules by the sum of the execution time over all queries. The top x\% of rules were then pre-processed, by calculating all potential rule heads which could form a grounding together with a set of triples from the KG as rule body. We excluded rules with one body triple, as pre-processing didn’t improve the performance. We also excluded rules with more than two body triples, as those rules incur a pre-processing time two orders of magnitude higher than rules with two body triples, while they only make up a small fraction of the most expensive and frequent rules.
@@ -108,20 +107,20 @@ FB15k-237 & XX ms & XX ms & XX ms & 14,505 & 237 & 310,079\\
 
 As illustrated in \Cref{tab:overall}, our approach works for different datasets and rulesets learned by AnyBURL in 10s, 50s and 100s. The approach is particularly well suited for datasets with many relations, like the Freebase dataset, as it allows for small B-trees of the indexes.
 
-\subsection{Ablation Study - Optimizations} 
+\subsection{Ablation study - optimizations} 
 
 \begin{table}[t]
 \centering
 \begin{tabular}{lll}
 \toprule
-Experiment & Avg. Execution Time \\
+Experiment & Avg. execution time \\
 \midrule
 All optimizations enabled & 10 ms\\
 \midrule
-Hash Maps for Rule Pre-filtering disabled & XX ms\\
+Rule pre-filtering disabled & XX ms\\
 Tables for each relation disabled & 140 ms\\
 Indexing disabled & 1680 ms\\
-Pre-processing of expensive rules disabled & 11 ms\\
+Pre-processing of expensive rules disabled & 18 ms\\
 
 \bottomrule
 \end{tabular}
