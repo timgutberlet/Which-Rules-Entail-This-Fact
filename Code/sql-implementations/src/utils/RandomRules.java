@@ -686,7 +686,7 @@ public class RandomRules {
         for (Triple triple : queryTriples) {
             learnQuerySearch(triple);
             queries++;
-            if (queries % 100 == 0) {
+            if (queries % 50 == 0) {
                 elapsedTime2 = System.nanoTime();
                 System.out.println("Gesamtzeit: " + ((elapsedTime2 - startTime2) / 1000000) + " ms");
                 System.out.println("Durchschnittszeit: " + (((elapsedTime2 - startTime2) / 1000000) / queries) + " ms");

@@ -895,7 +895,7 @@ public class DBFuncs {
             String executionTime = "";
             rs = stmt.executeQuery(sql.toString());
             while (rs.next()) {
-                System.out.println(rs.getString("QUERY PLAN"));
+                //System.out.println(rs.getString("QUERY PLAN"));
                 if (rs.getString("QUERY PLAN").startsWith("Planning Time:")) {
                     planningTime = rs.getString("QUERY PLAN");
                 }
