@@ -773,13 +773,13 @@ public class RandomRules {
             ruleList.add(ruleTime.getRule());
             preProcessedRules.put(ruleTime.getRule().getId(), ruleTime.getRule());
         }
+        quantilCalcSum(timeListAll);
+        System.exit(0);
         DBFuncs.viewsForQuantiles(ruleList);
         rulePreSave(ruleList);
         System.out.println("Quantil Calc old Rule learning");
         learnedTimelist = getLearnedRuleTime(preProcessedRules, this.validationTriples);
         System.out.println("Quantil Calc new Rule Learning for all Rules");
-        quantilCalcSum(timeListAll);
-        System.exit(0);
         printPriciestRuleTimes(timeList);
         //quantilCalcSum(learnedTimelist);
         printPriciestRuleTimes(learnedTimelist);
