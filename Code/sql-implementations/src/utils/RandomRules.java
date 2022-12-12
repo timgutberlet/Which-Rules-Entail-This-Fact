@@ -748,6 +748,7 @@ public class RandomRules {
         ArrayList<Rule> ruleList = new ArrayList<>();
         ArrayList<Double> timeList = new ArrayList<>();
         ArrayList<Double> learnedTimelist;
+        ArrayList<Double> timeListAll = new ArrayList<>();
         int i = 0;
         int threshhold = (int) (ruleCount * 0.01);
         //System.out.println("Rule Count: " + ruleCount);
@@ -759,6 +760,7 @@ public class RandomRules {
                 helpList.add(entry.getValue());
                 timeList.add(entry.getValue().sum());
             }
+            timeListAll.add(entry.getValue().sum());
             if(i >= (threshhold)){
             //if(i == 15){
                 break;
@@ -775,10 +777,10 @@ public class RandomRules {
         rulePreSave(ruleList);
         System.out.println("Quantil Calc old Rule learning");
         learnedTimelist = getLearnedRuleTime(preProcessedRules, this.validationTriples);
-        System.out.println("Quantil Calc new Rule Learning");
-        quantilCalcSum(timeList);
+        System.out.println("Quantil Calc new Rule Learning for all Rules");
+        quantilCalcSum(timeListAll);
         printPriciestRuleTimes(timeList);
-        quantilCalcSum(learnedTimelist);
+        //quantilCalcSum(learnedTimelist);
         printPriciestRuleTimes(learnedTimelist);
         System.exit(0);
     }
