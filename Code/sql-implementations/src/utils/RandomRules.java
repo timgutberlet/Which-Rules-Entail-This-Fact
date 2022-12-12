@@ -749,9 +749,9 @@ public class RandomRules {
         ArrayList<Double> timeList = new ArrayList<>();
         ArrayList<Double> learnedTimelist;
         int i = 0;
-        double threshhold = (double) ruleCount * 0.01;
-        System.out.println("Rule Count: " + ruleCount);
-        System.out.println("Threshhold " + threshhold);
+        int threshhold = (int) (ruleCount * 0.01);
+        //System.out.println("Rule Count: " + ruleCount);
+        //System.out.println("Threshhold " + threshhold);
         //System.exit(0);
         for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()) {
             if(entry.getValue().getRule().getBody().size() == 2) {
@@ -759,11 +759,12 @@ public class RandomRules {
                 helpList.add(entry.getValue());
                 timeList.add(entry.getValue().sum());
             }
-            if(i == (threshhold)){
+            if(i >= (threshhold)){
             //if(i == 15){
                 break;
             }
         }
+        //System.out.println("Size of Helplist : " + helpList.size());
         Collections.sort(helpList);
         for(RuleTime ruleTime : helpList){
             ruleTime.getRule().setLearned();
