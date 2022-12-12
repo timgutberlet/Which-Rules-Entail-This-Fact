@@ -559,6 +559,7 @@ public class RandomRules {
         for (TimeTuple timeTuple : resultMap.values()) {
             timeList.add(timeTuple.getTime());
         }
+        System.out.println("Quantil Calc for overall Query Analysis");
         quantilCalc(timeList);
     }
 
@@ -602,7 +603,7 @@ public class RandomRules {
 
     public static void quantilCalc(ArrayList<Long> timeList) {
         Collections.sort(timeList);
-        timeList.forEach(aLong -> System.out.println(aLong));
+        //timeList.forEach(aLong -> System.out.println(aLong));
         double help;
         double quantile = 0.05;
         for (double i = quantile; i <= 1; i += quantile) {
