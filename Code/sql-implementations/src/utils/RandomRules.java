@@ -750,6 +750,7 @@ public class RandomRules {
         ArrayList<Double> learnedTimelist;
         int i = 0;
         System.out.println("Rule Count: " + ruleCount);
+        System.exit(0);
         for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()) {
             if(entry.getValue().getRule().getBody().size() == 2) {
                 i++;

@@ -1112,11 +1112,11 @@ public class DBFuncs {
                 preSelect.append(select);
                 preSelect.append(where);
                 sql.append(preSelect);
-                System.out.println(rule);
-                System.out.println(sql);
+                //System.out.println(rule);
+                //System.out.println(sql);
                 stmt.addBatch(sql.toString());
                 sql = new StringBuffer("CREATE UNIQUE INDEX x" + rule.getId() + "Index ON x" + rule.getId());
-                System.out.println("Subset, Objectset: " + subSet + ", " + objSet);
+                //System.out.println("Subset, Objectset: " + subSet + ", " + objSet);
                 if (subSet && objSet) {
                     sql.append("(sub, obj);");
                     rule.setBound(0);
