@@ -782,7 +782,11 @@ public class RandomRules {
         printPriciestRuleTimes(timeList);
         //quantilCalcSum(learnedTimelist);
         printPriciestRuleTimes(learnedTimelist);
-        System.exit(0);
+        try {
+            Thread.sleep(30);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void printPriciestRuleTimes(ArrayList<Double> timeList){
