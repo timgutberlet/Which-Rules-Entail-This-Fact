@@ -544,7 +544,7 @@ public class RandomRules {
             //System.out.println(triple.toText());
             //resultMap.get(triple).getRuleList().forEach(e -> System.out.println(e.toString()));
             //System.out.println(elapsedTime / 1000000);
-            if (queries % 2 == 0) {
+            if (queries % 100 == 0) {
                 elapsedTime2 = System.nanoTime();
                 System.out.println("Gesamtzeit: " + ((elapsedTime2 - startTime2) / 1000000) + " ms");
                 System.out.println("Durchschnittszeit: " + (((elapsedTime2 - startTime2) / 1000000) / queries) + " ms");
@@ -755,8 +755,8 @@ public class RandomRules {
                 helpList.add(entry.getValue());
                 timeList.add(entry.getValue().sum());
             }
-            //if(i == (ruleCount*0.05)){
-            if(i == 15){
+            if(i == (ruleCount*0.05)){
+            //if(i == 15){
                 break;
             }
         }
@@ -769,10 +769,10 @@ public class RandomRules {
         DBFuncs.viewsForQuantiles(ruleList);
         rulePreSave(ruleList);
         System.out.println("Quantil Calc old Rule learning");
-        quantilCalcSum(timeList);
-        printPriciestRuleTimes(timeList);
         learnedTimelist = getLearnedRuleTime(preProcessedRules, this.validationTriples);
         System.out.println("Quantil Calc new Rule Learning");
+        quantilCalcSum(timeList);
+        printPriciestRuleTimes(timeList);
         quantilCalcSum(learnedTimelist);
         printPriciestRuleTimes(learnedTimelist);
         System.exit(0);
