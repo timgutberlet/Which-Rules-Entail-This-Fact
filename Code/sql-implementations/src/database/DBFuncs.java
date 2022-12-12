@@ -890,7 +890,7 @@ public class DBFuncs {
             sql.append(where);
             sql.append(sqlEnd);
 
-            System.out.println("Getting the time for a rule: " + sql.toString());
+            //System.out.println("Getting the time for a rule: " + sql.toString());
             String planningTime = "";
             String executionTime = "";
             rs = stmt.executeQuery(sql.toString());

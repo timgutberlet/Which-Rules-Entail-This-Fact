@@ -756,7 +756,7 @@ public class RandomRules {
                 helpList.add(entry.getValue());
                 timeList.add(entry.getValue().sum());
             }
-            if(i == (ruleCount*0.05)){
+            if(i == (ruleCount*0.01)){
             //if(i == 15){
                 break;
             }
