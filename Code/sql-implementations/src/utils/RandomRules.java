@@ -637,7 +637,7 @@ public class RandomRules {
         Collections.sort(timeList);
         //timeList.forEach(aLong -> System.out.println(aLong));
         double help;
-        double quantile = 0.05;
+        double quantile = 0.01;
         for (double i = quantile; i <= 1; i += quantile) {
             if (isFloat(i * timeList.size())) {
                 help = timeList.get((int) Math.floor(i * timeList.size()));
@@ -779,6 +779,7 @@ public class RandomRules {
         learnedTimelist = getLearnedRuleTime(preProcessedRules, this.validationTriples);
         System.out.println("Quantil Calc new Rule Learning for all Rules");
         quantilCalcSum(timeListAll);
+        System.exit(0);
         printPriciestRuleTimes(timeList);
         //quantilCalcSum(learnedTimelist);
         printPriciestRuleTimes(learnedTimelist);
