@@ -749,15 +749,17 @@ public class RandomRules {
         ArrayList<Double> timeList = new ArrayList<>();
         ArrayList<Double> learnedTimelist;
         int i = 0;
+        double threshhold = (double) ruleCount * 0.01;
         System.out.println("Rule Count: " + ruleCount);
-        System.exit(0);
+        System.out.println("Threshhold " + threshhold);
+        //System.exit(0);
         for (Map.Entry<Integer, RuleTime> entry : ruleTimeHashMap.entrySet()) {
             if(entry.getValue().getRule().getBody().size() == 2) {
                 i++;
                 helpList.add(entry.getValue());
                 timeList.add(entry.getValue().sum());
             }
-            if(i == (ruleCount*0.01)){
+            if(i == (threshhold)){
             //if(i == 15){
                 break;
             }
