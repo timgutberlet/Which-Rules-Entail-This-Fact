@@ -19,7 +19,7 @@
 %%% Mehrere Autoren werden durch \and voneinander getrennt.
 %%% Die Fußnote enthält die Adresse sowie eine E-Mail-Adresse.
 %%% Das optionale Argument (sofern angegeben) wird für die Kopfzeile verwendet.
-\title[Which Rules Entail this Fact? An Efficient Approach Using RDBMSs]{Which Rules Entail this Fact? An Efficient Approach Using RDBMSs}
+\title[Which Rules Entail this Fact? An Efficient Approach Using RDBMSs]{Which Rules Entail this Fact? \newline An Efficient Approach Using RDBMSs}
 %%% \subtitle{From Facts to Rules using Relational Databases} % if needed
 \author[Tim Gutberlet \and Janik Sauerbier]
 {Tim Gutberlet\footnote{University of Mannheim, \email{tim.gutberlet@students.uni-mannheim.de}} \and
@@ -75,7 +75,7 @@ The head of rule (\ref{eq:rule_2}) can be unified with the target fact by assign
 
 \section{Proposed Approach}
 
-The given KG is stored in one table of the relational database (\textit{kg\_table} with columns “sub” for subjects, “rel” for relations and “obj” for objects). The basic idea behind our approach is creating SQL queries which check whether a certain rule entails a certain target fact. Those individual queries are then combined using \textit{UNION ALL} operations over all rules, where the head can unify with the target fact. To improve this basic idea, we employ several optimizations listed below. This would be the query for rule (\ref{eq:rule_2}) and the target fact given in the preliminaries:
+The given KG is stored in one table of the relational database (\textit{kg\_table} with columns \textit{sub} for subjects, \textit{rel} for relations and \textit{obj} for objects). The basic idea behind our approach is creating SQL queries which check whether a certain rule entails a certain target fact. Those individual queries are then combined using \textit{UNION ALL} operations over all rules, where the head can unify with the target fact. To improve this basic idea, we employ several optimizations listed below. This would be the query for rule (\ref{eq:rule_2}) and the target fact given in the preliminaries:
 
 \textit{\textbf{SELECT} rule\_1 \textbf{FROM} kg\_table t0,  kg\_table t1 \textbf{WHERE} t0.sub = anna \textbf{AND} t0.rel = marriedTo \textbf{AND} t0.obj = t1.sub \textbf{AND} t1.rel = bornIn \textbf{AND} t1.obj = germany \textbf{LIMIT} 1;}
 
@@ -86,15 +86,15 @@ Alternative to having one big table for all facts, our approach uses one table f
 To speed up the search and enable direct access to the table contents through B-trees, we employ unique clustered indexes. We duplicate the knowledge graph tables and use once (subject, object) as key and once (object, subject) as key for the indexes. Within the generated SQL statements, the tables with the order (subject, object) are used in case of a fixed subject. The tables with the order (object, subject) are used in the case of a fixed object or no fixed subject and object. This ensures that the indexes are used efficiently.
 
 \subsection{Advanced Rule Pre-filtering} 
-Firstly, we only consider rules that can unify with the target fact for the query. This can be done by naively testing each rule. However, it can also be done more efficiently. The easiest way is storing each rule under its head as key in a hash map. The head stays unchanged, but we use “X” and “Y” as variable descriptors.
+Firstly, we only consider rules that can unify with the target fact for the query. This can be done by naively testing each rule. However, it can also be done more efficiently. The easiest way is storing each rule under its head as key in a hash map. The head stays unchanged, but we use “\textit{X}” and “\textit{Y}” as variable descriptors.
 
-Let (s, r, o) be a target triple with the entities s and o and the relation r. Then we only use the rules stored under the keys \textit{(X, r, Y)}, \textit{(s, r, X)}, \textit{(X, r, o)} or \textit{(s, r, o)} for the query. Additionally, when it is true that s=o for the target, we also use the key \textit{(X, r, X)}. Instead of looping through n rules naively in O(n), this allows for initial filtering of the rules in O(1).
+Let \textit{(s, r, o)} be a target triple with the entities \textit{s} and \textit{o} and the relation \textit{r}. Then we only use the rules stored under the keys \textit{(X, r, Y)}, \textit{(s, r, X)}, \textit{(X, r, o)} or \textit{(s, r, o)} for the query of the target triple. Additionally, when it is true that \(s=o\), we also use the key \textit{(X, r, X)}. Instead of looping through n rules naively in O(n), this allows for pre-filtering of the rules in O(1).
 
 \subsection{Pre-computing of Expensive Rules}
 \label{pre-computation}
 As we will illustrate in our experiments, certain rules result in way more cost in terms of execution time than others. To address that, we pre-compute a portion of those rules. To identify the most expensive rules, we gather an independent set of n target facts from the KG and run their queries with the \textit{EXPLAIN ANALYZE} command to get the execution time for the individual rule sub-queries. Afterwards, we rank all rules which appear in the results by their average execution time multiplied with their number of appearances in the results. 
 
-The top x\% of rules are then pre-computed, by calculating all potential assignments for variables in the rule head that form a grounding together with a set of facts from the KG. We then store these combinations in a table for the rule. If the subject or the object is a variable and the other one a constant, then the table only contains the column for the variable. For the implementation of the tables, we use materialized views to \(SELECT\) from the KG with all the conditions we already know from the rule. Consequently, the \(CREATE\) statement for pre-computing rule (\ref{eq:rule_2}) and the query for the target fact from the preliminaries would be: 
+The top x\% of rules are then pre-computed, by calculating all potential assignments for variables in the rule head that form a grounding together with a set of facts from the KG. We then store these combinations in a table for the rule. If the subject or the object is a variable and the other one a constant, then the table only contains the column for the variable. For the implementation, we use indexed materialized views to \(SELECT\) from the KG with all the conditions we already know from the rule. Consequently, the \(CREATE\) statement for pre-computing rule (\ref{eq:rule_2}) and the query for the target fact from the preliminaries would be: 
 
 \textit{\textbf{CREATE MATERIALIZED VIEW} view\_rule\_1 \textbf{SELECT} t0.sub \textbf{AS} sub \textbf{FROM} kg\_table t0,  kg\_table t1 \textbf{WHERE} t0.rel = marriedTo \textbf{AND} t0.obj = t1.sub \textbf{AND} t1.rel = bornIn \textbf{AND} t1.obj = germany};
 
@@ -136,7 +136,7 @@ WN18RR & 6k & 20k & 30k & 33.0\% & 23.9\% & 43.1\%\\
 FB15k-237 & 33k & 135k & 252k & 53.9\% & 26.2\% & 19.9\%\\
 \bottomrule
 \end{tabular}
-\caption{Composition of the rules (\# of rules | avg. share by \# of body atoms)}
+\caption{Composition of the rules (\# of rules | avg. share of rules by \# of body atoms)}
 \label{tab:rules}
 \end{table}
 
@@ -164,7 +164,7 @@ Pre-computing of expensive rules disabled & 16 ms\\
 \end{table}
 
 
-For the ablation study in \Cref{tab:ablation}, we use YAGO3-10 as the benchmark dataset and the AnyBURL 50s ruleset (107k rules). 
+For the ablation study in \Cref{tab:ablation}, we use YAGO3-10 as the benchmark dataset and the AnyBURL 50s ruleset (107k rules).
 
 The “tables for each relation” optimization described in \ref{database-structure} specifically reduces the execution time for long rules. We tested this, by measuring the average execution time of different rule lengths in the version where the “table for each relation” optimization is enabled versus the version where the “table for each relation” optimization is disabled. In both runs, the rule pre-computing was disabled. In this experiment, the execution time for rules with one body atom is reduced by 12\%, for two body atoms by 25\% and for three body atoms by 74\% when the “table for each relation” optimization is enabled. This might be caused by the increased use of the indexes during execution for longer rules.
 
