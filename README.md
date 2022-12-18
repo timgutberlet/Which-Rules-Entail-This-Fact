@@ -15,6 +15,3 @@ The final paper, first drafts and LaTeX files.
 ### Meeting Notes
 This folder contains all Meeting Notes including the aganda and resulting ToDo's within the context of the project.
 
-### Related Work
-A collection of related work, notes on related work and a collection of questions and answers that came up along the way.
-
