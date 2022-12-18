@@ -9,9 +9,8 @@ In this work, we focus on the problem of identifying all rules that entail a cer
 ### Code
 This folder contains the codebase for relevant software (e.g., AnyBURL) as well as experimental scripts and databases created throughout our project.
 
-### Paper
-The final paper, first drafts and LaTeX files.
-
 ### Meeting Notes
 This folder contains all Meeting Notes including the aganda and resulting ToDo's within the context of the project.
 
+### Paper
+The final paper, first drafts and LaTeX files.
