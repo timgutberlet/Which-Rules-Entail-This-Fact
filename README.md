@@ -1,4 +1,5 @@
-# Which Rules Entail this Fact? - An Efficient Approach Using RDBMSs
+# Which Rules Entail this Fact?
+# An Efficient Approach Using RDBMSs
 Tim Gutberlet (tgutberl@mail.uni-mannheim.de) & Janik Sauerbier (jsauerbi@mail.uni-mannheim.de)
 
 ## Summary
