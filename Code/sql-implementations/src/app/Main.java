@@ -20,6 +20,8 @@ public class Main {
   private static ConnectDB connectDB = new ConnectDB(Config.getStringValue("CLASSNAME"), Config.getStringValue("URL"), Config.getStringValue("USER"), Config.getStringValue("PASSWORD"));
 
   public static void main(String[] args) {
+    System.out.println("Hello World");
+    System.exit(0);
     initalize();
     DbFill dbFill = new DbFill();
     ArrayList<Integer> arrayList = new ArrayList<>();
