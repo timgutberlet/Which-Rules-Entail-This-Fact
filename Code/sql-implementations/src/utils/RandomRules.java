@@ -170,7 +170,7 @@ public class RandomRules {
                     if(rule.getHead().getSubject() == -24 && rule.getHead().getObject() == -25){
                         acyclic_continuer = true;
                     }
-                    if(!acyclic_continuer){
+                    if(acyclic_continuer){
                         continue;
                     }
                 }
