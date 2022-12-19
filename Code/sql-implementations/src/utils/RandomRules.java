@@ -167,13 +167,7 @@ public class RandomRules {
                 }
                 acyclic_continuer = false;
                 if(Config.getStringValue("ONLY_ACYCLIC").equals("YES")){
-                    if(rule.getBody().size() <= 1){
-                        continue;
-                    }
-                    if(rule.getHead().getSubject() == rule.getBody().get(0).getSubject() && rule.getHead().getObject() == rule.getBody().get(rule.getBody().size()-1).getObject()){
-                        acyclic_continuer = true;
-                    }
-                    if(rule.getHead().getObject() == rule.getBody().get(0).getSubject() && rule.getHead().getSubject() == rule.getBody().get(rule.getBody().size()-1).getObject()){
+                    if(rule.getHead().getSubject() == -24 && rule.getHead().getObject() == -25){
                         acyclic_continuer = true;
                     }
                     if(!acyclic_continuer){
