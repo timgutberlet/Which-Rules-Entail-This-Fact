@@ -750,12 +750,14 @@ public class RandomRules {
             filteredRules.addAll(ruleSet);
         }
         for (Rule rule : filteredRules) {
+            if(rule.getBody().size() == 3 && rule.getHead().getSubject() == -24 && rule.getHead().getObject() == -25){
                 System.out.println(ruleLearnCount++);
                 if (ruleTimeHashMap.containsKey(rule.getId())) {
                     ruleTimeHashMap.get(rule.getId()).addTime(DBFuncs.timePerRule(rule, triple));
                 } else {
                     ruleTimeHashMap.put(rule.getId(), new RuleTime(DBFuncs.timePerRule(rule, triple), rule));
                 }
+            }
         }
     }
 
