@@ -192,6 +192,7 @@ public class DbFill {
         break;
       default:
     }
+    System.out.println("Before Fill Indizes");
     fillIndizes();
     System.out.println("Vocabulary filled");
   }

@@ -296,7 +296,7 @@ public class RandomRules {
             System.out.println("5 Atom rules " + fiveAtomCounter);
             System.out.println("Total rule Count " + counter);
             System.out.println("Rule Import finished");
-            System.exit(0);
+            //System.exit(0);
             //System.exit(0);
             reader.close();
             if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews") && Config.getStringValue("REFILL_TABLES").equals("YES")) {
@@ -791,14 +791,15 @@ public class RandomRules {
         }
         //quantilCalcSum(timeListAll);
         //System.exit(0);
-        DBFuncs.viewsForQuantiles(ruleList);
         rulePreSave(ruleList);
+        DBFuncs.viewsForQuantiles(ruleList);
         System.out.println("Quantil Calc old Rule learning");
         learnedTimelist = getLearnedRuleTime(preProcessedRules, this.validationTriples);
         System.out.println("Quantil Calc new Rule Learning for all Rules");
         printPriciestRuleTimes(timeList);
         //quantilCalcSum(learnedTimelist);
         printPriciestRuleTimes(learnedTimelist);
+        System.exit(0);
         try {
             Thread.sleep(30);
         } catch (InterruptedException e) {

@@ -29,6 +29,7 @@ public class Main {
     DBFuncs.viewsForPredicate(arrayList);*/
     if(Config.getStringValue("REFILL_TABLES").equals("YES")){
       dbFill.fillVocabulary();
+      System.out.println("Filled Vocabulary");
       dbFill.fillKnowledgegraph();
       System.out.println("Knowledgegraph filled");
     }else {
