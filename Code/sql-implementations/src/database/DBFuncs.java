@@ -1677,6 +1677,7 @@ public class DBFuncs {
             }
             stmt.executeBatch();
             con.commit();
+            System.out.println("Commit dropping all Materialized views");
             count = 0;
             startTime = System.nanoTime();
             for (Integer integer : predicateList) {
