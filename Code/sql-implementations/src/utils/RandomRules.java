@@ -57,6 +57,7 @@ public class RandomRules {
     }
 
     public void importRules() {
+        boolean acyclic_continuer = false;
         Key3Int key3Int;
         int oneAtomCounter = 0;
         int twoAtomCounter = 0;
@@ -164,7 +165,21 @@ public class RandomRules {
                 } else {
                     continue;
                 }
-
+                acyclic_continuer = false;
+                if(Config.getStringValue("ONLY_ACYCLIC").equals("YES")){
+                    if(rule.getBody().size() <= 1){
+                        continue;
+                    }
+                    if(rule.getHead().getSubject() == rule.getBody().get(0).getSubject() && rule.getHead().getObject() == rule.getBody().get(rule.getBody().size()-1).getObject()){
+                        acyclic_continuer = true;
+                    }
+                    if(rule.getHead().getObject() == rule.getBody().get(0).getSubject() && rule.getHead().getSubject() == rule.getBody().get(rule.getBody().size()-1).getObject()){
+                        acyclic_continuer = true;
+                    }
+                    if(!acyclic_continuer){
+                        continue;
+                    }
+                }
 
                 if (Config.getStringValue("FILTER_SIMPLE_RULES").equals("YES")) {
                     continuer = false;
@@ -277,7 +292,9 @@ public class RandomRules {
                 System.out.println("3 Atom rules " + threeAtomCounter);
                 System.out.println("4 Atom rules " + fourAtomCounter);
                 System.out.println("5 Atom rules " + fiveAtomCounter);
+                System.out.println("Total rule Count " + counter);
                 System.out.println("Rule Import finished");
+                //System.exit(0);
             //System.exit(0);
             reader.close();
             if (Config.getStringValue("TESTRULES_METHOD").equals("testRulesSimpleViews") && Config.getStringValue("REFILL_TABLES").equals("YES")) {
@@ -417,7 +434,7 @@ public class RandomRules {
         if (ruleSet != null) {
             filteredRules.addAll(ruleSet);
         }
-        //ilteredRules.forEach(e -> System.out.println(e.getId() + " : " + e));
+        //filteredRules.forEach(e -> System.out.println(e.getId() + " : " + e));
         ArrayList<Integer> resultList;
         switch (Config.getStringValue("TESTRULES_METHOD")) {
             case "testRulesUnionAllShorterSelect":
