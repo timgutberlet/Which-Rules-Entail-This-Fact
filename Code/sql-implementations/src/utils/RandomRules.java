@@ -767,7 +767,8 @@ public class RandomRules {
         ArrayList<Double> learnedTimelist;
         ArrayList<Double> timeListAll = new ArrayList<>();
         int i = 0;
-        int threshhold = (int) (ruleCount * 0.10);
+        //int threshhold = (int) (ruleCount * 0.10);
+        int threshhold = 50;
         //System.out.println("Rule Count: " + ruleCount);
         //System.out.println("Threshhold " + threshhold);
         //System.exit(0);
