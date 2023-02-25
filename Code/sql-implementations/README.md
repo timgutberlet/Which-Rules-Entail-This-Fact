@@ -3,7 +3,7 @@
 2. Add database view to IntelliJ
 3. Create Tables:
 
-###SQL Create commands for the sql-implementation Database:
+### SQL Create commands for the sql-implementation Database:
 create table knowledgegraph
 (
 sub integer,
