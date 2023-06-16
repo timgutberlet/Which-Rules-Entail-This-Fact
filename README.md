@@ -1,6 +1,8 @@
 # Which Rules Entail this Fact? <br> An Efficient Approach Using RDBMSs
 Tim Gutberlet (tim.gutberlet@students.uni-mannheim.de) & Janik Sauerbier (janik.sauerbier@students.uni-mannheim.de)
 
+ Based on this work a paper was published at BTW-2023 (https://dl.gi.de/handle/20.500.12116/40386)
+
 ## Summary
 In this work, we focus on the problem of identifying all rules that entail a certain target fact given a knowledge graph and a set of previously learned rules. This problem is relevant in the context of link prediction and explainability. We propose an efficient approach using relational database technology including indexing, filtering and pre-computing methods. Our experiments demonstrate the efficiency of our approach and the effect of various optimizations on different datasets like YAGO3-10, WN18RR and FB15k-237 using rules learned by the bottom up rule learner AnyBURL.
 
